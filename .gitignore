@@ -1,0 +1,57 @@
+
+# Build klasörleri
+/build/
+/**/build/
+
+# IDE dosyaları
+.idea/
+/*.iml
+*.ipr
+*.iws
+
+# Gradle cache
+.gradle/
+/**/.gradle/
+
+# Local config
+local.properties
+*.keystore
+
+# Log dosyaları
+*.log
+
+# OS/Editor
+.DS_Store
+*.swp
+*.swo
+*.tmp
+*.bak
+Thumbs.db
+
+# Generated files
+.cxx/
+*.apk
+*.ap_
+*.dex
+*.class
+*.jar
+*.so
+*.bin
+
+# Kotlin/Jetpack Compose klasörleri
+.kotlinc/
+.ksp/
+
+# Test sonucu ve raporlar
+/test-results/
+*/test-results/
+*/outputs/
+
+# Jetifier
+.jetifier/
+
+# VS Code (kullanıyorsanız)
+.vscode/
+
+# Compose Preview cache
+**/.idea/.compose-previews/
