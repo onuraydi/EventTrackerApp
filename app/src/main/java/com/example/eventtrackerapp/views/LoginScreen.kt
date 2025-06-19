@@ -6,14 +6,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,12 +23,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedButton
+import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 
 @Composable
 fun LoginScreen(){
@@ -92,14 +90,9 @@ fun LoginScreen(){
             else VisualTransformation.None
         )
         Spacer(Modifier.padding(18.dp))
-        Button(onClick = {
 
-            },
-            Modifier.fillMaxWidth(0.7f),
-            shape = RoundedCornerShape(12.dp)
-        )
-        {
-            Text("Log In", fontSize = 18.sp)
+        EventTrackerAppPrimaryButton("Login") {
+            println("Login edildi")
         }
 
         Spacer(Modifier.padding(8.dp))
@@ -108,15 +101,8 @@ fun LoginScreen(){
 
         Spacer(Modifier.padding(vertical = 8.dp))
 
-        OutlinedButton(onClick = {
-
-        },
-            Modifier.fillMaxWidth(0.7f),
-            shape = RoundedCornerShape(12.dp),
-        )
-        {
-            Text("Sign In", fontSize = 18.sp,
-                textDecoration = TextDecoration.Underline,)
+        EventTrackerAppOutlinedButton("Sign Up") {
+            println("Sign up edildi")
         }
     }
 }
