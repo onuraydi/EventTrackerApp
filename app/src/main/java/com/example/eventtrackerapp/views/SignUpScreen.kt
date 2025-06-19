@@ -4,6 +4,7 @@ import android.graphics.drawable.shapes.Shape
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +50,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.eventtrackerapp.Greeting
+import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
@@ -85,6 +87,8 @@ fun SignUpScreen()
             var email = remember { mutableStateOf("") }
             var password = remember { mutableStateOf("") }
             var passwordConfirm = remember { mutableStateOf("") }
+            var isObscure = remember { mutableStateOf(false) }
+            var isObscureConfirm = remember { mutableStateOf(false) }
 
             Text(text = "Sign Up",
                 fontWeight = FontWeight.W500,
@@ -109,13 +113,32 @@ fun SignUpScreen()
             EventTrackerAppOutlinedTextField("Şifre", state = password,
                 leadingIcon = {
                     Icon(Icons.Filled.Lock,"password")
-                });
+                },
+                trailingIcon = {
+                    val icon = if(isObscure.value){
+                        painterResource(R.drawable.visibility_icon)}
+                    else{
+                        painterResource(R.drawable.visibility_off_icon)}
+
+                    Icon(painter = icon,"visibility",
+                        modifier = Modifier.clickable { isObscure.value = !isObscure.value })
+                },
+                isPassword = !isObscure.value);
+
+
             Spacer(modifier = Modifier.padding(15.dp))
 
             EventTrackerAppOutlinedTextField("Şifre tekrarı", state = passwordConfirm,
                 leadingIcon = {
                     Icon(Icons.Filled.Lock,"confirm password")
-            });
+            },
+                trailingIcon = {
+                        Icon(painter = painterResource(isObscureConfirm.value),"visibility",
+                            modifier = Modifier.clickable { isObscureConfirm.value = !isObscureConfirm.value })
+                    },
+                isPassword = !isObscureConfirm.value);
+
+
             Spacer(modifier = Modifier.padding(20.dp));
 
             Button(onClick = {},
@@ -141,6 +164,17 @@ fun SignUpScreen()
         }
     }
 
+}
+
+@Composable
+private fun painterResource(isObscure:Boolean):Painter
+{
+    val icon = if(isObscure){
+        painterResource(R.drawable.visibility_icon)}
+    else{
+        painterResource(R.drawable.visibility_off_icon)}
+
+    return icon
 }
 
 @Preview(showBackground = true)
