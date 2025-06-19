@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.eventtrackerapp.Greeting
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
-import com.example.eventtrackerapp.utils.EventAppOutlinedTextField
+import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.security.KeyStore.TrustedCertificateEntry
 
@@ -90,18 +90,18 @@ fun SignUpScreen()
                 modifier = Modifier.padding(top = 20.dp)
                 )
             Spacer(modifier = Modifier.padding(15.dp))
-            EventAppOutlinedTextField("Kullanıcı Adı", state = fullName);
+            EventTrackerAppOutlinedTextField("Kullanıcı Adı", state = fullName);
 
             Spacer(modifier = Modifier.padding(15.dp))
 
-            EventAppOutlinedTextField("Email", state = email);
+            EventTrackerAppOutlinedTextField("Email", state = email);
 
             Spacer(modifier = Modifier.padding(15.dp))
 
-            EventAppOutlinedTextField("Şifre", state = password);
+            EventTrackerAppOutlinedTextField("Şifre", state = password);
             Spacer(modifier = Modifier.padding(15.dp))
 
-            EventAppOutlinedTextField("Şifre tekrarı", state = passwordConfirm);
+            EventTrackerAppOutlinedTextField("Şifre tekrarı", state = passwordConfirm);
             Spacer(modifier = Modifier.padding(20.dp));
 
             Button(onClick = {},
@@ -121,7 +121,7 @@ fun SignUpScreen()
                     .fillMaxWidth(0.7f),
                     shape = RoundedCornerShape(12.dp) ) {
                 Text(text="Login",
-                    textDecoration = TextDecoration.Underline)
+                    textDecoration = TextDecoration.Underline, fontSize = 18.sp)
             }
 
         }

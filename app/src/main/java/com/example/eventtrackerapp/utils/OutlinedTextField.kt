@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 
 @Composable
-fun EventAppOutlinedTextField(txt:String,state: MutableState<String>)
+fun EventTrackerAppOutlinedTextField(txt:String,state: MutableState<String>)
 {
     OutlinedTextField(value = "${txt}",
         onValueChange = {
@@ -15,5 +15,7 @@ fun EventAppOutlinedTextField(txt:String,state: MutableState<String>)
         singleLine = true,
         placeholder = {"${txt}"},
         label = { Text(text = "${txt}") }
+
+
     )
 }
