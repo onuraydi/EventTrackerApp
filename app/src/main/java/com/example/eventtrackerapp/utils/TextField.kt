@@ -14,12 +14,12 @@ fun EventTrackerAppOutlinedTextField(txt:String,
      trailingIcon: @Composable (() -> Unit)? = null,
      isPassword:Boolean = false)
 {
-    OutlinedTextField(value = "${state.value}",
+    OutlinedTextField(value = state.value,
         onValueChange = {
             state.value = it;
         },
         singleLine = true,
-        label = { Text(text = "${txt}") },
+        label = { Text(text = txt) },
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         visualTransformation = if(isPassword)
