@@ -8,10 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -20,8 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,66 +26,50 @@ import androidx.compose.ui.unit.sp
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedButton
+import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 
 @Composable
 fun LoginScreen(){
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 15.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 15.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val userEmail = remember { mutableStateOf("") }
         val userPassword = remember { mutableStateOf("") }
-        val isObscure = remember { mutableStateOf(true) }
+        val isObscure = remember { mutableStateOf(false) }
 
         Text(text = "LOG IN", fontSize = 25.sp, fontWeight = FontWeight.W500)
         Spacer(Modifier.padding(vertical = 20.dp))
 
-        OutlinedTextField(
-            value = userEmail.value,
-            onValueChange = {
-                userEmail.value = it
-            },
-            leadingIcon = {
-                Icon(Icons.Filled.Person,"PersonIcon")
-            },
-            label = {
-                Text("Email")
-            },
-            singleLine = true
+        EventTrackerAppOutlinedTextField(
+            "Email",
+            state = userEmail,
+            leadingIcon = { Icon(Icons.Filled.MailOutline, "UserEmail") },
         )
 
         Spacer(Modifier.padding(vertical = 15.dp))
 
-        OutlinedTextField(
-            value = userPassword.value,
-            onValueChange = {
-                userPassword.value = it
-            },
-            leadingIcon = {
-                Icon(Icons.Filled.Lock,"LockIcon")
-            },
-            singleLine = true,
+        EventTrackerAppOutlinedTextField(
+            "Password",
+            userPassword,
+            isPassword = !isObscure.value,
+            leadingIcon = { Icon(Icons.Filled.Lock, "UserPassword") },
             trailingIcon = {
-
                 val icon = if(isObscure.value){
                     painterResource(R.drawable.visibility_icon)
                 }else{
                     painterResource(R.drawable.visibility_off_icon)
                 }
-
-                IconButton(onClick = { isObscure.value = !isObscure.value }) {
-                    Icon(painter = icon, "Visibility")
+                IconButton(onClick = {isObscure.value =! isObscure.value}){
+                    Icon(painter = icon, "visibility")
                 }
-            },
-            label = {
-                Text("Password")
-            },
-            visualTransformation = if(isObscure.value)
-                PasswordVisualTransformation()
-            else VisualTransformation.None
+            }
         )
+
         Spacer(Modifier.padding(18.dp))
 
         EventTrackerAppPrimaryButton("Login") {
