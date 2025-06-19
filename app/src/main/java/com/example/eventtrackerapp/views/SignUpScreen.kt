@@ -56,6 +56,7 @@ import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedButton
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
+import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.security.KeyStore.TrustedCertificateEntry
 
@@ -143,10 +144,9 @@ fun SignUpScreen()
 
             Spacer(modifier = Modifier.padding(20.dp));
 
-            Button(onClick = {},
-                modifier = Modifier.fillMaxWidth(0.7f),
-                shape = RoundedCornerShape(12.dp)){
-                Text("Sign Up", fontSize = 18.sp)
+            EventTrackerAppPrimaryButton("Sign Up")
+            {
+             // on click
             }
 
             Spacer(modifier = Modifier.padding(8.dp))
@@ -155,12 +155,9 @@ fun SignUpScreen()
 
             Spacer(modifier = Modifier.padding(8.dp))
 
-            OutlinedButton(onClick = {},
-                modifier = Modifier
-                    .fillMaxWidth(0.7f),
-                    shape = RoundedCornerShape(12.dp) ) {
-                Text(text="Login",
-                    textDecoration = TextDecoration.Underline, fontSize = 18.sp)
+            EventTrackerAppOutlinedButton("Login")
+            {
+                // on click
             }
 
         }
