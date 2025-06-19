@@ -1,6 +1,7 @@
 package com.example.eventtrackerapp.views
 
 import android.graphics.drawable.shapes.Shape
+import android.provider.CalendarContract.Colors
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFrom
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -52,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import com.example.eventtrackerapp.Greeting
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedButton
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.security.KeyStore.TrustedCertificateEntry
@@ -59,22 +62,21 @@ import java.security.KeyStore.TrustedCertificateEntry
 @Composable
 fun SignUpScreen()
 {
+
     Box(modifier = Modifier
         .padding(15.dp)
         .fillMaxSize())
     {
-        OutlinedButton(modifier = Modifier,
-            onClick = {},
 
-            colors = ButtonColors(
-                contentColor = Color.Green,
-                containerColor = Color.White,
-                disabledContentColor = Color.Red,
-                disabledContainerColor = Color.Red),
-            // Border rengi
-        ) {
-            Icon(Icons.Filled.KeyboardArrowLeft,"Back");
+        IconButton(onClick = {}, modifier = Modifier
+            .border(border = BorderStroke(1.3f.dp, color = MaterialTheme.colorScheme.primary),shape = RoundedCornerShape(12.dp)),) {
+            Icon(Icons.Filled.KeyboardArrowLeft,"back", tint = MaterialTheme.colorScheme.primary)
         }
+//        OutlinedButton(modifier = Modifier
+//            .padding(top = 15.dp, start = 10.dp)
+//            .size(width = 50.dp, height = 40.dp),
+//            shape = RoundedCornerShape(20.dp),
+//            onClick ={}) { }
 
         Column(modifier = Modifier
             .fillMaxSize()
