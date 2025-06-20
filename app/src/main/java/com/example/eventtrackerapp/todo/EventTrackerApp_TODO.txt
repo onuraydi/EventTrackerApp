@@ -1,0 +1,1 @@
+- LoginScreen mutable değerler ekran değişince sıfırlanıyor. ViewModel dan bu değerler alınmalı.
