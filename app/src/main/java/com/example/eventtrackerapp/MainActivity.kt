@@ -1,5 +1,6 @@
 package com.example.eventtrackerapp
 
+import android.graphics.pdf.content.PdfPageGotoLinkContent.Destination
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,6 +19,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
@@ -30,6 +33,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             EventTrackerAppTheme {
+
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     bottomBar = {
                         NavigationBar(windowInsets = NavigationBarDefaults.windowInsets, modifier = Modifier) {
@@ -55,7 +59,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-                ) { innerPadding -> Box(Modifier.padding(innerPadding))
+                ) { contentPadding -> Box(Modifier.padding(contentPadding))
                     HomeScreen()
 
                 }
