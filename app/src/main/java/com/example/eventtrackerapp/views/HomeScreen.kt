@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -33,6 +35,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.BottomAppBar
@@ -85,6 +88,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.eventtrackerapp.MainActivity
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,23 +116,21 @@ fun HomeScreen()
                 })
         },
         ) { innerPadding ->
-        Box(modifier = Modifier
-            .fillMaxSize())
-        {
             LazyColumn(modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .padding(bottom = 70.dp),
                 contentPadding = PaddingValues(5.dp, vertical = 15.dp),
             ) {
                 item()
                 {
                     EventRow();
                     EventRow();
+                    EventRow();
                 }
             }
         }
     }
-}
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -139,6 +141,8 @@ private fun EventRow()
     val scope = rememberCoroutineScope();
     var showBottomSheet by remember { mutableStateOf(false ) }
 
+
+    var commentState = remember { mutableStateOf("")}
 
     Column (modifier = Modifier
         .fillMaxWidth()
@@ -175,33 +179,50 @@ private fun EventRow()
 
 
         if (showBottomSheet) {
-            ModalBottomSheet(
-                modifier = Modifier.fillMaxHeight(),
-                onDismissRequest = { showBottomSheet = false },
-                sheetState = sheetState
-            ) {
-                Box(modifier = Modifier.fillMaxHeight()) {
-
-                    // Yorum listesi (scroll edilebilir)
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = 70.dp) // Altta yer bırakıyoruz sabit alan için
-                    ) {
-                        items(15) { // örnek olarak 10 yorum
-                            comment()
+            Column {
+                ModalBottomSheet(
+                    modifier = Modifier.fillMaxHeight(),
+                    onDismissRequest = { showBottomSheet = false },
+                    sheetState = sheetState
+                ) {
+                    Box(modifier = Modifier.fillMaxHeight()) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(bottom = 70.dp)
+                        ) {
+                            items(15) {
+                                comment()
+                            }
                         }
-                    }
 
-                    // Sabit alt alan
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter) // <-- en altta sabit
-                            .fillMaxWidth()
-                            .background(Color.White) // opsiyonel: arka plan ver
-                            .padding(10.dp)
-                    ) {
-                        Text("Yorum Ekle", modifier = Modifier.align(Alignment.CenterStart))
+
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .background(Color.White)
+                                .padding(10.dp)
+                        ) {
+                            Row() {
+                                Image(
+                                    painter = painterResource(R.drawable.ic_launcher_foreground),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .border(BorderStroke(2.dp, Color.Black), shape = CircleShape),
+
+                                    contentScale = ContentScale.Fit,
+                                )
+
+                                Spacer(modifier = Modifier.width(20.dp))
+
+                                EventTrackerAppOutlinedTextField("Etkinlik için Yorum Ekle...",commentState ,trailingIcon = {
+                                    Icon(Icons.Filled.PlayArrow,null, modifier = Modifier
+                                        .clickable {  })
+                                })
+                            }
+                        }
                     }
                 }
             }
@@ -225,7 +246,7 @@ fun comment()
             contentScale = ContentScale.Fit
         )
 
-        Spacer(modifier = Modifier.width(10.dp)) // resim ile yazı arasında boşluk
+        Spacer(modifier = Modifier.width(10.dp))
 
         Column {
             Text(
