@@ -1,7 +1,11 @@
 package com.example.eventtrackerapp.views
 
 import android.widget.Space
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +23,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -48,13 +53,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
@@ -94,7 +102,8 @@ fun MyAccountScreen(){
             var gender = rememberSaveable { mutableStateOf("") }
             var isExpanded = rememberSaveable { mutableStateOf(false) }
             var selectedCategoryList = remember { mutableStateListOf<String?>() }
-
+            var profilePhotoState = rememberSaveable { mutableStateOf(R.drawable.profile_photo_add_icon) }
+            // Buraya kullanıcının yüklediği profil gelecek
 
             Column(modifier = Modifier
                 .padding(bottom = 80.dp)
@@ -104,6 +113,34 @@ fun MyAccountScreen(){
                 horizontalAlignment = Alignment.CenterHorizontally)
             {
                 Spacer(modifier = Modifier.padding(vertical = 15.dp))
+
+                Box(
+                    Modifier
+                        .size(80.dp, 80.dp)
+                        .border(border = BorderStroke(2.dp, Color.Black), shape = CircleShape)
+                        .clickable {
+                        }
+                ) {
+                    Image(
+                        modifier = Modifier
+                            .fillMaxSize(0.8f)
+                            .align(Alignment.Center)
+                            .padding(start = 5.dp),
+                        painter = painterResource(profilePhotoState.value),
+                        contentDescription = "PhotoAdd",
+                    )
+                }
+
+                Spacer(Modifier.padding(vertical = 5.dp))
+
+                Text(
+                    text = "Update Profile Photo",
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier.clickable {  }
+                )
+
+                Spacer(Modifier.padding(vertical = 7.dp))
+
 
                 EventTrackerAppOutlinedTextField(txt="Full Name",fullNameState)
 
