@@ -376,7 +376,6 @@ fun ShowDateModal(
             Icon(Icons.Default.DateRange,"Select Date")
         },
         modifier = modifier
-            .fillMaxWidth(0.71f)
             .pointerInput(dateState.value) {
                 awaitEachGesture {
                     awaitFirstDown(pass = PointerEventPass.Initial)
