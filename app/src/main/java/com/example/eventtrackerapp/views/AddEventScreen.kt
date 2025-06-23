@@ -154,7 +154,6 @@ fun AddEventScreen() {
                     )
 
                     Spacer(Modifier.padding(vertical = 12.dp))
-                    /*TODO(SINGLE LINE)*/
                     EventTrackerAppOutlinedTextField(
                         txt = "Event Detail",
                         state = eventDetail,
