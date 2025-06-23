@@ -154,7 +154,6 @@ fun AddEventScreen() {
                     )
 
                     Spacer(Modifier.padding(vertical = 12.dp))
-                    /*TODO(SINGLE LINE)*/
                     EventTrackerAppOutlinedTextField(
                         txt = "Event Detail",
                         state = eventDetail,
@@ -376,7 +375,6 @@ fun ShowDateModal(
             Icon(Icons.Default.DateRange,"Select Date")
         },
         modifier = modifier
-
             .pointerInput(dateState.value) {
                 awaitEachGesture {
                     awaitFirstDown(pass = PointerEventPass.Initial)

@@ -1,170 +1,172 @@
 package com.example.eventtrackerapp.views
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
+import androidx.compose.ui.unit.sp
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyEvents(){
+fun MyEventsScreen(){
     EventTrackerAppTheme {
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
+            Modifier.fillMaxSize(),
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {Text("My Events")},
+                    navigationIcon = {
+                        IconButton(
+                            content = {
+                                Icon(Icons.Default.ArrowBack,"Go Back")
+                            },
+                            onClick = {
 
-        ) { innerPadding ->
-
-            val query = rememberSaveable { mutableStateOf("") }
-            val active = rememberSaveable { mutableStateOf(false) }
-            val searchList = remember { mutableStateListOf<String?>() }
-
-            Column(
-                modifier = Modifier.padding(innerPadding)
-            ) {
-                SimpleSearchBar(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 5.dp),
-                    query = query.value,
-                    onQueryChange = {
-                        query.value = it
-                    },
-                    active = active.value,
-                    onActiveChange = {
-                        active.value = it
-                    },
-                    onSearch = {
-                        searchList.add(query.value.trim())
-                        active.value = false
-                    },
-                    placeHolder = { Text("Search") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, "Search")
-                    },
-                    trailingIcon = {
-                        if (active.value) {
-                            if (searchList.isNotEmpty()) {
-                                Icon(
-                                    Icons.Default.Clear, "Clear",
-                                    modifier = Modifier.clickable {
-                                        if (query.value.isNotEmpty()) {
-                                            query.value = ""
-                                        } else {
-                                            active.value = false
-                                        }
-                                    },
-                                )
                             }
-                        }
-                    },
-                    searchResult = searchList.filterNotNull()
-                )
-                LazyVerticalStaggeredGrid(
-                    modifier = Modifier
-                        .padding(top = 16.dp, start = 8.dp, end = 8.dp),
-                    columns = StaggeredGridCells.Fixed(2),
-                    verticalItemSpacing = 8.dp,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    content = {
-                        items(24) {
-                            MyImage()
-                        }
+                        )
                     }
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun MyImage(){
-    val randomHeights = remember { (150..300).random().dp }
-    Image(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(randomHeights)
-            .border(
-                border = BorderStroke(
-                    1.dp,
-                    Color.Black
+        ) { innerPadding->
+            Box(
+                Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+            ) {
+                val eventList : List<Map<String,String>> = listOf(
+                    mapOf("isim" to "EtkinlikasdasdAdsaD ASDADas1", "detay" to "Detay1"),
+                    mapOf("isim" to "Etkinlik2", "detay" to "Detay2"),
+                    mapOf("isim" to "Etkinlik3", "detay" to "Detay3"),
                 )
-            ),
-        painter = painterResource(R.drawable.ic_launcher_foreground),
-        contentDescription = "",
-        contentScale = ContentScale.Crop,
-    )
-}
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(eventList){
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 72.dp),
+                            elevation = CardDefaults.cardElevation(2.dp),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 72.dp),
+                                //satırdaki elemanları ortaladı
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Image(
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .background(Color.Red)
+                                        .size(60.dp),
+                                    painter = painterResource(R.drawable.ic_launcher_foreground),
+                                    contentDescription = "Profile",
+                                )
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SimpleSearchBar(
-    query:String, //içerisine yazılacak yazı
-    onQueryChange: (String) -> Unit, //içerisine yazılacak yazı değişince tetiklenecek
-    onSearch: (String) ->Unit, // search edince olacak olay
-    active:Boolean, //search in aktif olup olmaması
-    onActiveChange: (Boolean) -> Unit, //aktifliğin değişmesi
-    modifier: Modifier = Modifier,
-    placeHolder: @Composable (()->Unit)? = null,
-    leadingIcon: @Composable (()->Unit)? = null,
-    trailingIcon: @Composable (()->Unit)? = null,
-    searchResult: List<String>
-){
-    //ekranın genişlemesini tutan state
-    SearchBar(
-        modifier = modifier,
-        query = query,
-        onQueryChange = onQueryChange,
-        onSearch = onSearch,
-        active = active,// Bu değer search in aktif olup olmadığını gösterir
-        onActiveChange = onActiveChange,
-        placeholder = placeHolder,
-        leadingIcon = leadingIcon,
-        trailingIcon = trailingIcon
-    ){
-        searchResult.forEach {
-            Row {
-                Icon(
-                    painterResource(R.drawable.history_icon),"History"
-                )
-                Text(it)
+                                Column(
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .weight(10f)
+                                        .padding(start = 12.dp)
+                                ) {
+                                    Text(
+                                        text = it["isim"] ?: "",
+                                        fontSize = 18.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = it["detay"] ?: "",
+                                        fontSize = 16.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+
+                                    )
+                                }
+
+                                Spacer(Modifier.weight(1f))
+
+                                Row(
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    IconButton(
+                                        content = {
+                                            Icon(Icons.Default.Info, "Detail")
+                                        },
+                                        onClick = {}
+                                    )
+                                    IconButton(
+                                        content = {
+                                            Icon(Icons.Default.Edit, "Edit")
+                                        },
+                                        onClick = {}
+                                    )
+                                    IconButton(
+                                        content = {
+                                            Icon(Icons.Default.Delete, "Edit")
+                                        },
+                                        onClick = {}
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
+
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewScreen(){
+fun PreviewMyScreen(){
     EventTrackerAppTheme {
-        MyEvents()
+        MyEventsScreen()
     }
 }

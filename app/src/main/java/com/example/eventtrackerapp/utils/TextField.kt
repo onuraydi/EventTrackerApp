@@ -1,11 +1,14 @@
 package com.example.eventtrackerapp.utils
 
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun EventTrackerAppOutlinedTextField(txt:String,
@@ -16,7 +19,9 @@ fun EventTrackerAppOutlinedTextField(txt:String,
      isReadOnly:Boolean=false,
      isPassword:Boolean = false)
 {
-    OutlinedTextField(value = state.value,
+    OutlinedTextField(
+        modifier = Modifier.widthIn(max = 280.dp),
+        value = state.value,
         onValueChange = {
             state.value = it;
         },
