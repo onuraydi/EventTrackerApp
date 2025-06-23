@@ -326,7 +326,7 @@ fun AddEventScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerModal(
+private fun DatePickerModal(
     onDateSelected: (Long?)->Unit,
     onDismiss: ()-> Unit
 ) {
