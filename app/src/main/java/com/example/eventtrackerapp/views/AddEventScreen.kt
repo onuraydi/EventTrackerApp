@@ -9,17 +9,27 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
@@ -30,6 +40,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -59,7 +71,7 @@ import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddEventScreen() {
     EventTrackerAppTheme {
@@ -92,6 +104,7 @@ fun AddEventScreen() {
                 val showModal = rememberSaveable { mutableStateOf(false) }
                 val eventDuration = rememberSaveable { mutableStateOf("") }
                 val eventLocation = rememberSaveable { mutableStateOf("") }
+                val tagIsSelected = rememberSaveable{mutableStateOf(false)}
                 /*TODO(Şimdilik bu kısım hem etiket ve kategori için kullanılacak. Sonrasında modellere göre)*/
                 val categories = arrayListOf(
                     "Yazılım",
@@ -105,6 +118,7 @@ fun AddEventScreen() {
                     "Örnek4"
                 )
                 val category = rememberSaveable{ mutableStateOf("") }
+                val selectedTagList = remember {mutableStateListOf<String?>()}
                 val isExpanded = rememberSaveable{ mutableStateOf(false)}
 
                 Column(
@@ -222,6 +236,74 @@ fun AddEventScreen() {
                             }
                         }
                     }
+
+                    Spacer(Modifier.padding(vertical = 12.dp))
+                    /*TODO(BURADA KULLANILAN ROW VE BOX REFACTOR EDİLMELİ)*/
+                    Text("Select event tag")
+                    LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)){
+                        items(categories){
+                            FilterChip(
+                                modifier = Modifier.padding(end = 8.dp),
+                                selected = tagIsSelected.value,
+                                label = {
+                                    Text(it)
+                                },
+                                onClick = {
+                                    tagIsSelected.value = !tagIsSelected.value
+                                    if(!selectedTagList.contains(it)){
+                                        selectedTagList.add(it)
+                                    }else{
+                                        selectedTagList.remove(it)
+                                    }
+                                },
+                                trailingIcon = if (tagIsSelected.value){
+                                    {
+                                        Icon(
+                                            Icons.Default.Done,
+                                            "Done",
+                                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                        )
+                                    }
+                                }else{
+                                    null
+                                }
+
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.padding(vertical = 5.dp))
+
+                    Box(
+                        Modifier
+                            .fillMaxWidth(0.9f)
+                            .wrapContentHeight()
+                            .defaultMinSize(minHeight = 80.dp)
+                            .heightIn(max=150.dp)
+                            .verticalScroll(rememberScrollState())
+                            .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
+                    ){
+                        FlowRow(
+                            modifier = Modifier.padding(5.dp),
+                            maxItemsInEachRow = 4
+                        ) {
+                            selectedTagList.filterNotNull().forEach {
+                                FilterChip(
+                                    modifier = Modifier.padding(end = 3.dp),
+                                    selected = tagIsSelected.value,
+                                    label = {Text(it, fontSize = 12.sp, maxLines = 1)},
+                                    onClick = {
+                                        tagIsSelected.value = !tagIsSelected.value
+                                        selectedTagList.remove(it)
+                                    },
+                                    trailingIcon = {
+                                        Icon(Icons.Default.Clear,"Clear")
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                 }
 
                 Spacer(Modifier.padding(vertical = 20.dp))
@@ -232,11 +314,11 @@ fun AddEventScreen() {
                 ) {
                     EventTrackerAppPrimaryButton(
                         text = "Add Event",
-                    ){
-                        //onClick
-                    }
-                }
+                        onClick = {
 
+                        }
+                    )
+                }
             }
 
         }

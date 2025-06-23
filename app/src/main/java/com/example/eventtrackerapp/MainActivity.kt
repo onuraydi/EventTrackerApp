@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.views.AddEventScreen
 import com.example.eventtrackerapp.views.CreateProfileScreen
 import com.example.eventtrackerapp.views.HomeScreen
 import com.example.eventtrackerapp.views.LoginScreen
@@ -62,7 +63,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { contentPadding -> Box(Modifier.padding(contentPadding))
-                    MyAccountScreen()
+                    AddEventScreen()
                     //CreateProfileScreen()
                 }
             }
