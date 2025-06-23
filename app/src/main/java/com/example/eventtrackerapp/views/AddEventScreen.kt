@@ -327,7 +327,7 @@ fun AddEventScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerModal(
+private fun DatePickerModal(
     onDateSelected: (Long?)->Unit,
     onDismiss: ()-> Unit
 ) {
@@ -376,7 +376,7 @@ fun ShowDateModal(
             Icon(Icons.Default.DateRange,"Select Date")
         },
         modifier = modifier
-            .fillMaxWidth(0.71f)
+
             .pointerInput(dateState.value) {
                 awaitEachGesture {
                     awaitFirstDown(pass = PointerEventPass.Initial)

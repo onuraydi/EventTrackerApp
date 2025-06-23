@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -23,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.views.AddEventScreen
 import com.example.eventtrackerapp.views.CreateProfileScreen
+import com.example.eventtrackerapp.views.EditEventScreen
 import com.example.eventtrackerapp.views.HomeScreen
 import com.example.eventtrackerapp.views.LoginScreen
 import com.example.eventtrackerapp.views.MyAccountScreen
@@ -32,6 +34,7 @@ import com.example.eventtrackerapp.views.ProfileScreen
 import com.example.eventtrackerapp.views.SignUpScreen
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalLayoutApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -63,7 +66,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { contentPadding -> Box(Modifier.padding(contentPadding))
-                    AddEventScreen()
+                    EditEventScreen()
                     //CreateProfileScreen()
                 }
             }
