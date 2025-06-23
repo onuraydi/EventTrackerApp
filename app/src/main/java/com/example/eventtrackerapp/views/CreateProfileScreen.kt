@@ -1,7 +1,11 @@
 package com.example.eventtrackerapp.views
 
 import androidx.compose.animation.expandIn
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +30,8 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -53,11 +59,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
@@ -106,6 +117,31 @@ fun CreateProfileScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(Modifier.padding(vertical = 15.dp))
+
+                    Box(
+                        Modifier
+                            .size(80.dp, 80.dp)
+                            .border(border = BorderStroke(2.dp, Color.Black), shape = CircleShape)
+                            .clickable {
+                            }
+                    ) {
+                        Image(
+                            modifier = Modifier
+                                .fillMaxSize(0.8f)
+                                .align(Alignment.Center)
+                                .padding(start = 5.dp),
+                            painter = painterResource(R.drawable.profile_photo_add_icon),
+                            contentDescription = "PhotoAdd",
+                            )
+                    }
+
+                    Spacer(Modifier.padding(vertical = 5.dp))
+
+                    Text(
+                        text = "Add Profile Photo",
+                    )
+
+                    Spacer(Modifier.padding(vertical = 7.dp))
 
                     EventTrackerAppOutlinedTextField(
                         "Full Name",
@@ -319,7 +355,9 @@ fun CreateProfileScreen() {
                 Spacer(Modifier.padding(vertical = 20.dp))
 
                 Box(
-                    Modifier.align(Alignment.BottomCenter).padding(bottom = 15.dp)
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 15.dp)
                 ) {
                     EventTrackerAppPrimaryButton("Complete") { }
                 }
