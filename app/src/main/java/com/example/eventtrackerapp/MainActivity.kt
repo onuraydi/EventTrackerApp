@@ -21,8 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.views.CreateProfileScreen
 import com.example.eventtrackerapp.views.HomeScreen
 import com.example.eventtrackerapp.views.LoginScreen
+import com.example.eventtrackerapp.views.MyAccountScreen
 import com.example.eventtrackerapp.views.MyEvents
 import com.example.eventtrackerapp.views.NotificationScreen
 import com.example.eventtrackerapp.views.ProfileScreen
@@ -35,32 +37,33 @@ class MainActivity : ComponentActivity() {
         setContent {
             EventTrackerAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize(),
-//                    bottomBar = {
-//                        NavigationBar(windowInsets = NavigationBarDefaults.windowInsets, modifier = Modifier) {
-//                            NavigationBarItem(
-//                                selected = true,
-//                                icon ={ Icon(Icons.Filled.Home,"Home") },
-//                                label = {Text("Home")},
-//                                onClick = {},
-//                            )
-//
-//                            NavigationBarItem(
-//                                selected = false,
-//                                icon ={ Icon(Icons.Filled.Search,"Explore") },
-//                                label = {Text("Explore")},
-//                                onClick = {},
-//                            )
-//
-//                            NavigationBarItem(
-//                                selected = false,
-//                                icon ={ Icon(Icons.Filled.Person,"Profile") },
-//                                label = {Text("Profile")},
-//                                onClick = {},
-//                            )
-//                        }
-//                    }
+                    bottomBar = {
+                        NavigationBar(windowInsets = NavigationBarDefaults.windowInsets, modifier = Modifier) {
+                            NavigationBarItem(
+                                selected = true,
+                                icon ={ Icon(Icons.Filled.Home,"Home") },
+                                label = {Text("Home")},
+                                onClick = {},
+                            )
+
+                            NavigationBarItem(
+                                selected = false,
+                                icon ={ Icon(Icons.Filled.Search,"Explore") },
+                                label = {Text("Explore")},
+                                onClick = {},
+                            )
+
+                            NavigationBarItem(
+                                selected = false,
+                                icon ={ Icon(Icons.Filled.Person,"Profile") },
+                                label = {Text("Profile")},
+                                onClick = {},
+                            )
+                        }
+                    }
                 ) { contentPadding -> Box(Modifier.padding(contentPadding))
-                    NotificationScreen()
+                    MyAccountScreen()
+                    //CreateProfileScreen()
                 }
             }
         }
