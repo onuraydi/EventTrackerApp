@@ -20,18 +20,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
-import com.example.eventtrackerapp.views.AddEventScreen
-import com.example.eventtrackerapp.views.CreateProfileScreen
-import com.example.eventtrackerapp.views.EditEventScreen
-import com.example.eventtrackerapp.views.HomeScreen
-import com.example.eventtrackerapp.views.LoginScreen
-import com.example.eventtrackerapp.views.MyAccountScreen
-import com.example.eventtrackerapp.views.MyEvents
-import com.example.eventtrackerapp.views.NotificationScreen
-import com.example.eventtrackerapp.views.ProfileScreen
-import com.example.eventtrackerapp.views.SignUpScreen
+import com.example.eventtrackerapp.views.DetailScreen
+
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalLayoutApi::class)
@@ -66,7 +57,8 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { contentPadding -> Box(Modifier.padding(contentPadding))
-                    EditEventScreen()
+                    DetailScreen()
+                    //MyEvents()
                     //CreateProfileScreen()
                 }
             }
