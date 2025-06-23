@@ -23,7 +23,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.views.HomeScreen
 import com.example.eventtrackerapp.views.LoginScreen
+import com.example.eventtrackerapp.views.MyEvents
+import com.example.eventtrackerapp.views.NotificationScreen
 import com.example.eventtrackerapp.views.ProfileScreen
+import com.example.eventtrackerapp.views.SignUpScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,32 +35,32 @@ class MainActivity : ComponentActivity() {
         setContent {
             EventTrackerAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize(),
-                    bottomBar = {
-                        NavigationBar(windowInsets = NavigationBarDefaults.windowInsets, modifier = Modifier) {
-                            NavigationBarItem(
-                                selected = true,
-                                icon ={ Icon(Icons.Filled.Home,"Home") },
-                                label = {Text("Home")},
-                                onClick = {},
-                            )
-
-                            NavigationBarItem(
-                                selected = false,
-                                icon ={ Icon(Icons.Filled.Search,"Explore") },
-                                label = {Text("Explore")},
-                                onClick = {},
-                            )
-
-                            NavigationBarItem(
-                                selected = false,
-                                icon ={ Icon(Icons.Filled.Person,"Profile") },
-                                label = {Text("Profile")},
-                                onClick = {},
-                            )
-                        }
-                    }
+//                    bottomBar = {
+//                        NavigationBar(windowInsets = NavigationBarDefaults.windowInsets, modifier = Modifier) {
+//                            NavigationBarItem(
+//                                selected = true,
+//                                icon ={ Icon(Icons.Filled.Home,"Home") },
+//                                label = {Text("Home")},
+//                                onClick = {},
+//                            )
+//
+//                            NavigationBarItem(
+//                                selected = false,
+//                                icon ={ Icon(Icons.Filled.Search,"Explore") },
+//                                label = {Text("Explore")},
+//                                onClick = {},
+//                            )
+//
+//                            NavigationBarItem(
+//                                selected = false,
+//                                icon ={ Icon(Icons.Filled.Person,"Profile") },
+//                                label = {Text("Profile")},
+//                                onClick = {},
+//                            )
+//                        }
+//                    }
                 ) { contentPadding -> Box(Modifier.padding(contentPadding))
-                    ProfileScreen()
+                    NotificationScreen()
                 }
             }
         }
@@ -70,12 +73,4 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         text = "Hello $name!",
         modifier = modifier
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    EventTrackerAppTheme {
-        Greeting("Android")
-    }
 }
