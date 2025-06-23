@@ -12,13 +12,16 @@ fun EventTrackerAppOutlinedTextField(txt:String,
      state: MutableState<String>,
      leadingIcon: @Composable (() -> Unit)? = null,
      trailingIcon: @Composable (() -> Unit)? = null,
+     isSingleLine: Boolean = true,
+     isReadOnly:Boolean=false,
      isPassword:Boolean = false)
 {
     OutlinedTextField(value = state.value,
         onValueChange = {
             state.value = it;
         },
-        singleLine = true,
+        singleLine = isSingleLine,
+        readOnly = isReadOnly,
         label = { Text(text = txt) },
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
