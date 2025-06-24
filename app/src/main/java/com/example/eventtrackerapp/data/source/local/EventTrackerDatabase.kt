@@ -10,7 +10,10 @@ import com.example.eventtrackerapp.model.Tag
 @Database(entities = [Category::class, Tag::class], version = 1)
 abstract class EventTrackerDatabase : RoomDatabase(){
 
-    //abstract fun eventDao(): EventDAO Onur EventDAO interface'ini eklemeli
+    abstract fun eventDao(): EventDao
+    abstract fun categoryDao(): CategoryDao
+    abstract fun profileDao(): ProfileDao
+    abstract fun tagDao(): TagDao
     //bu fonksiyon çağrıldığı yerde eğer database objesi oluşturulduysa aynı
     //obje üzerinden süreç işler.
 
