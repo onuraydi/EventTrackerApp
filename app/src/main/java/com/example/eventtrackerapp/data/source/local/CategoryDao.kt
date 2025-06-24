@@ -1,6 +1,7 @@
 package com.example.eventtrackerapp.data.source.local
 
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
 import com.example.eventtrackerapp.model.Category
 
@@ -12,4 +13,5 @@ interface CategoryDao {
 
     @Query("SELECT * FROM categories WHERE id = :id ")
     suspend fun getById(id:Int)
+    
 }
