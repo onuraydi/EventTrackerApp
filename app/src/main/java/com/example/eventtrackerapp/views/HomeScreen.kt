@@ -56,10 +56,6 @@ import androidx.compose.ui.unit.sp
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/develop
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

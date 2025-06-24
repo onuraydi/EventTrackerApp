@@ -29,6 +29,7 @@ import com.example.eventtrackerapp.views.HomeScreen
 import com.example.eventtrackerapp.views.LoginScreen
 import com.example.eventtrackerapp.views.MyAccountScreen
 import com.example.eventtrackerapp.views.NotificationScreen
+import com.example.eventtrackerapp.views.PreferencesScreen
 import com.example.eventtrackerapp.views.ProfileScreen
 import com.example.eventtrackerapp.views.SignUpScreen
 
@@ -65,7 +66,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { contentPadding -> Box(Modifier.padding(contentPadding))
-                    EditEventScreen()
+                    PreferencesScreen()
                     //CreateProfileScreen()
                 }
             }
