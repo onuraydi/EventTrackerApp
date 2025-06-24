@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.views.DetailScreen
+import com.example.eventtrackerapp.views.HomeScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -58,6 +59,7 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { contentPadding -> Box(Modifier.padding(contentPadding))
                     DetailScreen()
+                    //HomeScreen()
                     //MyEvents()
                     //CreateProfileScreen()
                 }
