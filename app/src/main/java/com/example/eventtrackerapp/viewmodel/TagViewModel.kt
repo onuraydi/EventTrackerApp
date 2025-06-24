@@ -26,7 +26,7 @@ class TagViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun getById(id:Int){
+    fun getTagById(id:Int){
         viewModelScope.launch(Dispatchers.IO) {
             _tag.value = tagDao.getById(id);
         }
