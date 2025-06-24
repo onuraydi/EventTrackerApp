@@ -6,16 +6,16 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "events")
 data class Event(
-    val name:String,
-    val detail: String,
-    val date:Long,
-    val duration:String,
-    val location:String,
-    val category:Category,
-    val tagLİst:List<Tag>,
-    val image:Int,
-    val likeCount:Int,
-    val participants:List<Profile>,
+    val name:String? = "",
+    val detail: String? = "",
+    val date:Long? = 0,
+    val duration:String? = "",
+    val location:String? = "",
+    val category:Category? = Category(),
+    val tagList:List<Tag>? = arrayListOf(),
+    val image:Int = 0,
+    val likeCount:Int = 0,
+    val participants:List<Profile> = arrayListOf(),
 
     // Yorumlar eklenecek
 ){
