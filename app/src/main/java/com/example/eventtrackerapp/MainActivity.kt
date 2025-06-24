@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.views.DetailScreen
 import com.example.eventtrackerapp.views.HomeScreen
+import com.example.eventtrackerapp.views.SplashScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -58,7 +59,8 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { contentPadding -> Box(Modifier.padding(contentPadding))
-                    DetailScreen()
+                    SplashScreen()
+                    //DetailScreen()
                     //HomeScreen()
                     //MyEvents()
                     //CreateProfileScreen()
