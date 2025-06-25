@@ -4,10 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverter
+import androidx.room.TypeConverters
 import com.example.eventtrackerapp.model.Category
 import com.example.eventtrackerapp.model.Tag
 
 @Database(entities = [Category::class, Tag::class], version = 1)
+@TypeConverters(TypeConverter::class)
 abstract class EventTrackerDatabase : RoomDatabase(){
 
     abstract fun eventDao(): EventDao
