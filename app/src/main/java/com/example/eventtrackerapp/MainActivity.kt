@@ -22,9 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.views.AddEventScreen
-import com.example.eventtrackerapp.views.DetailScreen
-import com.example.eventtrackerapp.views.HomeScreen
-import com.example.eventtrackerapp.views.SplashScreen
 
 
 class MainActivity : ComponentActivity() {
