@@ -7,9 +7,11 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import com.example.eventtrackerapp.model.Category
+import com.example.eventtrackerapp.model.Event
+import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.model.Tag
 
-@Database(entities = [Category::class, Tag::class], version = 1)
+@Database(entities = [Category::class, Tag::class,Event::class,Profile::class], version = 1)
 @TypeConverters(TypeConverter::class)
 abstract class EventTrackerDatabase : RoomDatabase(){
 

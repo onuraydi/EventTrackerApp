@@ -50,6 +50,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,16 +65,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.model.Category
+import com.example.eventtrackerapp.model.Event
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
-import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedButton
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.viewmodel.EventViewModel
 import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun AddEventScreen() {
+fun AddEventScreen(
+    eventViewModel: EventViewModel = viewModel()
+    /*TODO Bu kısıma navigation da eklenecek */
+) {
+
+    val event = eventViewModel.event.collectAsState().value
+
+
     EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -314,7 +326,19 @@ fun AddEventScreen() {
                     EventTrackerAppPrimaryButton(
                         text = "Add Event",
                         onClick = {
-
+                            val event = Event(
+                                name = eventName.value,
+                                detail = eventDetail.value,
+                                image = R.drawable.ic_launcher_background,
+                                date = selectedDate.value,
+                                duration = eventDuration.value,
+                                location = eventLocation.value,
+                                likeCount = 19,
+                                participants = arrayListOf(),
+                                category = Category(),
+                                tagList = arrayListOf()
+                            )
+                            eventViewModel.addEvent(event)
                         }
                     )
                 }
