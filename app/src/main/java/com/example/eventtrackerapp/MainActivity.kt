@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,13 +20,21 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHost
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.views.AddEventScreen
+import com.example.eventtrackerapp.views.HomeScreen
 
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalLayoutApi::class)
+
+    val viewModel: EventViewModel by viewModels<EventViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -57,10 +66,14 @@ class MainActivity : ComponentActivity() {
 //                        }
 //                    }
                 ) { contentPadding -> Box(Modifier.padding(contentPadding))
-                    AddEventScreen()
+                    LaunchedEffect(Unit) {
+                        viewModel.getAllEvents()
+                    }
+                    val eventList by viewModel.eventList.collectAsState()
+                    //AddEventScreen()
                     //SplashScreen()
                     //DetailScreen()
-                    //HomeScreen()
+                    HomeScreen(eventList)
                     //MyEvents()
                     //CreateProfileScreen()
                 }

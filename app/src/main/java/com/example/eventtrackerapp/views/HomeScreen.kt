@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -53,14 +54,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
+import com.example.eventtrackerapp.viewmodel.EventViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen()
+fun HomeScreen(
+    eventList:List<Event>,
+    eventViewModel: EventViewModel = viewModel()
+)
 {
+
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(modifier = Modifier
@@ -88,11 +96,10 @@ fun HomeScreen()
                 .padding(bottom = 70.dp),
                 contentPadding = PaddingValues(5.dp, vertical = 15.dp),
             ) {
-                item()
+
+                items(eventList)
                 {
-                    EventRow();
-                    EventRow();
-                    EventRow();
+                    EventRow(it)
                 }
             }
         }
@@ -101,7 +108,7 @@ fun HomeScreen()
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EventRow()
+private fun EventRow(event:Event)
 {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false);
     val scope = rememberCoroutineScope();
@@ -139,9 +146,11 @@ private fun EventRow()
         }
 
 
-        Text(text="text", modifier = Modifier
-            .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
-            .clickable {  })
+        event.name?.let {
+            Text(text= it, modifier = Modifier
+                .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
+                .clickable {  })
+        }
 
 
         if (showBottomSheet) {
@@ -232,6 +241,6 @@ fun comment()
 @Composable
 fun HomePreview() {
     EventTrackerAppTheme {
-        HomeScreen();
+        //HomeScreen();
     }
 }
