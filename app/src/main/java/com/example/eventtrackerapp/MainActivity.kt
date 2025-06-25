@@ -32,30 +32,30 @@ class MainActivity : ComponentActivity() {
         setContent {
             EventTrackerAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize(),
-                    bottomBar = {
-                        NavigationBar(windowInsets = NavigationBarDefaults.windowInsets, modifier = Modifier) {
-                            NavigationBarItem(
-                                selected = true,
-                                icon ={ Icon(Icons.Filled.Home,"Home") },
-                                label = {Text("Home")},
-                                onClick = {},
-                            )
-
-                            NavigationBarItem(
-                                selected = false,
-                                icon ={ Icon(Icons.Filled.Search,"Explore") },
-                                label = {Text("Explore")},
-                                onClick = {},
-                            )
-
-                            NavigationBarItem(
-                                selected = false,
-                                icon ={ Icon(Icons.Filled.Person,"Profile") },
-                                label = {Text("Profile")},
-                                onClick = {},
-                            )
-                        }
-                    }
+//                    bottomBar = {
+//                        NavigationBar(windowInsets = NavigationBarDefaults.windowInsets, modifier = Modifier) {
+//                            NavigationBarItem(
+//                                selected = true,
+//                                icon ={ Icon(Icons.Filled.Home,"Home") },
+//                                label = {Text("Home")},
+//                                onClick = {},
+//                            )
+//
+//                            NavigationBarItem(
+//                                selected = false,
+//                                icon ={ Icon(Icons.Filled.Search,"Explore") },
+//                                label = {Text("Explore")},
+//                                onClick = {},
+//                            )
+//
+//                            NavigationBarItem(
+//                                selected = false,
+//                                icon ={ Icon(Icons.Filled.Person,"Profile") },
+//                                label = {Text("Profile")},
+//                                onClick = {},
+//                            )
+//                        }
+//                    }
                 ) { contentPadding -> Box(Modifier.padding(contentPadding))
                     AddEventScreen()
                     //SplashScreen()

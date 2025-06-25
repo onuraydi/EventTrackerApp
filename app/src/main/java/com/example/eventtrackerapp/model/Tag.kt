@@ -9,21 +9,21 @@ data class Tag(
 ){
     @PrimaryKey(autoGenerate = true) var id:Int = 0
 }
-
-val Tags = listOf(
-    Tag("Work"),
-    Tag("Personal"),
-    Tag("Software"),
-    Tag("Important"),
-    Tag("Family"),
-    Tag("Friends"),
-    Tag("Health"),
-    Tag("Fitness"),
-    Tag("Travel"),
-    Tag("Shopping"),
-    Tag("Hobbies"),
-    Tag("Education"),
-    Tag("Finance"),
-    Tag("Home"),
-    Tag("Events")
-)
+//
+//val Tags = listOf(
+//    Tag("Work"),
+//    Tag("Personal"),
+//    Tag("Software"),
+//    Tag("Important"),
+//    Tag("Family"),
+//    Tag("Friends"),
+//    Tag("Health"),
+//    Tag("Fitness"),
+//    Tag("Travel"),
+//    Tag("Shopping"),
+//    Tag("Hobbies"),
+//    Tag("Education"),
+//    Tag("Finance"),
+//    Tag("Home"),
+//    Tag("Events")
+//)

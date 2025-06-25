@@ -12,7 +12,7 @@ import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.model.Tag
 
 @Database(entities = [Category::class, Tag::class,Event::class,Profile::class], version = 1)
-@TypeConverters(TypeConverter::class)
+@TypeConverters(Converter::class)
 abstract class EventTrackerDatabase : RoomDatabase(){
 
     abstract fun eventDao(): EventDao

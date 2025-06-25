@@ -334,7 +334,7 @@ fun AddEventScreen(
                                 duration = eventDuration.value,
                                 location = eventLocation.value,
                                 likeCount = 19,
-                                participants = arrayListOf(),
+                                //participants = arrayListOf(),
                                 category = Category(),
                                 tagList = arrayListOf()
                             )

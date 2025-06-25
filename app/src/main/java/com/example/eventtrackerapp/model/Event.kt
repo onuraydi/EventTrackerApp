@@ -15,7 +15,7 @@ data class Event(
     val tagList:List<Tag>? = arrayListOf(),
     val image:Int = 0,
     val likeCount:Int = 0,
-    val participants:List<Profile> = arrayListOf(),
+    //val participants:List<Profile> = arrayListOf(),
 
     // Yorumlar eklenecek
 ){
