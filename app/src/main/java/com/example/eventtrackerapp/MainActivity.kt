@@ -9,14 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,10 +16,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHost
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.viewmodel.EventViewModel
-import com.example.eventtrackerapp.views.AddEventScreen
+import com.example.eventtrackerapp.views.AppNavGraph
 import com.example.eventtrackerapp.views.HomeScreen
 
 
@@ -39,8 +32,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val navController = rememberNavController()
             EventTrackerAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize(),
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
 //                    bottomBar = {
 //                        NavigationBar(windowInsets = NavigationBarDefaults.windowInsets, modifier = Modifier) {
 //                            NavigationBarItem(
@@ -65,15 +60,20 @@ class MainActivity : ComponentActivity() {
 //                            )
 //                        }
 //                    }
-                ) { contentPadding -> Box(Modifier.padding(contentPadding))
+                ) { contentPadding ->
+                    Box(Modifier.padding(contentPadding))
                     LaunchedEffect(Unit) {
                         viewModel.getAllEvents()
+
                     }
-                    val eventList by viewModel.eventList.collectAsState()
+//                    val eventList by viewModel.eventList.collectAsState()
                     //AddEventScreen()
                     //SplashScreen()
                     //DetailScreen()
-                    HomeScreen(eventList)
+                    AppNavGraph(navController = navController)
+
+
+                    //HomeScreen(eventList,navController)
                     //MyEvents()
                     //CreateProfileScreen()
                 }

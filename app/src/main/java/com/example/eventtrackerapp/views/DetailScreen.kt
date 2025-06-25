@@ -65,6 +65,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
@@ -72,7 +73,9 @@ import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen()
+fun DetailScreen(
+    navController: NavController
+)
 {
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false);
@@ -268,6 +271,6 @@ fun DetailScreen()
 @Composable
 fun DetailScreenPreview() {
     EventTrackerAppTheme {
-        DetailScreen();
+        //DetailScreen();
     }
 }

@@ -55,6 +55,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
@@ -64,13 +66,15 @@ import com.example.eventtrackerapp.viewmodel.EventViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    eventList:List<Event>,
-    eventViewModel: EventViewModel = viewModel()
+    eventList: List<Event>,
+    navController: NavController
 )
 {
 
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
+
+
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     Scaffold(modifier = Modifier
         .fillMaxSize()
         .nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -99,7 +103,7 @@ fun HomeScreen(
 
                 items(eventList)
                 {
-                    EventRow(it)
+                    EventRow(it,navController)
                 }
             }
         }
@@ -108,8 +112,9 @@ fun HomeScreen(
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EventRow(event:Event)
+private fun EventRow(event:Event,navController: NavController)
 {
+
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false);
     val scope = rememberCoroutineScope();
     var showBottomSheet by remember { mutableStateOf(false ) }
@@ -127,7 +132,7 @@ private fun EventRow(event:Event)
             .fillMaxWidth()
             .height(220.dp)
             .align(Alignment.CenterHorizontally)
-            .clickable {  }
+            .clickable { navController.navigate("detail")}
             .clip(RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)),
 
             contentScale = ContentScale.Crop)
@@ -149,7 +154,7 @@ private fun EventRow(event:Event)
         event.name?.let {
             Text(text= it, modifier = Modifier
                 .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
-                .clickable {  })
+                .clickable {  navController.navigate("detail")})
         }
 
 
