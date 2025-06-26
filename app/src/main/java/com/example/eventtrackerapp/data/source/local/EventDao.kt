@@ -28,6 +28,12 @@ interface EventDao {
     @Delete
     suspend fun delete(event: Event)
 
+    @Query("UPDATE events SET likeCount = likeCount + 1 WHERE id = :eventId")
+    suspend fun incrementLike(eventId:Int)
+
+    @Query("UPDATE events SET likeCount = likeCount + 1 WHERE id = :eventId")
+    suspend fun decrementLike(eventId:Int)
+
     @Insert
     suspend fun insertEventTags(crossRef: List<EventTagCrossRef>)
 
