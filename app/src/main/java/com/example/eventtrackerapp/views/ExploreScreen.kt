@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
@@ -32,11 +33,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 
 @Composable
-fun ExploreScreen(){
+fun ExploreScreen(
+    eventList:List<Event>,
+    navController:NavController
+){
     EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -95,8 +101,8 @@ fun ExploreScreen(){
                     verticalItemSpacing = 8.dp,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     content = {
-                        items(24) {
-                            MyImage()
+                        items(eventList) {
+                            MyImage(it,navController)
                         }
                     }
                 )
@@ -106,7 +112,7 @@ fun ExploreScreen(){
 }
 
 @Composable
-fun MyImage(){
+fun MyImage(event:Event,navController: NavController){
     val randomHeights = remember { (150..300).random().dp }
     Image(
         modifier = Modifier
@@ -117,8 +123,11 @@ fun MyImage(){
                     1.dp,
                     Color.Black
                 )
-            ),
-        painter = painterResource(R.drawable.ic_launcher_foreground),
+            )
+            .clickable {
+                navController.navigate("detail")
+            },
+        painter = painterResource(event.image),
         contentDescription = "",
         contentScale = ContentScale.Crop,
     )
@@ -165,6 +174,6 @@ fun SimpleSearchBar(
 @Composable
 fun PreviewScreen(){
     EventTrackerAppTheme {
-        ExploreScreen()
+        //ExploreScreen()
     }
 }
