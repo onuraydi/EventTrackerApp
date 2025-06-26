@@ -4,11 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 
 @Composable
@@ -28,5 +28,11 @@ fun AppNavGraph(navController: NavHostController,eventViewModel: EventViewModel 
             }
             val event by eventViewModel.event.collectAsState()
             DetailScreen(event,navController) }
+        composable("detail") { DetailScreen(navController) }
+
+        composable("explorer"){
+            val eventList by eventViewModel.eventList.collectAsStateWithLifecycle()
+            ExploreScreen(eventList,navController)
+        }
     }
 }
