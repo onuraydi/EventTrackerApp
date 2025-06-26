@@ -25,6 +25,7 @@ import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.utils.BottomNavBar
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,6 +54,13 @@ fun HomeScreen(
                     Text(text = "Home")
                 })
         },
+        floatingActionButton = {
+            FloatingActionButton(onClick = {navController.navigate("addEvent")}) {
+                Icon(Icons.Filled.Add, null)
+            }
+        },
+
+        bottomBar = {BottomNavBar(navController = navController)}
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -65,11 +73,6 @@ fun HomeScreen(
             {
                 EventRow(it, navController)
             }
-        }
-    }
-    Box(modifier = Modifier.fillMaxSize()) {
-        FloatingActionButton(onClick = {navController.navigate("addEvent")}, Modifier.align(Alignment.BottomEnd).padding(20.dp)) {
-            Icon(Icons.Filled.Add, null)
         }
     }
 }

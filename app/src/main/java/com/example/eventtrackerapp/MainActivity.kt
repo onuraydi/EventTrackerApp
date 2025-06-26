@@ -46,66 +46,10 @@ class MainActivity : ComponentActivity() {
             EventTrackerAppTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-//                    bottomBar = {
-//                        val isSelectedHome = rememberSaveable { mutableStateOf(true)}
-//                        val isSelectedExplore = rememberSaveable { mutableStateOf(false)}
-//                        val isSelectedProfile = rememberSaveable { mutableStateOf(false)}
-//                        NavigationBar(windowInsets = NavigationBarDefaults.windowInsets, modifier = Modifier) {
-//                            NavigationBarItem(
-//                                selected = isSelectedHome.value,
-//                                icon ={ Icon(Icons.Filled.Home,"Home") },
-//                                label = {Text("Home")},
-//                                onClick = {
-//                                    isSelectedHome.value = true
-//                                    isSelectedExplore.value = false
-//                                    isSelectedProfile.value = false
-//                                    navController.navigate("home"){
-//                                        launchSingleTop = true
-//                                    }
-//                                },
-//                            )
-//
-//                            NavigationBarItem(
-//                                selected = isSelectedExplore.value,
-//                                icon ={ Icon(Icons.Filled.Search,"Explore") },
-//                                label = {Text("Explore")},
-//                                onClick = {
-//                                    isSelectedHome.value = false
-//                                    isSelectedExplore.value = true
-//                                    isSelectedProfile.value = false
-//                                    navController.navigate("explorer"){
-//                                        launchSingleTop = true
-//                                    }
-//                                },
-//                            )
-//
-//                            NavigationBarItem(
-//                                selected = isSelectedProfile.value,
-//                                icon ={ Icon(Icons.Filled.Person,"Profile") },
-//                                label = {Text("Profile")},
-//                                onClick = {
-//                                    isSelectedHome.value = false
-//                                    isSelectedExplore.value = false
-//                                    isSelectedProfile.value = true
-//                                    navController.navigate("profile"){
-//                                        launchSingleTop = true
-//                                    }
-//                                },
-//                            )
-//                        }
-//                    }
                 ) { contentPadding ->
-                    Box(Modifier.padding(contentPadding))
-//                    val eventList by viewModel.eventList.collectAsState()
-                    //AddEventScreen()
-                    //SplashScreen()
-                    //DetailScreen()
+                    Box(Modifier.padding(contentPadding)){
+                    }
                     AppNavGraph(navController = navController)
-
-
-                    //HomeScreen(eventList,navController)
-                    //MyEvents()
-                    //CreateProfileScreen()
                 }
             }
         }

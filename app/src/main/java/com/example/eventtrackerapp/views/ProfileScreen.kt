@@ -41,18 +41,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.utils.BottomNavBar
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 
 @Composable
-fun ProfileScreen()
+fun ProfileScreen(navController: NavController)
 {
     Scaffold(Modifier
-        .fillMaxSize()
-
+        .fillMaxSize(),
+        bottomBar = { BottomNavBar(navController = navController)}
     ) { innerPadding ->
         Column(modifier = Modifier
             .padding(innerPadding)
@@ -163,6 +165,6 @@ fun ProfileScreen()
 @Composable
 fun ProfilePreview() {
     EventTrackerAppTheme {
-        ProfileScreen();
+//        ProfileScreen();
     }
 }

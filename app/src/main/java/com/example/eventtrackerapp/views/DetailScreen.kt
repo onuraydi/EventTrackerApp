@@ -109,7 +109,6 @@ fun DetailScreen(
             .padding(innerPadding)
             .fillMaxWidth()
             .padding(8.dp)
-            .padding(bottom = 100.dp)
             .verticalScroll(rememberScrollState())) {
             Column() {
                 /*TODO: Buraya etkinliğin fotoğrafı gelecek event.image ile hata veriyor*/

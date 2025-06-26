@@ -43,5 +43,9 @@ fun AppNavGraph(navController: NavHostController,eventViewModel: EventViewModel 
             val eventList by eventViewModel.eventList.collectAsStateWithLifecycle()
             ExploreScreen(eventList,navController)
         }
+
+        composable("profile") {
+            ProfileScreen(navController = navController)
+        }
     }
 }

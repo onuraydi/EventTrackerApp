@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
@@ -37,6 +38,7 @@ import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.utils.BottomNavBar
 
 @Composable
 fun ExploreScreen(
@@ -46,9 +48,8 @@ fun ExploreScreen(
     EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-
+            bottomBar = {BottomNavBar(navController = navController)}
         ) { innerPadding ->
-
             val query = rememberSaveable { mutableStateOf("") }
             val active = rememberSaveable { mutableStateOf(false) }
             val searchList = remember { mutableStateListOf<String?>() }
