@@ -1,6 +1,7 @@
 package com.example.eventtrackerapp.views
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -14,9 +15,18 @@ import com.example.eventtrackerapp.viewmodel.EventViewModel
 fun AppNavGraph(navController: NavHostController,eventViewModel: EventViewModel = viewModel()){
 
     NavHost(navController=navController, startDestination = "home") {
+
         composable("home") {
             val eventList by eventViewModel.eventList.collectAsState()
             HomeScreen(eventList = eventList, navController = navController) }
-        composable("detail") { DetailScreen(navController) }
+
+
+        composable("detail/{id}") { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("id")
+            LaunchedEffect(Unit) {
+                eventViewModel.getEventById(eventId?.toIntOrNull() ?: 0)
+            }
+            val event by eventViewModel.event.collectAsState()
+            DetailScreen(event,navController) }
     }
 }

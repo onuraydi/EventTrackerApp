@@ -64,7 +64,6 @@ class MainActivity : ComponentActivity() {
                     Box(Modifier.padding(contentPadding))
                     LaunchedEffect(Unit) {
                         viewModel.getAllEvents()
-
                     }
 //                    val eventList by viewModel.eventList.collectAsState()
                     //AddEventScreen()

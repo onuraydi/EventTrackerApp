@@ -128,11 +128,11 @@ private fun EventRow(event:Event,navController: NavController)
         .border(BorderStroke(2.dp, Color.Black), shape = RoundedCornerShape(20.dp))
         )
     {
-        Image(painterResource(R.drawable.ic_launcher_background), null, modifier = Modifier
+        Image(painterResource(event.image), null, modifier = Modifier
             .fillMaxWidth()
             .height(220.dp)
             .align(Alignment.CenterHorizontally)
-            .clickable { navController.navigate("detail")}
+            .clickable { navController.navigate("detail/${event.id}") }
             .clip(RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)),
 
             contentScale = ContentScale.Crop)
@@ -154,7 +154,7 @@ private fun EventRow(event:Event,navController: NavController)
         event.name?.let {
             Text(text= it, modifier = Modifier
                 .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
-                .clickable {  navController.navigate("detail")})
+                .clickable {  navController.navigate("detail/${event.id}") },)
         }
 
 

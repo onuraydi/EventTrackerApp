@@ -65,15 +65,20 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.viewmodel.EventViewModel
+import kotlinx.serialization.builtins.serializer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
+    event: Event,
     navController: NavController
 )
 {
@@ -93,7 +98,9 @@ fun DetailScreen(
                     Text("Etkinlik Detay Sayfası", fontSize = 25.sp)
                 },
                 navigationIcon = {
-                    Icon(Icons.Default.ArrowBack,null, modifier = Modifier.padding(start = 8.dp))
+                    Icon(Icons.Default.ArrowBack,null, modifier = Modifier
+                        .padding(start = 8.dp)
+                        .clickable { navController.popBackStack() })
                 }
             )
         }
@@ -105,43 +112,38 @@ fun DetailScreen(
             .padding(bottom = 100.dp)
             .verticalScroll(rememberScrollState())) {
             Column() {
-                Image(painterResource(R.drawable.ic_launcher_background),null, contentScale = ContentScale.Crop, modifier = Modifier
+                /*TODO: Buraya etkinliğin fotoğrafı gelecek event.image ile hata veriyor*/
+                Image(painterResource(R.drawable.ic_launcher_foreground),null, contentScale = ContentScale.Crop, modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp))
 
                 Spacer(Modifier.padding(top = 18.dp))
 
-                Text(text="Etkinlik Başlığı", fontSize = 30.sp, fontWeight = FontWeight.W500)
+                event.name?.let { Text(text= it, fontSize = 30.sp, fontWeight = FontWeight.W500) }
                 Spacer(Modifier.padding(top = 3.dp))
-                Text("Kategori:" + " Etkinlik Kategorisi")
+                Text("Kategori:" + event.category)
                 Spacer(Modifier.padding(top = 10.dp))
                 Row(Modifier.padding(horizontal = 20.dp)) {
                     Icon(Icons.Default.DateRange,null)
                     Spacer(Modifier.padding(start = 5.dp))
-                    Text("04.04.2025")
+                    Text(text = event.date.toString())
 
                     Spacer(Modifier.weight(1f))
 
                     Icon(Icons.Default.LocationOn,null)
-                    Text("İstanbul/Türkiye")
+                    event.location?.let { Text(text = it) }
                 }
 
                 Spacer(Modifier.padding(top = 20.dp))
                 Text("Etkinlik Açıklaması", fontSize = 30.sp, fontWeight = FontWeight.W500)
                 Spacer(Modifier.padding(top = 5.dp))
-                Text("Lorem Ipsum is simply dummy text of the printing and typesetting industry. " +
-                        "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s," +
-                        " when an unknown printer took a galley of type and scrambled it to make a type" +
-                        " specimen book. It has survived not only five centuries, but also the leap into" +
-                        " electronic typesetting, remaining essentially unchanged. It was popularised in " +
-                        "the 1960s with the release of Letraset sheets containing Lorem Ipsum passages," +
-                        " and more recently with desktop publishing software like Aldus PageMaker " +
-                        "including versions of Lorem Ipsum", textAlign = TextAlign.Justify)
+                Text(text = event.detail.toString(), textAlign = TextAlign.Justify)
 
                 Spacer(Modifier.padding(top = 20.dp))
                 Text("Katılımcılar", fontSize = 30.sp, fontWeight = FontWeight.W500, modifier = Modifier.clickable {  })
                 Spacer(Modifier.padding(top = 5.dp))
                 Row() {
+                    /*TODO: Buraya katılımcıların fotoğrafları gelecek ilk 4 tanesinin*/
                     Image(
                         painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
                         Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
@@ -157,6 +159,8 @@ fun DetailScreen(
                         Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
                             .size(60.dp))
                     Spacer(Modifier.padding(start = 10.dp))
+
+                    /*TODO: Buraya katılımıcıların sayısı gelecek*/
                     Text("+12 Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier
                         .clickable {  }
                         .align(Alignment.CenterVertically))
