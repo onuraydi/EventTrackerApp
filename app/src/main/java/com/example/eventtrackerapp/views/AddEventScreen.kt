@@ -68,6 +68,7 @@ import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Category
 import com.example.eventtrackerapp.model.Event
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
@@ -79,13 +80,10 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddEventScreen(
-    eventViewModel: EventViewModel = viewModel()
-    /*TODO Bu kısıma navigation da eklenecek */
+    navController: NavController
+    /*TODO Bu kısıma navigation da eklenecek */,
+    insert : (Event) -> Unit
 ) {
-
-    val event = eventViewModel.event.collectAsState().value
-
-
     EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -97,6 +95,7 @@ fun AddEventScreen(
                             imageVector = Icons.Default.ArrowBack,
                             "GoBack",
                             modifier = Modifier.padding(start = 8.dp)
+                                .clickable { navController.popBackStack() }
                         )
                     }
                 )
@@ -338,7 +337,7 @@ fun AddEventScreen(
                                 category = Category(),
                                 tagList = arrayListOf()
                             )
-                            eventViewModel.addEvent(event)
+                            insert(event) // Insert the event using the provided function
                         }
                     )
                 }
@@ -434,6 +433,6 @@ fun convertMillisToDate(millis:Long) :String{
 @Composable
 fun PreviewPage(){
     EventTrackerAppTheme {
-        AddEventScreen()
+        //AddEventScreen()
     }
 }

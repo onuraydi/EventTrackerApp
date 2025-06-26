@@ -17,9 +17,19 @@ fun AppNavGraph(navController: NavHostController,eventViewModel: EventViewModel 
     NavHost(navController=navController, startDestination = "home") {
 
         composable("home") {
+            LaunchedEffect(Unit) {
+                eventViewModel.getAllEvents()
+            }
             val eventList by eventViewModel.eventList.collectAsState()
             HomeScreen(eventList = eventList, navController = navController) }
 
+
+        composable("addEvent") {
+            AddEventScreen(navController = navController){
+                eventViewModel.addEvent(it)
+                navController.popBackStack()
+            }
+        }
 
         composable("detail/{id}") { backStackEntry ->
             val eventId = backStackEntry.arguments?.getString("id")
@@ -28,7 +38,6 @@ fun AppNavGraph(navController: NavHostController,eventViewModel: EventViewModel 
             }
             val event by eventViewModel.event.collectAsState()
             DetailScreen(event,navController) }
-        composable("detail") { DetailScreen(navController) }
 
         composable("explorer"){
             val eventList by eventViewModel.eventList.collectAsStateWithLifecycle()
