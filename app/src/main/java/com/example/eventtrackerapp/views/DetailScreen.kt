@@ -120,7 +120,7 @@ fun DetailScreen(
 
                 event.name?.let { Text(text= it, fontSize = 30.sp, fontWeight = FontWeight.W500) }
                 Spacer(Modifier.padding(top = 3.dp))
-                Text("Kategori:" + event.category)
+                Text("Kategori:" + event.categoryId)
                 Spacer(Modifier.padding(top = 10.dp))
                 Row(Modifier.padding(horizontal = 20.dp)) {
                     Icon(Icons.Default.DateRange,null)

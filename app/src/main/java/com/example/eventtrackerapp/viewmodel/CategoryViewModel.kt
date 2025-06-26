@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class CategoryViewModel(application: Application): AndroidViewModel(application){
 
-    private val categoryDao = EventTrackerDatabase(application).categoryDao()
+    private val categoryDao = EventTrackerDatabase.getDatabase(application,viewModelScope).categoryDao()
 
     private val _categories = MutableStateFlow<List<Category>>(arrayListOf())
     private val _category = MutableStateFlow<Category>(Category())

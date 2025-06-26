@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class ProfileViewModel(application: Application): AndroidViewModel(application) {
 
-    private val profileDao = EventTrackerDatabase(application).profileDao()
+    private val profileDao = EventTrackerDatabase.getDatabase(application,viewModelScope).profileDao()
 
     private val _profileList = MutableStateFlow<List<Profile>>(arrayListOf())
     private val _profile = MutableStateFlow<Profile>(Profile())

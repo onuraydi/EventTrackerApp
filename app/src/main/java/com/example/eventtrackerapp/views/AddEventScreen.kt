@@ -334,8 +334,8 @@ fun AddEventScreen(
                                 location = eventLocation.value,
                                 likeCount = 19,
                                 //participants = arrayListOf(),
-                                category = Category(),
-                                tagList = arrayListOf()
+//                                category = Category(),
+//                                tagList = arrayListOf()
                             )
                             insert(event) // Insert the event using the provided function
                         }

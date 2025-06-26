@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class EventViewModel(application:Application): AndroidViewModel(application) {
 
-    private val eventDao = EventTrackerDatabase(application).eventDao()
+    private val eventDao = EventTrackerDatabase.getDatabase(application, viewModelScope).eventDao()
 
     private val _eventList = MutableStateFlow<List<Event>>(arrayListOf())
     private val _event = MutableStateFlow<Event>(Event())

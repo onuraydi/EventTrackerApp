@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class TagViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val tagDao = EventTrackerDatabase(application).tagDao();
+    private val tagDao = EventTrackerDatabase.getDatabase(application,viewModelScope).tagDao();
 
     private val _tagList = MutableStateFlow<List<Tag>>(arrayListOf())
     private val _tag = MutableStateFlow<Tag>(Tag())

@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 
-@Entity(primaryKeys = ["categoryId","tagId"])
+@Entity(primaryKeys = ["eventId","tagId"])
 data class EventTagCrossRef(
     val eventId:Int,
     val tagId:Int
