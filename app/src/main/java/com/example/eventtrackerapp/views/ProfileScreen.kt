@@ -75,9 +75,13 @@ fun ProfileScreen(navController: NavController)
 
             // Hesabım
 
-            ExtendedFloatingActionButton(onClick = {
-
-                },Modifier
+            ExtendedFloatingActionButton(
+                onClick = {
+                    navController.navigate("my_account"){
+                        launchSingleTop = true
+                    }
+                },
+                Modifier
                     .fillMaxWidth()
                     .height(60.dp)
                     .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp)
@@ -96,9 +100,13 @@ fun ProfileScreen(navController: NavController)
 
             // Tercihler
 
-            ExtendedFloatingActionButton(onClick = {
-
-            },Modifier
+            ExtendedFloatingActionButton(
+                onClick = {
+                    navController.navigate("preferences"){
+                        launchSingleTop = true
+                    }
+            },
+                Modifier
                 .fillMaxWidth()
                 .height(60.dp)
                 .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp)
@@ -117,9 +125,13 @@ fun ProfileScreen(navController: NavController)
 
             // Eklediğim Etkinlikler
 
-            ExtendedFloatingActionButton(onClick = {
-
-            },Modifier
+            ExtendedFloatingActionButton(
+                onClick = {
+                    navController.navigate("my_events"){
+                        launchSingleTop = true
+                    }
+            },
+                Modifier
                 .fillMaxWidth()
                 .height(60.dp)
                 .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp)
@@ -138,9 +150,11 @@ fun ProfileScreen(navController: NavController)
 
             // Çıkış yap
 
-            ExtendedFloatingActionButton(onClick = {
-
-            },Modifier
+            ExtendedFloatingActionButton(
+                onClick = {
+                    /*TODO(Firebase Auth Logout)*/
+            },
+                Modifier
                 .fillMaxWidth()
                 .height(60.dp)
                 .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp)

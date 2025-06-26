@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
@@ -51,7 +52,7 @@ import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun MyAccountScreen() {
+fun MyAccountScreen(navController:NavController) {
     Scaffold(modifier = Modifier
         .fillMaxSize(),
         topBar = {
@@ -68,7 +69,9 @@ fun MyAccountScreen() {
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, null)
                     }
                 })
@@ -210,6 +213,6 @@ fun MyAccountScreen() {
 @Composable
 fun MyAccountScreenPrev() {
     EventTrackerAppTheme {
-        MyAccountScreen()
+        //MyAccountScreen()
     }
 }

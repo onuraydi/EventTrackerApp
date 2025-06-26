@@ -43,12 +43,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyEventsScreen(){
+fun MyEventsScreen(navController: NavController){
     EventTrackerAppTheme {
         Scaffold(
             Modifier.fillMaxSize(),
@@ -61,7 +62,7 @@ fun MyEventsScreen(){
                                 Icon(Icons.Default.ArrowBack,"Go Back")
                             },
                             onClick = {
-
+                                navController.popBackStack()
                             }
                         )
                     }
@@ -73,6 +74,7 @@ fun MyEventsScreen(){
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
+                /*TODO VERİLER SENKRON GELDİKTEN SONRA NAVİGASYONLAR YAPILACAK*/
                 val eventList : List<Map<String,String>> = listOf(
                     mapOf("isim" to "EtkinlikasdasdAdsaD ASDADas1", "detay" to "Detay1"),
                     mapOf("isim" to "Etkinlik2", "detay" to "Detay2"),
@@ -138,7 +140,9 @@ fun MyEventsScreen(){
                                         content = {
                                             Icon(Icons.Default.Info, "Detail")
                                         },
-                                        onClick = {}
+                                        onClick = {
+
+                                        }
                                     )
                                     IconButton(
                                         content = {
@@ -167,6 +171,6 @@ fun MyEventsScreen(){
 @Composable
 fun PreviewMyScreen(){
     EventTrackerAppTheme {
-        MyEventsScreen()
+        //MyEventsScreen()
     }
 }

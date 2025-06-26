@@ -47,5 +47,17 @@ fun AppNavGraph(navController: NavHostController,eventViewModel: EventViewModel 
         composable("profile") {
             ProfileScreen(navController = navController)
         }
+
+        composable("my_account") {
+            MyAccountScreen(navController)
+        }
+
+        composable("preferences"){
+            PreferencesScreen(navController)
+        }
+
+        composable("my_events"){
+            MyEventsScreen(navController)
+        }
     }
 }

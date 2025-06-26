@@ -52,12 +52,13 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun PreferencesScreen(){
+fun PreferencesScreen(navController: NavController){
     EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -71,7 +72,9 @@ fun PreferencesScreen(){
                                     imageVector = Icons.Default.ArrowBack,
                                     contentDescription = "Go Back")
                               },
-                            onClick = {}
+                            onClick = {
+                                navController.popBackStack()
+                            }
                         )
                     }
                 )
@@ -250,6 +253,6 @@ fun CardRow(
 @Composable
 fun ShowMyScreen(){
     EventTrackerAppTheme {
-        PreferencesScreen()
+        //PreferencesScreen()
     }
 }
