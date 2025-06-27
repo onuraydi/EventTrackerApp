@@ -51,7 +51,7 @@ fun HomeScreen(
                 titleContentColor = MaterialTheme.colorScheme.primary,
             ),
                 actions = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = {navController.navigate("notification")}) {
                         Icon(Icons.Filled.Notifications, contentDescription = null)
                     }
                 },

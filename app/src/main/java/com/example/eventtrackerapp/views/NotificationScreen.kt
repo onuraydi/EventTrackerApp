@@ -55,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.eventtrackerapp.Greeting
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import kotlinx.coroutines.processNextEventInCurrentThread
@@ -62,7 +63,7 @@ import kotlin.math.exp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationScreen(){
+fun NotificationScreen(navController: NavController){
     Scaffold(modifier = Modifier
         .fillMaxSize(),
         topBar = {
@@ -75,7 +76,9 @@ fun NotificationScreen(){
 
                 },
                 navigationIcon = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack,null)
                     }
                 })
@@ -159,6 +162,6 @@ private fun Notification(text:String){
 @Composable
 fun NotificationPreview() {
     EventTrackerAppTheme {
-        NotificationScreen()
+//        NotificationScreen()
     }
 }

@@ -89,5 +89,9 @@ fun AppNavGraph(
         composable("my_events"){
             MyEventsScreen(navController)
         }
+
+        composable("notification") {
+            NotificationScreen(navController)
+        }
     }
 }
