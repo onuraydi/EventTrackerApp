@@ -92,6 +92,7 @@ fun AppNavGraph(
 
         composable("notification") {
             NotificationScreen(navController)
+        }
         composable("create_profile_screen") {
             LaunchedEffect(Unit) {
                 categoryViewModel.getAllCategoryWithTags()
