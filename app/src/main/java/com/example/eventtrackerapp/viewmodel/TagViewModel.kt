@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
+import com.example.eventtrackerapp.model.CategoryWithTag
 import com.example.eventtrackerapp.model.Tag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,21 +15,33 @@ class TagViewModel(application: Application) : AndroidViewModel(application) {
 
     private val tagDao = EventTrackerDatabase.getDatabase(application,viewModelScope).tagDao();
 
-    private val _tagList = MutableStateFlow<List<Tag>>(arrayListOf())
-    private val _tag = MutableStateFlow<Tag>(Tag())
+    private val _selectedTags = MutableStateFlow<List<Tag>>(arrayListOf())
+    private val _chosenTags = MutableStateFlow<List<Tag>>(arrayListOf())
 
-    public val tagList:StateFlow<List<Tag>> = _tagList;
-    public val tag:StateFlow<Tag> = _tag;
+    val selectedTag:StateFlow<List<Tag>> = _selectedTags
+    val chosenTags:StateFlow<List<Tag>> = _chosenTags
 
-    fun getAllTags() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _tagList.value = tagDao.getAll();
-        }
+    fun updateSelectedCategoryTags(categoryWithTag: CategoryWithTag){
+        _selectedTags.value = categoryWithTag.tags
+        _chosenTags.value = emptyList() //kategori değişince seçili tag'leri sıfırlar
     }
 
-    fun getTagById(id:Int){
-        viewModelScope.launch(Dispatchers.IO) {
-            _tag.value = tagDao.getById(id);
+    fun toggleTag(tag:Tag){
+        val current = _chosenTags.value.toMutableList()
+        if (current.any{ it.id == tag.id}){
+            current.removeAll {it.id==tag.id}
+        }else{
+            current.add(tag)
         }
+        _chosenTags.value = current
+    }
+
+    fun removeChosenTag(tag:Tag){
+        _chosenTags.value = _chosenTags.value.filter{it.id!=tag.id}
+    }
+
+    fun resetTag(){
+        _chosenTags.value = emptyList()
+        _selectedTags.value = emptyList()
     }
 }

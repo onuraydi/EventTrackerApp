@@ -49,9 +49,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -64,26 +65,36 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.Category
 import com.example.eventtrackerapp.model.Event
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
-import com.example.eventtrackerapp.viewmodel.EventViewModel
+import com.example.eventtrackerapp.viewmodel.CategoryViewModel
+import com.example.eventtrackerapp.viewmodel.TagViewModel
 import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddEventScreen(
-    navController: NavController
-    /*TODO Bu kısıma navigation da eklenecek */,
+    navController: NavController,
+    tagViewModel: TagViewModel = viewModel(),
+    categoryViewModel: CategoryViewModel = viewModel(),
     insert : (Event) -> Unit
 ) {
+    LaunchedEffect(Unit) {
+        tagViewModel.resetTag()
+    }
+    val categoryWithTags by categoryViewModel.categoryWithTags.collectAsState()
+    val selectedTag by tagViewModel.selectedTag.collectAsStateWithLifecycle()
+    val chosenTags by tagViewModel.chosenTags.collectAsStateWithLifecycle()
+
+    val selectedCategoryName = remember { mutableStateOf("") }
+
     EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -94,7 +105,8 @@ fun AddEventScreen(
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             "GoBack",
-                            modifier = Modifier.padding(start = 8.dp)
+                            modifier = Modifier
+                                .padding(start = 8.dp)
                                 .clickable { navController.popBackStack() }
                         )
                     }
@@ -115,21 +127,8 @@ fun AddEventScreen(
                 val showModal = rememberSaveable { mutableStateOf(false) }
                 val eventDuration = rememberSaveable { mutableStateOf("") }
                 val eventLocation = rememberSaveable { mutableStateOf("") }
-                val tagIsSelected = rememberSaveable{mutableStateOf(false)}
-                /*TODO(Şimdilik bu kısım hem etiket ve kategori için kullanılacak. Sonrasında modellere göre)*/
-                val categories = arrayListOf(
-                    "Yazılım",
-                    "Yapay Zeka",
-                    "Back-End",
-                    "Front-End",
-                    "Teknoloji",
-                    "Örnek",
-                    "Örnek2",
-                    "Örnek3",
-                    "Örnek4"
-                )
-                val category = rememberSaveable{ mutableStateOf("") }
-                val selectedTagList = remember {mutableStateListOf<String?>()}
+
+                val categoryId = rememberSaveable{ mutableStateOf(0) }
                 val isExpanded = rememberSaveable{ mutableStateOf(false)}
 
                 Column(
@@ -214,7 +213,7 @@ fun AddEventScreen(
                     ) {
                         OutlinedTextField(
                             modifier = Modifier.menuAnchor(),
-                            value = category.value,
+                            value = selectedCategoryName.value,
                             onValueChange = {},
                             readOnly = true,
                             placeholder = {
@@ -235,12 +234,14 @@ fun AddEventScreen(
                             expanded = isExpanded.value,
                             onDismissRequest = { isExpanded.value = false}//bu sayede menü kapanacak
                         ) {
-                            categories.forEach{
+                            categoryWithTags.forEach{
                                 DropdownMenuItem(
-                                    text = {Text(it)},
+                                    text = {Text("${it.category.name}")},
                                     onClick = {
                                         isExpanded.value = false
-                                        category.value = it
+                                        categoryId.value = it.category.id
+                                        selectedCategoryName.value = it.category.name ?: ""
+                                        tagViewModel.updateSelectedCategoryTags(it)
                                     }
                                 )
                             }
@@ -251,22 +252,19 @@ fun AddEventScreen(
                     /*TODO(BURADA KULLANILAN ROW VE BOX REFACTOR EDİLMELİ)*/
                     Text("Select event tag")
                     LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)){
-                        items(categories){
+                        items(selectedTag){tag->
+                            val isSelected = chosenTags.any{it.id==tag.id}
+
                             FilterChip(
                                 modifier = Modifier.padding(end = 8.dp),
-                                selected = tagIsSelected.value,
+                                selected = isSelected,
                                 label = {
-                                    Text(it)
+                                    Text(tag.name?:"")
                                 },
                                 onClick = {
-                                    tagIsSelected.value = !tagIsSelected.value
-                                    if(!selectedTagList.contains(it)){
-                                        selectedTagList.add(it)
-                                    }else{
-                                        selectedTagList.remove(it)
-                                    }
+                                    tagViewModel.toggleTag(tag)
                                 },
-                                trailingIcon = if (tagIsSelected.value){
+                                trailingIcon = if (isSelected){
                                     {
                                         Icon(
                                             Icons.Default.Done,
@@ -289,7 +287,7 @@ fun AddEventScreen(
                             .fillMaxWidth(0.9f)
                             .wrapContentHeight()
                             .defaultMinSize(minHeight = 80.dp)
-                            .heightIn(max=150.dp)
+                            .heightIn(max = 150.dp)
                             .verticalScroll(rememberScrollState())
                             .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
                     ){
@@ -297,14 +295,13 @@ fun AddEventScreen(
                             modifier = Modifier.padding(5.dp),
                             maxItemsInEachRow = 4
                         ) {
-                            selectedTagList.filterNotNull().forEach {
+                            chosenTags.forEach {tag->
                                 FilterChip(
                                     modifier = Modifier.padding(end = 3.dp),
-                                    selected = tagIsSelected.value,
-                                    label = {Text(it, fontSize = 12.sp, maxLines = 1)},
+                                    selected = true,
+                                    label = {Text(tag.name?:"", fontSize = 12.sp, maxLines = 1)},
                                     onClick = {
-                                        tagIsSelected.value = !tagIsSelected.value
-                                        selectedTagList.remove(it)
+                                        tagViewModel.removeChosenTag(tag)
                                     },
                                     trailingIcon = {
                                         Icon(Icons.Default.Clear,"Clear")
@@ -319,7 +316,8 @@ fun AddEventScreen(
                 Spacer(Modifier.padding(vertical = 20.dp))
 
                 Box(
-                    Modifier.align(Alignment.BottomCenter)
+                    Modifier
+                        .align(Alignment.BottomCenter)
                         .padding(bottom = 15.dp)
                 ) {
                     EventTrackerAppPrimaryButton(
@@ -332,7 +330,8 @@ fun AddEventScreen(
                                 date = selectedDate.value,
                                 duration = eventDuration.value,
                                 location = eventLocation.value,
-                                likeCount = 19,
+                                likeCount = 0,
+                                categoryId = categoryId.value
                                 //participants = arrayListOf(),
 //                                category = Category(),
 //                                tagList = arrayListOf()
