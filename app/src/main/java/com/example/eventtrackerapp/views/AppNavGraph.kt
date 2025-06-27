@@ -21,7 +21,7 @@ fun AppNavGraph(
     tagViewModel: TagViewModel = viewModel(),
 ){
 
-    NavHost(navController=navController, startDestination = "create_profile_screen") {
+    NavHost(navController=navController, startDestination = "home") {
 
         composable("home") {
             LaunchedEffect(Unit) {
