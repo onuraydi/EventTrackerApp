@@ -126,7 +126,7 @@ fun MyImage(event:Event,navController: NavController){
                 )
             )
             .clickable {
-                navController.navigate("detail")
+                navController.navigate("detail/${event.id}")
             },
         painter = painterResource(event.image),
         contentDescription = "",
