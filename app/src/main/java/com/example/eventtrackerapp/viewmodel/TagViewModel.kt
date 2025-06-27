@@ -44,4 +44,8 @@ class TagViewModel(application: Application) : AndroidViewModel(application) {
         _chosenTags.value = emptyList()
         _selectedTags.value = emptyList()
     }
+
+    fun resetChosenTagForCategory(categoryId: Int) {
+        _chosenTags.value = _chosenTags.value.filterNot { it.categoryId == categoryId }
+    }
 }
