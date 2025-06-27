@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,15 +19,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight.Companion.W500
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.BottomNavBar
-import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
+import com.example.eventtrackerapp.utils.CommentBottomSheet
+import com.example.eventtrackerapp.viewmodel.EventViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +39,8 @@ fun HomeScreen(
     navController: NavController
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -51,7 +57,7 @@ fun HomeScreen(
                 },
                 modifier = Modifier,
                 title = {
-                    Text(text = "Home")
+                    Text(text = "Ana Sayfa")
                 })
         },
         floatingActionButton = {
@@ -78,17 +84,21 @@ fun HomeScreen(
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EventRow(event:Event,navController: NavController)
 {
+    var eventViewModel: EventViewModel = viewModel()
 
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false);
-    val scope = rememberCoroutineScope();
+
     var showBottomSheet by remember { mutableStateOf(false ) }
 
 
-    var commentState = remember { mutableStateOf("")}
+    // TODO Bu kısımda bir sıkıntı var icon tutulmuyor çözümü ise kullanıcı ekledikten sonra ilişki
+    //  ile kullanıcının like durumunu tutmak
+    val isLikeState = rememberSaveable {mutableStateOf(false)}
+    val likeCount = rememberSaveable { mutableStateOf(event.likeCount)}
+
+    val commentCount = rememberSaveable { mutableStateOf(0) }  // TODO buraya daha sonra event.comment count gelecek
 
     Column (modifier = Modifier
         .fillMaxWidth()
@@ -107,12 +117,32 @@ private fun EventRow(event:Event,navController: NavController)
 
 
         Row() {
-            Icon(Icons.Filled.FavoriteBorder,null, modifier = Modifier
-                .padding(15.dp)
-                .clickable {  })
+            if(isLikeState.value == false)
+            {
+                Icon(Icons.Filled.FavoriteBorder,null, modifier = Modifier
+                    .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
+                    .clickable {
+                        isLikeState.value = true;
+                        likeCount.value++;
+                        eventViewModel.incrementLike(eventId = event.id)
+                    })
+                Text(text = "${likeCount.value}",Modifier.align(Alignment.CenterVertically))
+            }else
+            {
+                Icon(Icons.Filled.Favorite,null, modifier = Modifier
+                    .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
+                    .clickable {
+                        isLikeState.value = false;
+                        likeCount.value--;
+                        eventViewModel.decrementLike(eventId = event.id)
+                    })
+                Text(text = "${likeCount.value}",Modifier.align(Alignment.CenterVertically))
+            }
+
             Icon(painterResource(R.drawable.baseline_chat_bubble_outline_24),null, modifier = Modifier
-                .padding(15.dp)
+                .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end = 5.dp)
                 .clickable { showBottomSheet = true })
+            Text(text = "${commentCount.value}",Modifier.align(Alignment.CenterVertically))
             Icon(Icons.Filled.Share ,null, modifier = Modifier
                 .padding(15.dp)
                 .clickable {  })
@@ -122,94 +152,22 @@ private fun EventRow(event:Event,navController: NavController)
         event.name?.let {
             Text(text= it, modifier = Modifier
                 .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
-                .clickable {  navController.navigate("detail/${event.id}") },)
-        }
-
-
-        if (showBottomSheet) {
-            Column {
-                ModalBottomSheet(
-                    modifier = Modifier.fillMaxHeight(),
-                    onDismissRequest = { showBottomSheet = false },
-                    sheetState = sheetState
-                ) {
-                    Box(modifier = Modifier.fillMaxHeight()) {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(bottom = 70.dp)
-                        ) {
-                            items(15) {
-                                comment()
-                            }
-                        }
-
-
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .background(Color.White)
-                                .padding(10.dp)
-                        ) {
-                            Row() {
-                                Image(
-                                    painter = painterResource(R.drawable.ic_launcher_foreground),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(50.dp)
-                                        .border(BorderStroke(2.dp, Color.Black), shape = CircleShape),
-
-                                    contentScale = ContentScale.Fit,
-                                )
-
-                                Spacer(modifier = Modifier.width(20.dp))
-
-                                EventTrackerAppOutlinedTextField("Etkinlik için Yorum Ekle...",commentState ,trailingIcon = {
-                                    Icon(Icons.Filled.PlayArrow,null, modifier = Modifier
-                                        .clickable {  })
-                                })
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-
-fun comment()
-{
-    Row(
-        modifier = Modifier.padding(8.dp)
-    ) {
-        Image(
-            painter = painterResource(R.drawable.ic_launcher_foreground),
-            contentDescription = null,
-            modifier = Modifier
-                .size(50.dp)
-                .border(BorderStroke(2.dp, Color.Black), shape = CircleShape),
-            contentScale = ContentScale.Fit
-        )
-
-        Spacer(modifier = Modifier.width(10.dp))
-
-        Column {
-            Text(
-                text = "username",
-                fontSize = 15.sp
-            )
-            Text(
-                text = "yorum detayı",
-                fontSize = 20.sp
+                .clickable {  navController.navigate("detail/${event.id}") },
+                fontWeight = W500, fontSize = 20.sp
             )
         }
 
+        CommentBottomSheet(
+            showSheet = showBottomSheet,
+            onDismiss = {showBottomSheet = false},
+            comments = arrayListOf(),
+            onSendComment = {},
+            currentUserImage = painterResource(R.drawable.ic_launcher_foreground),
+            currentUserName = "deneme"
+            )
+        }
     }
-}
+
 
 @Preview(showBackground = true)
 @Composable

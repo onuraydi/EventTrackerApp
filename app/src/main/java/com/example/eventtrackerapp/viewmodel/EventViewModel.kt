@@ -49,4 +49,16 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
             eventDao.delete(event)
         }
     }
+
+    fun incrementLike(eventId:Int){
+        viewModelScope.launch(Dispatchers.IO) {
+            eventDao.incrementLike(eventId)
+        }
+    }
+
+    fun decrementLike(eventId:Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            eventDao.decrementLike(eventId)
+        }
+    }
 }
