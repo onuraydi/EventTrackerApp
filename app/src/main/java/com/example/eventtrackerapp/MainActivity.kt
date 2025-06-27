@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
@@ -49,6 +50,8 @@ class MainActivity : ComponentActivity() {
                 ) { contentPadding ->
                     Box(Modifier.padding(contentPadding)){
                     }
+                    WindowCompat.setDecorFitsSystemWindows(window, false)
+
                     AppNavGraph(navController = navController)
                 }
             }

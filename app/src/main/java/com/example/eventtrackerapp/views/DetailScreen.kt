@@ -210,7 +210,7 @@ fun DetailScreen(
                                         .padding(bottom = 70.dp)
                                 ) {
                                     items(15) {
-                                        comment()
+                                        //comment()
                                     }
                                 }
 
