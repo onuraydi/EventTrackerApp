@@ -1,37 +1,28 @@
 package com.example.eventtrackerapp.views
 
-import androidx.compose.animation.expandIn
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -46,37 +37,52 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
-import kotlin.math.max
+import com.example.eventtrackerapp.viewmodel.CategoryViewModel
+import com.example.eventtrackerapp.viewmodel.TagViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun CreateProfileScreen() {
+fun CreateProfileScreen(
+    tagViewModel: TagViewModel = viewModel(),
+    categoryViewModel: CategoryViewModel = viewModel()
+) {
+    /*LaunchedEffect(Unit) {
+        tagViewModel.resetTag()
+    }*/
+    val categoryWithTags by categoryViewModel.categoryWithTags.collectAsStateWithLifecycle()
+    val selectedTag by tagViewModel.selectedTag.collectAsStateWithLifecycle()
+    val chosenTags by tagViewModel.chosenTags.collectAsStateWithLifecycle()
+
+    val selectedCompleteTagList = remember{ mutableStateListOf<Tag?>(null) }
+    val isShow = rememberSaveable { mutableStateOf(false) }
+
     EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -104,10 +110,8 @@ fun CreateProfileScreen() {
             ) {
                 val fullNameState = rememberSaveable { mutableStateOf("") }
                 val userNameState = rememberSaveable { mutableStateOf("") }
-                val selected = rememberSaveable { mutableStateOf(false) }
                 val gender = rememberSaveable { mutableStateOf("") }
                 val isExpanded = rememberSaveable { mutableStateOf(false) }
-                val selectedCategoryList = remember { mutableStateListOf<String?>() }
 
                 Column(
                     modifier = Modifier
@@ -204,29 +208,28 @@ fun CreateProfileScreen() {
 
                     Spacer(Modifier.padding(vertical = 3.dp))
 
+                    //TODO BU KATEGORİ ALANINDA SELECTED NASIL HALLOLUR
+                    //TODO HATA: Kullanıcı kategoriyi seçtikten sonra etiketleri seçmeden başka kategori seçebiliyor
                     LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
-                        val categories = arrayListOf(
-                            "Yazılım",
-                            "Yapay Zeka",
-                            "Back-End",
-                            "Front-End",
-                            "Teknoloji",
-                            "Örnek",
-                            "Örnek2",
-                            "Örnek3",
-                            "Örnek4"
-                        )
-                        items(categories) {
+                        items(categoryWithTags) {
+                            val selected = rememberSaveable { mutableStateOf(false) }
+
                             FilterChip(
                                 modifier = Modifier.padding(end = 8.dp),
                                 selected = selected.value,
-                                label = { Text(it) },
+                                label = { Text(it.category.name?:"") },
                                 onClick = {
                                     selected.value = !selected.value
-                                    if (!selectedCategoryList.contains(it)) {
-                                        selectedCategoryList.add(it)
-                                    } else {
-                                        selectedCategoryList.remove(it)
+                                    isShow.value = selected.value
+
+                                    if(selected.value){
+                                        tagViewModel.updateSelectedCategoryTags(it) //selectedTags ı doldurur
+                                    }else{
+                                        // Kategori kaldırıldı → hem chosenTags hem selectedCompleteTagList içinden temizle
+                                        tagViewModel.resetChosenTagForCategory(it.category.id)
+
+                                        // Compose'daki selectedCompleteTagList içinden bu kategoriye ait tag’leri çıkar
+                                        selectedCompleteTagList.removeAll{tag-> tag?.categoryId == it.category.id }
                                     }
                                 },
                                 trailingIcon = if (selected.value) {
@@ -245,8 +248,7 @@ fun CreateProfileScreen() {
                         }
                     }
 
-                    Spacer(Modifier.padding(vertical = 5.dp))
-
+                    /*Spacer(Modifier.padding(vertical = 5.dp))
                     Box(
                         Modifier
                             .fillMaxWidth(0.9f)
@@ -260,14 +262,20 @@ fun CreateProfileScreen() {
                             Modifier.padding(5.dp),
                             maxItemsInEachRow = 4,
                         ) {
-                            selectedCategoryList.filterNotNull().forEach {
+                            selectedTag.forEach {tag->
+                                val isSelected = chosenTags.any { it.id == tag.id }
+
                                 FilterChip(
                                     modifier = Modifier.padding(end = 3.dp),
-                                    label = { Text(it, fontSize = 12.sp, maxLines = 1) },
-                                    selected = selected.value,
+                                    label = { Text(tag.name?:"", fontSize = 12.sp, maxLines = 1) },
+                                    selected = isSelected,
                                     onClick = {
-                                        selected.value = !selected.value
-                                        selectedCategoryList.remove(it)
+                                        if(isSelected){
+                                            tagViewModel.toggleTag(tag)
+                                            selectedCompleteTagList.remove(tag)
+                                        }else{
+                                            selectedCompleteTagList.add(tag)
+                                        }
                                     },
                                     trailingIcon = {
                                         Icon(Icons.Default.Clear, "Clear")
@@ -275,48 +283,42 @@ fun CreateProfileScreen() {
                                 )
                             }
                         }
-                    }
+                    }*/
 
                     Spacer(Modifier.padding(vertical = 12.dp))
 
-                    LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
-                        val categories = arrayListOf(
-                            "Yazılım",
-                            "Yapay Zeka",
-                            "Back-End",
-                            "Front-End",
-                            "Teknoloji",
-                            "Örnek",
-                            "Örnek2",
-                            "Örnek3",
-                            "Örnek4"
-                        )
-                        items(categories) {
-                            FilterChip(
-                                modifier = Modifier.padding(end = 8.dp),
-                                selected = selected.value,
-                                label = { Text(it) },
-                                onClick = {
-                                    selected.value = !selected.value
-                                    if (!selectedCategoryList.contains(it)) {
-                                        selectedCategoryList.add(it)
-                                    } else {
-                                        selectedCategoryList.remove(it)
-                                    }
-                                },
-                                trailingIcon = if (selected.value) {
-                                    {
-                                        Icon(
-                                            Icons.Filled.Done,
-                                            "Done",
-                                            modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                        )
-                                    }
-                                } else {
-                                    null
-                                }
+                    if(isShow.value){
+                        LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
+                            items(selectedTag) {tag->
 
-                            )
+                                val isSelected = chosenTags.any { it.id == tag.id }
+
+                                FilterChip(
+                                    modifier = Modifier.padding(end = 8.dp),
+                                    selected = isSelected,
+                                    label = { Text(tag.name ?: "") },
+                                    onClick = {
+                                        tagViewModel.toggleTag(tag)
+                                        if(!selectedCompleteTagList.any{it?.id == tag.id}){
+                                            selectedCompleteTagList.add(tag)
+                                        }else if(isSelected){
+                                            selectedCompleteTagList.removeAll{it?.id == tag.id}
+                                        }
+                                    },
+                                    trailingIcon = if (isSelected) {
+                                        {
+                                            Icon(
+                                                Icons.Filled.Done,
+                                                "Done",
+                                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                            )
+                                        }
+                                    } else {
+                                        null
+                                    }
+
+                                )
+                            }
                         }
                     }
 
@@ -335,14 +337,14 @@ fun CreateProfileScreen() {
                             Modifier.padding(5.dp),
                             maxItemsInEachRow = 4,
                         ) {
-                            selectedCategoryList.filterNotNull().forEach {
+                            selectedCompleteTagList.filterNotNull().forEach {tag->
                                 FilterChip(
                                     modifier = Modifier.padding(end = 3.dp),
-                                    label = { Text(it, fontSize = 12.sp, maxLines = 1) },
-                                    selected = selected.value,
+                                    label = { Text(tag.name?:"", fontSize = 12.sp, maxLines = 1) },
+                                    selected = true,
                                     onClick = {
-                                        selected.value = !selected.value
-                                        selectedCategoryList.remove(it)
+                                        tagViewModel.removeChosenTag(tag)
+                                        selectedCompleteTagList.remove(tag)
                                     },
                                     trailingIcon = {
                                         Icon(Icons.Default.Clear, "Clear")

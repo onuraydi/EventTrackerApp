@@ -21,7 +21,7 @@ fun AppNavGraph(
     tagViewModel: TagViewModel = viewModel(),
 ){
 
-    NavHost(navController=navController, startDestination = "home") {
+    NavHost(navController=navController, startDestination = "create_profile_screen") {
 
         composable("home") {
             LaunchedEffect(Unit) {
@@ -72,6 +72,13 @@ fun AppNavGraph(
 
         composable("my_events"){
             MyEventsScreen(navController)
+        }
+
+        composable("create_profile_screen") {
+            LaunchedEffect(Unit) {
+                categoryViewModel.getAllCategoryWithTags()
+            }
+            CreateProfileScreen(tagViewModel,categoryViewModel)
         }
     }
 }
