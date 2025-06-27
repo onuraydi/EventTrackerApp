@@ -96,7 +96,8 @@ private fun EventRow(event:Event,navController: NavController)
     // TODO Bu kısımda bir sıkıntı var icon tutulmuyor çözümü ise kullanıcı ekledikten sonra ilişki
     //  ile kullanıcının like durumunu tutmak
     val isLikeState = rememberSaveable {mutableStateOf(false)}
-    val likeCount = rememberSaveable { mutableStateOf(event.likeCount)}
+    var likeCount = remember(event.likeCount) { mutableStateOf(event.likeCount) }
+
 
     val commentCount = rememberSaveable { mutableStateOf(0) }  // TODO buraya daha sonra event.comment count gelecek
 

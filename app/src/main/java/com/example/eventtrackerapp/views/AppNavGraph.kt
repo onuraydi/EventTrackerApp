@@ -46,12 +46,28 @@ fun AppNavGraph(
         }
 
         composable("detail/{id}") { backStackEntry ->
-            val eventId = backStackEntry.arguments?.getString("id")
-            LaunchedEffect(Unit) {
-                eventViewModel.getEventById(eventId?.toIntOrNull() ?: 0)
+
+            val eventId = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: 0
+
+            // Event'i çağır
+            LaunchedEffect(eventId) {
+                eventViewModel.getEventById(eventId)
             }
+
             val event by eventViewModel.event.collectAsState()
-            DetailScreen(event,navController) }
+
+            val category by categoryViewModel.category.collectAsState()
+
+            LaunchedEffect(event?.categoryId) {
+                val categoryID = event?.categoryId ?: 0
+                if (categoryID != 0) {
+                    categoryViewModel.getCategoryById(categoryID)
+                }
+            }
+
+            DetailScreen(event = event, navController = navController, category = category)
+        }
+
 
         composable("explorer"){
             val eventList by eventViewModel.eventList.collectAsStateWithLifecycle()
