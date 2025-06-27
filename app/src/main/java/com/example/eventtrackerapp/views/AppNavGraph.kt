@@ -9,10 +9,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
+import com.example.eventtrackerapp.viewmodel.TagViewModel
 
 @Composable
-fun AppNavGraph(navController: NavHostController,eventViewModel: EventViewModel = viewModel()){
+fun AppNavGraph(
+    navController: NavHostController,
+    eventViewModel: EventViewModel = viewModel(),
+    categoryViewModel: CategoryViewModel = viewModel(),
+    tagViewModel: TagViewModel = viewModel(),
+){
 
     NavHost(navController=navController, startDestination = "home") {
 
@@ -25,7 +32,14 @@ fun AppNavGraph(navController: NavHostController,eventViewModel: EventViewModel 
 
 
         composable("addEvent") {
-            AddEventScreen(navController = navController){
+            LaunchedEffect(Unit) {
+                categoryViewModel.getAllCategoryWithTags()
+            }
+            AddEventScreen(
+                navController = navController,
+                tagViewModel,
+                categoryViewModel
+            ){
                 eventViewModel.addEvent(it)
                 navController.popBackStack()
             }
