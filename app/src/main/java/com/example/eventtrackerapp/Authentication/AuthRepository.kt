@@ -1,9 +1,8 @@
 package com.example.eventtrackerapp.Authentication
-
-
-import androidx.compose.runtime.traceEventEnd
 import com.google.firebase.auth.FirebaseAuth
 
+
+import com.google.firebase.auth.FirebaseAuth
 
 class AuthRepository {
 
@@ -16,6 +15,17 @@ class AuthRepository {
                     onResult(true,"Kayıt olma işlemi başarılı")
                 }
                 else {
+                    onResult(false,task.exception?.message)
+                }
+            }
+}
+
+    fun login(email:String, password:String, onResult: (Boolean,String?) -> Unit){
+        firebaseAuth.signInWithEmailAndPassword(email,password)
+            .addOnCompleteListener { task->
+                if(task.isSuccessful){
+                    onResult(true,null)
+                }else{
                     onResult(false,task.exception?.message)
                 }
             }
