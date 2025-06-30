@@ -1,9 +1,7 @@
 package com.example.eventtrackerapp.views
 
-import android.graphics.drawable.shapes.Shape
-import android.provider.CalendarContract.Colors
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,58 +9,50 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.paddingFrom
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.AlignmentLine
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.eventtrackerapp.Greeting
+import androidx.navigation.NavController
+import com.example.eventtrackerapp.Authentication.AuthViewModel
+import com.example.eventtrackerapp.Authentication.SignUpRequest
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedButton
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
-import java.security.KeyStore.TrustedCertificateEntry
 
 @Composable
-fun SignUpScreen()
+fun SignUpScreen(
+    navController: NavController,
+    authViewModel: AuthViewModel
+)
 {
+
+    var context = LocalContext.current
+    var signUpRequest = authViewModel.signUpRequest
+
 
     Box(modifier = Modifier
         .padding(15.dp)
@@ -87,9 +77,9 @@ fun SignUpScreen()
             )
         {
             var fullName = remember { mutableStateOf("") }
-            var email = remember { mutableStateOf("") }
-            var password = remember { mutableStateOf("") }
-            var passwordConfirm = remember { mutableStateOf("") }
+            var email = remember { mutableStateOf(signUpRequest.email) }
+            var password = remember { mutableStateOf(signUpRequest.password) }
+            var passwordConfirm = remember { mutableStateOf(signUpRequest.repeatPassword) }
             var isObscure = remember { mutableStateOf(false) }
             var isObscureConfirm = remember { mutableStateOf(false) }
 
@@ -146,7 +136,19 @@ fun SignUpScreen()
 
             EventTrackerAppPrimaryButton("Sign Up")
             {
-             // on click
+                authViewModel.signUpRequest = SignUpRequest(
+                    email = email.value,
+                    password = password.value
+                )
+                authViewModel.signUp(){
+                    success,error ->
+                    if (success)
+                    {
+                        navController.navigate("create_profile_screen")
+                    }else{
+                        Toast.makeText(context, error ?: "Bilinmeyen hata", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.padding(8.dp))
@@ -157,7 +159,7 @@ fun SignUpScreen()
 
             EventTrackerAppOutlinedButton("Login")
             {
-                // on click
+                navController.navigate("login_screen")
             }
 
         }
@@ -180,6 +182,6 @@ private fun painterResource(isObscure:Boolean):Painter
 @Composable
 fun GreetingPreview() {
     EventTrackerAppTheme {
-        SignUpScreen();
+//        SignUpScreen();
     }
 }

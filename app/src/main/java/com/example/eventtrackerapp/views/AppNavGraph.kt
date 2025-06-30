@@ -4,11 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
@@ -19,9 +21,10 @@ fun AppNavGraph(
     eventViewModel: EventViewModel = viewModel(),
     categoryViewModel: CategoryViewModel = viewModel(),
     tagViewModel: TagViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel()
 ){
 
-    NavHost(navController=navController, startDestination = "home") {
+    NavHost(navController=navController, startDestination = "sign_up") {
 
         composable("home") {
             LaunchedEffect(Unit) {
@@ -98,6 +101,10 @@ fun AppNavGraph(
                 categoryViewModel.getAllCategoryWithTags()
             }
             CreateProfileScreen(tagViewModel,categoryViewModel)
+        }
+
+        composable("sign_up") {
+            SignUpScreen(navController,authViewModel)
         }
     }
 }
