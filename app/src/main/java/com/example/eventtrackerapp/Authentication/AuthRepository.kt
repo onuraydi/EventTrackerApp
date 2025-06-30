@@ -6,16 +6,26 @@ class AuthRepository {
 
     private val firebaseAuth = FirebaseAuth.getInstance()
 
-    fun signUp(email:String, password:String,onResult: (Boolean, String?) -> Unit){
-        firebaseAuth.createUserWithEmailAndPassword(email,password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful){
-                    onResult(true,"Kayıt olma işlemi başarılı")
+    fun signUp(email:String, password:String,passwordRepeat:String,onResult: (Boolean, String?) -> Unit){
+        if(password == passwordRepeat)
+        {
+            firebaseAuth.createUserWithEmailAndPassword(email,password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful){
+                        onResult(true,"Kayıt olma işlemi başarılı")
+                    }
+                    else {
+                        onResult(false,task.exception?.message)
+                    }
                 }
-                else {
-                    onResult(false,task.exception?.message)
-                }
-            }
+        }else if(passwordRepeat == ""){
+            onResult(false,"lütfen şifrenizi doğrulayınız")
+        }
+        else{
+            onResult(false,"Girdiğiniz şifreler eşleşmiyor")
+        }
+
+
 }
 
     fun login(email:String, password:String, onResult: (Boolean,String?) -> Unit){

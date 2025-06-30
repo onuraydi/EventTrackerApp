@@ -140,7 +140,8 @@ fun SignUpScreen(
             {
                 authViewModel.signUpRequest = SignUpRequest(
                     email = email.value,
-                    password = password.value
+                    password = password.value,
+                    repeatPassword = passwordConfirm.value
                 )
                 authViewModel.signUp(){
                     success,error ->

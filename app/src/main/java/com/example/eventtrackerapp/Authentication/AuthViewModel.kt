@@ -15,7 +15,7 @@ class AuthViewModel:ViewModel() {
 
     fun signUp(onResult: (Boolean, String?) -> Unit) {
         isLoading = true
-        authRepository.signUp(signUpRequest.email, signUpRequest.password) { success, error ->
+        authRepository.signUp(signUpRequest.email, signUpRequest.password, signUpRequest.repeatPassword) { success, error ->
             isLoading = false
             errorMessage = error
             onResult(success, error)
