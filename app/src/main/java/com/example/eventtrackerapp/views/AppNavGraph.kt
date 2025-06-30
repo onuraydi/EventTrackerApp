@@ -24,7 +24,7 @@ fun AppNavGraph(
     authViewModel: AuthViewModel = viewModel(),
 ){
 
-    NavHost(navController=navController, startDestination = "login_screen") {
+    NavHost(navController=navController, startDestination = "sign_up") {
 
         composable("home") {
             LaunchedEffect(Unit) {
