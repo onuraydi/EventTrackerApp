@@ -28,21 +28,6 @@ fun SplashScreen(navController: NavController)
     LaunchedEffect(Unit) {
         delay(1500)
 
-        val auth = FirebaseAuth.getInstance()
-        if(auth.currentUser != null){
-            //oturum açıksa
-            navController.navigate("profile"){
-                popUpTo("splash_screen"){
-                    inclusive = true
-                }
-            }
-        }else{
-            navController.navigate("login"){
-                popUpTo("splash_screen"){
-                    inclusive = true
-                }
-            }
-        }
     }
 
     Scaffold(Modifier.fillMaxSize()) {innerPadding ->

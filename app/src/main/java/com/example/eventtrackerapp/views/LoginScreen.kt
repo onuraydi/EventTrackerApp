@@ -88,7 +88,7 @@ fun LoginScreen(
             authViewModel.login(userEmail.value,userPassword.value){
                 boolean,string->
                 if(boolean){
-                    navController.navigate("profile"){
+                    navController.navigate("home"){
                         launchSingleTop = true
                     }
                 }else{
@@ -104,7 +104,7 @@ fun LoginScreen(
         Spacer(Modifier.padding(vertical = 8.dp))
 
         EventTrackerAppOutlinedButton("Sign Up") {
-            println("Sign up edildi")
+            navController.navigate("sign_up")
         }
     }
 }

@@ -55,6 +55,7 @@ dependencies {
     //implementation(libs.androidx.navigation.compose.jvmstubs)
     implementation(libs.androidx.benchmark.common)
     implementation(libs.support.annotations)
+    implementation(libs.androidx.datastore.core.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -91,4 +92,5 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
 
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 }

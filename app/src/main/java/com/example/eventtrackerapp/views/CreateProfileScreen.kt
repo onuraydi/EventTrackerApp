@@ -48,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,18 +61,21 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.data.source.local.UserPreferences
 import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CreateProfileScreen(
     tagViewModel: TagViewModel = viewModel(),
-    categoryViewModel: CategoryViewModel = viewModel()
+    categoryViewModel: CategoryViewModel = viewModel(),
+    userPreferences: UserPreferences
 ) {
     /*LaunchedEffect(Unit) {
         tagViewModel.resetTag()
@@ -82,6 +86,8 @@ fun CreateProfileScreen(
 
     val selectedCompleteTagList = remember{ mutableStateListOf<Tag?>(null) }
     val isShow = rememberSaveable { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
 
     EventTrackerAppTheme {
         Scaffold(
@@ -362,7 +368,12 @@ fun CreateProfileScreen(
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 15.dp)
                 ) {
-                    EventTrackerAppPrimaryButton("Complete") { }
+                    EventTrackerAppPrimaryButton("Complete") {
+                        scope.launch {
+                            userPreferences.setIsProfileCompleted(value = true)
+                            // onclick 
+                        }
+                    }
                 }
 
             }
@@ -375,6 +386,6 @@ fun CreateProfileScreen(
 @Composable
 fun Preview(){
     EventTrackerAppTheme {
-        CreateProfileScreen()
+//        CreateProfileScreen()
     }
 }
