@@ -10,7 +10,6 @@ class AuthViewModel:ViewModel() {
     private val authRepository = AuthRepository()
 
     var signUpRequest by mutableStateOf(SignUpRequest())
-
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
 
@@ -22,6 +21,7 @@ class AuthViewModel:ViewModel() {
             onResult(success, error)
         }
     }
+    
     //Only the ViewModel can post new values for this mutableState.
     // The LoginScreen will only be able to observe these new states and
     // react to them.
