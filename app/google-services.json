@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "604537191104",
+    "project_id": "eventtrackerapp-b4f67",
+    "storage_bucket": "eventtrackerapp-b4f67.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:604537191104:android:fa5e928670973376c68b25",
+        "android_client_info": {
+          "package_name": "com.exapmle.eventtrackerapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA04cefRaCCC9_CK1kPupgPB-031SaPEUc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
