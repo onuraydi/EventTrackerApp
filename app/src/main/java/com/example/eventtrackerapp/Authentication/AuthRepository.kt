@@ -1,9 +1,6 @@
 package com.example.eventtrackerapp.Authentication
 import com.google.firebase.auth.FirebaseAuth
 
-
-import com.google.firebase.auth.FirebaseAuth
-
 class AuthRepository {
 
     private val firebaseAuth = FirebaseAuth.getInstance()

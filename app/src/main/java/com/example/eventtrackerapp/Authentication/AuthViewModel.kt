@@ -14,21 +14,21 @@ class AuthViewModel:ViewModel() {
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
 
-    fun signUp(onResult: (Boolean, String?) -> Unit){
+    fun signUp(onResult: (Boolean, String?) -> Unit) {
         isLoading = true
-        authRepository.signUp(signUpRequest.email,signUpRequest.password) {
-            success,error ->
+        authRepository.signUp(signUpRequest.email, signUpRequest.password) { success, error ->
             isLoading = false
             errorMessage = error
-            onResult(success,error)
+            onResult(success, error)
         }
-
+    }
     //Only the ViewModel can post new values for this mutableState.
     // The LoginScreen will only be able to observe these new states and
     // react to them.
     var loginRequest = mutableStateOf(LoginRequest())
         private set
 
-    fun login(email:String, password:String, onResult: (Boolean, String?) ->Unit){
-        authRepository.login(email,password,onResult)
+    fun login(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
+        authRepository.login(email, password, onResult)
     }
+}
