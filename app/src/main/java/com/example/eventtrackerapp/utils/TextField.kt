@@ -48,6 +48,7 @@ fun EventTrackerAppAuthTextField(
     isReadOnly: Boolean = false,
     isPassword: Boolean = false,
     isError: Boolean = false,
+    supportingText: @Composable (()->Unit)? = null,
     onValueChange: (String)->Unit
 )
 {
@@ -61,6 +62,7 @@ fun EventTrackerAppAuthTextField(
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         isError = isError,
+        supportingText = supportingText,
         visualTransformation = if(isPassword)
             PasswordVisualTransformation()
         else VisualTransformation.None
