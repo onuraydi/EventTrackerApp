@@ -26,13 +26,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.example.eventtrackerapp.data.source.local.UserPreferences
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.views.AppNavGraph
 import com.example.eventtrackerapp.views.HomeScreen
+import com.google.firebase.auth.FirebaseAuth
 
 
 class MainActivity : ComponentActivity() {
@@ -51,8 +54,8 @@ class MainActivity : ComponentActivity() {
                     Box(Modifier.padding(contentPadding)){
                     }
                     WindowCompat.setDecorFitsSystemWindows(window, false)
-
-                    AppNavGraph(navController = navController)
+                    val context = LocalContext.current
+                    AppNavGraph(navController = navController, auth = FirebaseAuth.getInstance(), userPreferences = UserPreferences(context))
                 }
             }
         }
