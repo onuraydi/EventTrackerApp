@@ -37,7 +37,7 @@ fun SplashScreen(navController: NavController)
                 }
             }
         }else{
-            navController.navigate("login"){
+            navController.navigate("login_screen"){
                 popUpTo("splash_screen"){
                     inclusive = true
                 }
