@@ -12,7 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EventTrackerApp"
         tools:targetApi="31"
-        android:name=".Authentication.MyApp"
         >
         <activity
             android:name=".MainActivity"

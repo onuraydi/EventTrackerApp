@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
@@ -19,9 +20,10 @@ fun AppNavGraph(
     eventViewModel: EventViewModel = viewModel(),
     categoryViewModel: CategoryViewModel = viewModel(),
     tagViewModel: TagViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel(),
 ){
 
-    NavHost(navController=navController, startDestination = "home") {
+    NavHost(navController=navController, startDestination = "login_screen") {
 
         composable("home") {
             LaunchedEffect(Unit) {
@@ -98,6 +100,10 @@ fun AppNavGraph(
                 categoryViewModel.getAllCategoryWithTags()
             }
             CreateProfileScreen(tagViewModel,categoryViewModel)
+        }
+
+        composable("login_screen") {
+            LoginScreen(navController, authViewModel)
         }
     }
 }

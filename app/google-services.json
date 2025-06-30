@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:604537191104:android:fa5e928670973376c68b25",
         "android_client_info": {
-          "package_name": "com.exapmle.eventtrackerapp"
+          "package_name": "com.example.eventtrackerapp"
         }
       },
       "oauth_client": [],
