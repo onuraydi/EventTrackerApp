@@ -17,6 +17,11 @@
 local.properties
 *.keystore
 
+# google-services.json
+
+google-services.json
+
+
 # Log dosyaları
 *.log
 
