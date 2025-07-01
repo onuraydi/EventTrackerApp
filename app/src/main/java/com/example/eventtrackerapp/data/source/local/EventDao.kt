@@ -9,6 +9,7 @@ import androidx.room.Update
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.model.EventTagCrossRef
 import com.example.eventtrackerapp.model.EventWithTags
+import com.example.eventtrackerapp.model.Tag
 
 @Dao
 interface EventDao {
@@ -40,4 +41,10 @@ interface EventDao {
     @Transaction
     @Query("SELECT * FROM events")
     suspend fun getAllEventsWithTags():List<EventWithTags>
+
+
+    // TODO ??
+    @Transaction
+    @Query("SELECT E.* FROM events E INNER JOIN EventTagCrossRef ETC ON E.id = ETC.eventId WHERE ETC.tagId IN (:tagIds)")
+    suspend fun getEventBySelectedTag(tagIds:List<Tag>):List<EventWithTags>
 }
