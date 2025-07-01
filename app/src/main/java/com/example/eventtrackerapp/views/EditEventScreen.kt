@@ -61,6 +61,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
@@ -69,7 +71,7 @@ import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 @ExperimentalLayoutApi
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditEventScreen(){
+fun EditEventScreen(navController:NavHostController){
     Scaffold(Modifier
         .fillMaxSize(),
         topBar = {
@@ -79,6 +81,7 @@ fun EditEventScreen(){
                     Icon(
                         imageVector = Icons.Default.ArrowBack,null,
                         modifier = Modifier.padding(start = 8.dp)
+                            .clickable { navController.popBackStack() }
                     )
                 }
             )
@@ -336,6 +339,6 @@ private fun DatePickerModal(
 @Composable
 fun EditEventScreenPrev(){
     EventTrackerAppTheme {
-        EditEventScreen()
+//        EditEventScreen()
     }
 }

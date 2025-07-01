@@ -1,6 +1,7 @@
 package com.example.eventtrackerapp.views
 
 import android.util.Log
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,6 +21,7 @@ import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import com.google.firebase.auth.FirebaseAuth
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
@@ -146,6 +148,10 @@ fun AppNavGraph(
 
             composable("participants_screen") {
                 ParticipantsScreen(navController)
+            }
+
+            composable("edit_event_screen") {
+                EditEventScreen(navController)
             }
         }
     }

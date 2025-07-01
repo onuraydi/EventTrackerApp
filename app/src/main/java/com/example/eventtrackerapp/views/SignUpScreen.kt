@@ -61,10 +61,10 @@ fun SignUpScreen(
         .fillMaxSize())
     {
 
-        IconButton(onClick = {}, modifier = Modifier
-            .border(border = BorderStroke(1.3f.dp, color = MaterialTheme.colorScheme.primary),shape = RoundedCornerShape(12.dp)),) {
-            Icon(Icons.Filled.KeyboardArrowLeft,"back", tint = MaterialTheme.colorScheme.primary)
-        }
+//        IconButton(onClick = {navController.popBackStack()}, modifier = Modifier
+//            .border(border = BorderStroke(1.3f.dp, color = MaterialTheme.colorScheme.primary),shape = RoundedCornerShape(12.dp)),) {
+//            Icon(Icons.Filled.KeyboardArrowLeft,"back", tint = MaterialTheme.colorScheme.primary)
+//        }
 //        OutlinedButton(modifier = Modifier
 //            .padding(top = 15.dp, start = 10.dp)
 //            .size(width = 50.dp, height = 40.dp),
@@ -162,7 +162,8 @@ fun SignUpScreen(
 
             EventTrackerAppOutlinedButton("Login")
             {
-                navController.navigate("login_screen")
+                navController.popBackStack()
+
             }
 
         }
