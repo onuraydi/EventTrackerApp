@@ -32,6 +32,7 @@ fun AppNavGraph(
     categoryViewModel: CategoryViewModel = viewModel(),
     tagViewModel: TagViewModel = viewModel(),
     authViewModel: AuthViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel(),
     auth: FirebaseAuth,
     userPreferences: UserPreferences,
     profileViewModel: ProfileViewModel = viewModel()
@@ -65,7 +66,8 @@ fun AppNavGraph(
                 }
                 val categoryWithTags by categoryViewModel
                     .categoryWithTags.collectAsStateWithLifecycle(initialValue = emptyList())
-                CreateProfileScreen(navController,tagViewModel,userPreferences,categoryWithTags)
+                val uid = auth.currentUser?.uid
+                CreateProfileScreen(navController,tagViewModel,profileViewModel,userPreferences,categoryWithTags,uid)
             }
 
             composable("home") {
