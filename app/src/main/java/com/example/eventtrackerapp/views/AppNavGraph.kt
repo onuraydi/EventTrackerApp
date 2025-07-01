@@ -18,6 +18,7 @@ import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.data.source.local.UserPreferences
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
+import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
@@ -30,6 +31,7 @@ fun AppNavGraph(
     categoryViewModel: CategoryViewModel = viewModel(),
     tagViewModel: TagViewModel = viewModel(),
     authViewModel: AuthViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel(),
     auth: FirebaseAuth,
     userPreferences: UserPreferences
 ){
@@ -62,7 +64,8 @@ fun AppNavGraph(
                 }
                 val categoryWithTags by categoryViewModel
                     .categoryWithTags.collectAsStateWithLifecycle(initialValue = emptyList())
-                CreateProfileScreen(navController,tagViewModel,userPreferences,categoryWithTags)
+                val uid = auth.currentUser?.uid
+                CreateProfileScreen(navController,tagViewModel,profileViewModel,userPreferences,categoryWithTags,uid)
             }
 
             composable("home") {

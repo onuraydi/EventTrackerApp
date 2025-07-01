@@ -14,7 +14,7 @@ interface ProfileEventDao {
 
     @Transaction
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrUpdateProfileUserCrossRef(crossRef: ProfileEventCrossRef)
+    suspend fun insertOrUpdateProfileEventCrossRef(crossRef: ProfileEventCrossRef)
 
     @Transaction
     @Query("SELECT * FROM profiles WHERE id = :profileId")

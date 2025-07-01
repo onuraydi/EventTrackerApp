@@ -19,13 +19,13 @@ class Converter {
 //        return value.split(",").map { it.trim() }
 //    }
     @TypeConverter
-    fun fromCategory(category: Category?): String? {
-        return gson.toJson(category)
+    fun fromCategoryList(categoryList: List<Category>?): String? {
+        return gson.toJson(categoryList)
     }
 
     @TypeConverter
-    fun toCategory(categoryString: String?): Category? {
-        return if (categoryString.isNullOrEmpty()) null else gson.fromJson(categoryString, Category::class.java)
+    fun toCategoryList(categoryString: String?): List<Category>? {
+        return if (categoryString.isNullOrEmpty()) emptyList() else gson.fromJson(categoryString, object : TypeToken<List<Category>>() {}.type)
     }
 
     @TypeConverter

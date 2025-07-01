@@ -62,11 +62,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.data.source.local.UserPreferences
+import com.example.eventtrackerapp.model.Category
 import com.example.eventtrackerapp.model.CategoryWithTag
+import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import kotlinx.coroutines.launch
 
@@ -75,13 +78,16 @@ import kotlinx.coroutines.launch
 fun CreateProfileScreen(
     navController: NavController,
     tagViewModel: TagViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel(),
     userPreferences: UserPreferences,
-    categoryWithTags:List<CategoryWithTag>
+    categoryWithTags:List<CategoryWithTag>,
+    uid:String?=""
 ) {
     val selectedTag by tagViewModel.selectedTag.collectAsStateWithLifecycle()
     val chosenTags by tagViewModel.chosenTags.collectAsStateWithLifecycle()
 
     val selectedCompleteTagList = remember{ mutableStateListOf<Tag?>(null) }
+    val selectedCompleteCategoryList = remember{ mutableStateListOf<Category?>(null) }
     val isShow = rememberSaveable { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
@@ -239,9 +245,12 @@ fun CreateProfileScreen(
 
                                         if(selected.value){
                                             tagViewModel.updateSelectedCategoryTags(it) //selectedTags ı doldurur
+                                            selectedCompleteCategoryList.add(it.category) //categoryWithTag eklendi
                                         }else{
                                             // Kategori kaldırıldı → hem chosenTags hem selectedCompleteTagList içinden temizle
                                             tagViewModel.resetChosenTagForCategory(it.category.id)
+
+                                            selectedCompleteCategoryList.removeAll{category-> category == it.category}
 
                                             // Compose'daki selectedCompleteTagList içinden bu kategoriye ait tag’leri çıkar
                                             selectedCompleteTagList.removeAll{tag-> tag?.categoryId == it.category.id }
@@ -387,6 +396,16 @@ fun CreateProfileScreen(
                             scope.launch {
                                 userPreferences.setIsProfileCompleted(value = true)
                             }
+                            val profile = Profile(
+                                id = uid ?: "",
+                                fullName = fullNameState.value,
+                                userName = userNameState.value,
+                                gender = gender.value,
+                                selectedCategoryList = selectedCompleteCategoryList.filterNotNull(),
+                                selectedTagList = selectedCompleteTagList.filterNotNull(),
+                                photo = R.drawable.ic_launcher_background
+                            )
+                            profileViewModel.insertProfile(profile)
                             navController.navigate("home"){
                                 popUpTo("create_profile_screen"){
                                     inclusive = true
