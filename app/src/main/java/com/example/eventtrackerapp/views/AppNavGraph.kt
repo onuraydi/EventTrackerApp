@@ -35,7 +35,6 @@ fun AppNavGraph(
     profileViewModel: ProfileViewModel = viewModel(),
     auth: FirebaseAuth,
     userPreferences: UserPreferences,
-    profileViewModel: ProfileViewModel = viewModel()
 ){
 
     var startDestination by remember { mutableStateOf("splash_screen") }
