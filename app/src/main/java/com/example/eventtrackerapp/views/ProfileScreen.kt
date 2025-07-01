@@ -42,15 +42,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.BottomNavBar
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
+import com.google.firebase.auth.FirebaseAuth
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 
 @Composable
-fun ProfileScreen(navController: NavController)
+fun ProfileScreen(navController: NavController,authViewModel:AuthViewModel)
 {
     Scaffold(Modifier
         .fillMaxSize(),
@@ -152,7 +154,12 @@ fun ProfileScreen(navController: NavController)
 
             ExtendedFloatingActionButton(
                 onClick = {
-                    /*TODO(Firebase Auth Logout)*/
+                    authViewModel.logOut()
+                    navController.navigate("login_screen"){
+                        popUpTo("profile"){
+                            inclusive = true
+                        }
+                    }
             },
                 Modifier
                 .fillMaxWidth()
