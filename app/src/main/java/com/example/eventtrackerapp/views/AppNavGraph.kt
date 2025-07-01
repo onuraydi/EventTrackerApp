@@ -16,8 +16,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.data.source.local.UserPreferences
+import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
+import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
@@ -31,7 +33,8 @@ fun AppNavGraph(
     tagViewModel: TagViewModel = viewModel(),
     authViewModel: AuthViewModel = viewModel(),
     auth: FirebaseAuth,
-    userPreferences: UserPreferences
+    userPreferences: UserPreferences,
+    profileViewModel: ProfileViewModel = viewModel()
 ){
 
     var startDestination by remember { mutableStateOf("splash_screen") }
@@ -117,7 +120,15 @@ fun AppNavGraph(
             }
 
             composable("profile") {
-                ProfileScreen(navController = navController,authViewModel)
+                var uid = auth.currentUser?.uid
+                LaunchedEffect(Unit) {
+                    profileViewModel.getById(uid!!)
+                }
+
+                val profile by profileViewModel.profile.collectAsStateWithLifecycle()
+
+
+                ProfileScreen(navController = navController,authViewModel,profile)
             }
 
             composable("my_account") {
