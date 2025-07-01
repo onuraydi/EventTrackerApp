@@ -26,10 +26,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -43,7 +43,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,12 +62,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.data.source.local.UserPreferences
+import com.example.eventtrackerapp.model.CategoryWithTag
 import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
-import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
-import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import kotlinx.coroutines.launch
 
@@ -77,13 +75,9 @@ import kotlinx.coroutines.launch
 fun CreateProfileScreen(
     navController: NavController,
     tagViewModel: TagViewModel = viewModel(),
-    categoryViewModel: CategoryViewModel = viewModel(),
-    userPreferences: UserPreferences
+    userPreferences: UserPreferences,
+    categoryWithTags:List<CategoryWithTag>
 ) {
-    /*LaunchedEffect(Unit) {
-        tagViewModel.resetTag()
-    }*/
-    val categoryWithTags by categoryViewModel.categoryWithTags.collectAsStateWithLifecycle()
     val selectedTag by tagViewModel.selectedTag.collectAsStateWithLifecycle()
     val chosenTags by tagViewModel.chosenTags.collectAsStateWithLifecycle()
 
@@ -228,41 +222,45 @@ fun CreateProfileScreen(
 
                     //TODO BU KATEGORİ ALANINDA SELECTED NASIL HALLOLUR
                     //TODO HATA: Kullanıcı kategoriyi seçtikten sonra etiketleri seçmeden başka kategori seçebiliyor
-                    LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
-                        items(categoryWithTags) {
-                            val selected = rememberSaveable { mutableStateOf(false) }
+                    if(categoryWithTags.isEmpty()){
+                        CircularProgressIndicator()
+                    }else{
+                        LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
+                            items(categoryWithTags) {
+                                val selected = rememberSaveable { mutableStateOf(false) }
 
-                            FilterChip(
-                                modifier = Modifier.padding(end = 8.dp),
-                                selected = selected.value,
-                                label = { Text(it.category.name?:"") },
-                                onClick = {
-                                    selected.value = !selected.value
-                                    isShow.value = selected.value
+                                FilterChip(
+                                    modifier = Modifier.padding(end = 8.dp),
+                                    selected = selected.value,
+                                    label = { Text(it.category.name?:"") },
+                                    onClick = {
+                                        selected.value = !selected.value
+                                        isShow.value = selected.value
 
-                                    if(selected.value){
-                                        tagViewModel.updateSelectedCategoryTags(it) //selectedTags ı doldurur
-                                    }else{
-                                        // Kategori kaldırıldı → hem chosenTags hem selectedCompleteTagList içinden temizle
-                                        tagViewModel.resetChosenTagForCategory(it.category.id)
+                                        if(selected.value){
+                                            tagViewModel.updateSelectedCategoryTags(it) //selectedTags ı doldurur
+                                        }else{
+                                            // Kategori kaldırıldı → hem chosenTags hem selectedCompleteTagList içinden temizle
+                                            tagViewModel.resetChosenTagForCategory(it.category.id)
 
-                                        // Compose'daki selectedCompleteTagList içinden bu kategoriye ait tag’leri çıkar
-                                        selectedCompleteTagList.removeAll{tag-> tag?.categoryId == it.category.id }
+                                            // Compose'daki selectedCompleteTagList içinden bu kategoriye ait tag’leri çıkar
+                                            selectedCompleteTagList.removeAll{tag-> tag?.categoryId == it.category.id }
+                                        }
+                                    },
+                                    trailingIcon = if (selected.value) {
+                                        {
+                                            Icon(
+                                                Icons.Filled.Done,
+                                                "Done",
+                                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                            )
+                                        }
+                                    } else {
+                                        null
                                     }
-                                },
-                                trailingIcon = if (selected.value) {
-                                    {
-                                        Icon(
-                                            Icons.Filled.Done,
-                                            "Done",
-                                            modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                        )
-                                    }
-                                } else {
-                                    null
-                                }
 
-                            )
+                                )
+                            }
                         }
                     }
 
