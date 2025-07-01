@@ -19,6 +19,7 @@ import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
 
 @Composable
 fun AppNavGraph(
@@ -55,10 +56,11 @@ fun AppNavGraph(
 
             composable("create_profile_screen") {
                 LaunchedEffect(Unit) {
-                    val list = categoryViewModel.getAllCategoryWithTags()
-                    println("Gelen Liste:"+list)
+                    categoryViewModel.getAllCategoryWithTags()
                 }
-                CreateProfileScreen(navController,tagViewModel,categoryViewModel,userPreferences)
+                val categoryWithTags by categoryViewModel
+                    .categoryWithTags.collectAsStateWithLifecycle(initialValue = emptyList())
+                CreateProfileScreen(navController,tagViewModel,userPreferences,categoryWithTags)
             }
 
             composable("home") {

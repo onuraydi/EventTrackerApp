@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.example.eventtrackerapp.model.Category
 import com.example.eventtrackerapp.model.CategoryWithTag
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CategoryDao {
@@ -18,7 +19,7 @@ interface CategoryDao {
 
     @Transaction
     @Query("SELECT * FROM categories")
-    suspend fun getCategoryWithTags():List<CategoryWithTag>
+    fun getCategoryWithTags(): Flow<List<CategoryWithTag>>
 
     @Insert
     suspend fun insert(category: Category):Long
