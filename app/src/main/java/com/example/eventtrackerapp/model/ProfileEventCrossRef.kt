@@ -3,7 +3,7 @@ package com.example.eventtrackerapp.model
 import androidx.room.Entity
 
 @Entity(
-    primaryKeys = ["eventId,profileId"]
+    primaryKeys = ["profileId","eventId"]
 )
 data class ProfileEventCrossRef(
     val profileId:String,

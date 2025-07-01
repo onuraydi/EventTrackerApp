@@ -15,6 +15,6 @@ data class ProfileWithEvents(
             entityColumn = "eventId"
         )
     )
-    val eventList:List<Event>
+    val events:List<Event>
 ) {
 }
