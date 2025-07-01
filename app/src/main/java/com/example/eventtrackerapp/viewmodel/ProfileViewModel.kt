@@ -26,7 +26,7 @@ class ProfileViewModel(application: Application): AndroidViewModel(application) 
         }
     }
 
-    fun getById(id:Int){
+    fun getById(id:String){
         viewModelScope.launch(Dispatchers.IO) {
             _profile.value = profileDao.getById(id)
         }

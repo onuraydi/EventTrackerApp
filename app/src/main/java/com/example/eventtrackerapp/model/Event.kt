@@ -1,6 +1,7 @@
 package com.example.eventtrackerapp.model
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 
@@ -16,7 +17,7 @@ data class Event(
     var likeCount:Int = 0,
     //val participants:List<Profile> = arrayListOf(),
 
-    // Yorumlar eklenecek
+    //TODO Yorumlar eklenecek
 ){
     @PrimaryKey(autoGenerate = true) var id:Int = 0;
 }

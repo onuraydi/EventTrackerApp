@@ -4,17 +4,16 @@ import androidx.room.Embedded
 import androidx.room.Junction
 import androidx.room.Relation
 
-data class ProfileWithEvents(
-    @Embedded val profile: Profile,
+data class EventWithProfile(
+    @Embedded val event:Event,
     @Relation(
         parentColumn = "id",
         entityColumn = "id",
         associateBy = Junction(
             value = ProfileEventCrossRef::class,
-            parentColumn = "profileId",
-            entityColumn = "eventId"
+            parentColumn = "eventId",
+            entityColumn = "profileId"
         )
     )
-    val eventList:List<Event>
-) {
-}
+    val profiles: List<Profile>
+)
