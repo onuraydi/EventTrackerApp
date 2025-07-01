@@ -145,6 +145,10 @@ fun AppNavGraph(
             composable("splash_screen"){
                 SplashScreen(navController)
             }
+
+            composable("participants_screen") {
+                ParticipantsScreen(navController)
+            }
         }
     }
 }

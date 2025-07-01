@@ -146,9 +146,14 @@ fun DetailScreen(
                 Text(text = event.detail.toString(), textAlign = TextAlign.Justify)
 
                 Spacer(Modifier.padding(top = 20.dp))
-                Text("Katılımcılar", fontSize = 30.sp, fontWeight = FontWeight.W500, modifier = Modifier.clickable {  })
+                Text("Katılımcılar", fontSize = 30.sp, fontWeight = FontWeight.W500, modifier = Modifier
+                    .clickable {
+                        // TODO buraya id ya da liste ile bir yönlendirme yapılmalı
+                        navController.navigate("participants_screen")
+                })
                 Spacer(Modifier.padding(top = 5.dp))
-                Row() {
+                Row(modifier = Modifier
+                    .clickable { navController.navigate("participants_screen") }) {
                     /*TODO: Buraya katılımcıların fotoğrafları gelecek ilk 4 tanesinin*/
                     Image(
                         painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
@@ -168,7 +173,6 @@ fun DetailScreen(
 
                     /*TODO: Buraya katılımıcıların sayısı gelecek*/
                     Text("+12 Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier
-                        .clickable {  }
                         .align(Alignment.CenterVertically))
                 }
                 Spacer(Modifier.padding(top = 20.dp))
