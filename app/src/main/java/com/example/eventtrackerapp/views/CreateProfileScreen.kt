@@ -60,10 +60,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.data.source.local.UserPreferences
 import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
@@ -73,6 +75,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CreateProfileScreen(
+    navController: NavController,
     tagViewModel: TagViewModel = viewModel(),
     categoryViewModel: CategoryViewModel = viewModel(),
     userPreferences: UserPreferences
@@ -97,15 +100,7 @@ fun CreateProfileScreen(
                     title = { Text(text = "Complete Your Profile", color = Color.White) },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    ),
-                    navigationIcon = {
-                        Icon(Icons.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            modifier = Modifier.padding(start = 8.dp),
-                            tint = Color.White)
-
-                        println("asdasd")
-                    }
+                    )
                 )
             }
         ) { innerPadding ->
@@ -115,8 +110,11 @@ fun CreateProfileScreen(
                     .fillMaxSize(),
             ) {
                 val fullNameState = rememberSaveable { mutableStateOf("") }
+                val fullNameError = rememberSaveable{mutableStateOf(false)}
                 val userNameState = rememberSaveable { mutableStateOf("") }
+                val userNameError = rememberSaveable{mutableStateOf(false)}
                 val gender = rememberSaveable { mutableStateOf("") }
+                val genderError = rememberSaveable{ mutableStateOf(false) }
                 val isExpanded = rememberSaveable { mutableStateOf(false) }
 
                 Column(
@@ -154,16 +152,26 @@ fun CreateProfileScreen(
 
                     Spacer(Modifier.padding(vertical = 7.dp))
 
-                    EventTrackerAppOutlinedTextField(
-                        "Full Name",
-                        fullNameState
+                    EventTrackerAppAuthTextField(
+                        txt = "Fullname",
+                        state = fullNameState,
+                        onValueChange = {
+                            fullNameState.value = it
+                            fullNameError.value = fullNameState.value.isBlank()
+                        },
+                        isError = fullNameError.value
                     )
 
                     Spacer(Modifier.padding(vertical = 12.dp))
 
-                    EventTrackerAppOutlinedTextField(
-                        "Username",
-                        userNameState
+                    EventTrackerAppAuthTextField(
+                        txt = "Username",
+                        state = userNameState,
+                        onValueChange = {
+                            userNameState.value = it
+                            userNameError.value = userNameState.value.isBlank()
+                        },
+                        isError = userNameError.value
                     )
                     Spacer(Modifier.padding(vertical = 12.dp))
 
@@ -176,12 +184,15 @@ fun CreateProfileScreen(
                         OutlinedTextField(
                             modifier = Modifier.menuAnchor(),
                             value = gender.value,
-                            onValueChange = {},
+                            onValueChange = {
+                                genderError.value = gender.value.isBlank()
+                            },
                             placeholder = { Text("Gender") },
                             readOnly = true,
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded.value)
                             },
+                            isError = genderError.value
                         )
 
                         ExposedDropdownMenu(
@@ -364,18 +375,28 @@ fun CreateProfileScreen(
                 Spacer(Modifier.padding(vertical = 20.dp))
 
                 Box(
-                    Modifier
+                    modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 15.dp)
-                ) {
-                    EventTrackerAppPrimaryButton("Complete") {
-                        scope.launch {
-                            userPreferences.setIsProfileCompleted(value = true)
-                            // onclick 
+                ){
+                    EventTrackerAppPrimaryButton("Tamamla") {
+                        if(fullNameState.value.isBlank() || userNameState.value.isBlank() || gender.value.isBlank() || selectedCompleteTagList.size == 0){
+                            fullNameError.value = fullNameState.value.isBlank()
+                            userNameError.value = userNameState.value.isBlank()
+                            genderError.value = gender.value.isBlank()
+                            return@EventTrackerAppPrimaryButton
+                        }else{
+                            scope.launch {
+                                userPreferences.setIsProfileCompleted(value = true)
+                            }
+                            navController.navigate("home"){
+                                popUpTo("create_profile_screen"){
+                                    inclusive = true
+                                }
+                            }
                         }
                     }
                 }
-
             }
 
         }
