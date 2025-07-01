@@ -3,7 +3,7 @@ package com.example.eventtrackerapp.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-
+//uid, katılınan etkinlikler, beğenilen etkinlikler,tercihler(cat, tag, bildirimler, darkMode)
 @Entity(tableName = "profiles")
 data class Profile(
     val fullName:String? = "",
@@ -14,5 +14,5 @@ data class Profile(
     val photo:Int? = 0,
     val addedEvents:List<Event>? = arrayListOf(),
     ){
-    @PrimaryKey(autoGenerate = true) var id:Int = 0;
+    @PrimaryKey var id:String? = ""; //TODO???
 }
