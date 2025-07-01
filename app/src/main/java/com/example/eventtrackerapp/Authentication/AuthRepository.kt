@@ -38,4 +38,8 @@ class AuthRepository {
                 }
             }
     }
+
+    fun logOut(){
+        firebaseAuth.signOut()
+    }
 }

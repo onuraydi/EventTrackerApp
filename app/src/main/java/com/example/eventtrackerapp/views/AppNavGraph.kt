@@ -44,7 +44,7 @@ fun AppNavGraph(
 
         startDestination = when{
 //            !hasSeenOnboarding -> "onboarding"
-            !isLoggedIn -> "sign_up"
+            !isLoggedIn -> "login_screen"
             !isProfileCompleted -> "create_profile_screen"
             else -> "home"
         }
@@ -109,7 +109,7 @@ fun AppNavGraph(
             }
 
             composable("profile") {
-                ProfileScreen(navController = navController)
+                ProfileScreen(navController = navController,authViewModel)
             }
 
             composable("my_account") {
