@@ -4,7 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
+import com.example.eventtrackerapp.model.Category
 import com.example.eventtrackerapp.model.Profile
+import com.example.eventtrackerapp.model.Tag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,6 +38,25 @@ class ProfileViewModel(application: Application): AndroidViewModel(application) 
         viewModelScope.launch(Dispatchers.IO) {
             profileDao.add(profile)
         }
+    }
+
+    fun addTag(tag: Tag){
+        if (!_profile.value.selectedTagList.orEmpty().contains(tag)) {
+            val updatedList = _profile.value.selectedTagList.orEmpty() + tag
+            val updatedProfile = _profile.value.copy(selectedTagList = updatedList)
+            _profile.value = updatedProfile
+            updateProfile(updatedProfile)
+        }
+    }
+
+    fun removeTag(tagId:Int){
+        //id'ye göre silme
+        val updatedList = _profile.value.selectedTagList.orEmpty()
+            .filterNot { it.id == tagId }
+
+        val updatedProfile = _profile.value.copy(selectedTagList = updatedList)
+        _profile.value = updatedProfile
+        updateProfile(updatedProfile)
     }
 
     fun updateProfile(profile:Profile){

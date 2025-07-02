@@ -40,6 +40,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,13 +53,21 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.model.Category
+import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun PreferencesScreen(navController: NavController){
+fun PreferencesScreen(
+    navController: NavController,
+    profile:Profile,
+    profileViewModel: ProfileViewModel = viewModel()
+){
     EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -82,8 +91,7 @@ fun PreferencesScreen(navController: NavController){
         )
         { innerPadding->
 
-            val myCategories = remember{mutableStateListOf<String?>("Seçili1","Seçili2","Seçili3")}
-            val isSelected = rememberSaveable{mutableStateOf(false)}
+            val myTags = rememberSaveable{ mutableStateOf(profile.selectedTagList.orEmpty().toList()) }
             val isEdit = rememberSaveable { mutableStateOf(false) }
 
 
@@ -95,12 +103,16 @@ fun PreferencesScreen(navController: NavController){
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+
+                    //Bildirimler
                     CardRow("Notifications") {
                         Icon(Icons.Default.Notifications,
                             "Notification",
                             Modifier.size(32.dp)
                         )
                     }
+
+                    //DarkMode
                     CardRow("Dark Mode"){
                         Icon(painter = painterResource(R.drawable.dark_mode_icon),
                             "DarkMode",
@@ -109,8 +121,10 @@ fun PreferencesScreen(navController: NavController){
                     }
 
                     Spacer(Modifier.padding(vertical = 12.dp))
+
+                    //Kategorilerim
                     Row {
-                        Text("My Categories", modifier = Modifier.weight(5f))
+                        Text("My Tags", modifier = Modifier.weight(5f))
                         Text(
                             text = if(isEdit.value){
                                 "Confirm"
@@ -123,51 +137,11 @@ fun PreferencesScreen(navController: NavController){
                                 .weight(1f)
                                 .clickable {
                                     isEdit.value = !isEdit.value
+                                    if(!isEdit.value){
+                                        myTags.value = profile.selectedTagList.orEmpty().toList()
+                                    }
                                 }
                         )
-                    }
-
-                    if(isEdit.value){
-                        LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
-                            val categories = arrayListOf(
-                                "Yazılım",
-                                "Yapay Zeka",
-                                "Back-End",
-                                "Front-End",
-                                "Teknoloji",
-                                "Örnek",
-                                "Örnek2",
-                                "Örnek3",
-                                "Örnek4"
-                            )
-                            items(categories) {
-                                FilterChip(
-                                    modifier = Modifier.padding(end = 8.dp),
-                                    selected = isSelected.value,
-                                    label = { Text(it) },
-                                    onClick = {
-                                        isSelected.value = !isSelected.value
-                                        if (myCategories.contains(it)) {
-                                            myCategories.add(it)
-                                        } else {
-                                            myCategories.remove(it)
-                                        }
-                                    },
-                                    trailingIcon = if (isSelected.value) {
-                                        {
-                                            Icon(
-                                                Icons.Filled.Done,
-                                                "Done",
-                                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                            )
-                                        }
-                                    } else {
-                                        null
-                                    }
-
-                                )
-                            }
-                        }
                     }
 
                     Box(
@@ -183,27 +157,34 @@ fun PreferencesScreen(navController: NavController){
                             Modifier.padding(5.dp),
                             maxItemsInEachRow = 4
                         ) {
-                            myCategories.filterNotNull().forEach {
+                            myTags.value.forEach {tag ->
+
+                                val isSelected = rememberSaveable{ mutableStateOf(true) }
                                 FilterChip(
-                                    modifier = Modifier.padding(end = 5.dp),
+                                    modifier = Modifier.padding(end = 8.dp),
                                     selected = isSelected.value,
+                                    enabled = isEdit.value,
                                     onClick = {
                                         isSelected.value = !isSelected.value
-                                        myCategories.remove(it)
+
+                                        if(isSelected.value){
+                                            //kategori eklenecek
+                                            profileViewModel.addTag(tag)
+                                        }else{
+                                            //kategori silinecek
+                                            profileViewModel.removeTag(tag.id)
+                                        }
                                     },
-                                    label = {Text(it)},
+                                    label = {Text(tag.name ?: "")},
                                     trailingIcon = {
-                                        Icon(Icons.Default.Clear,"Clear")
-                                    },
-                                    enabled = isEdit.value
+                                        if(myTags.value.contains(tag)){
+                                            Icon(Icons.Default.Clear,"Clear")
+                                        }
+                                    }
                                 )
                             }
-
                         }
-
                     }
-
-
                 }
             }
 

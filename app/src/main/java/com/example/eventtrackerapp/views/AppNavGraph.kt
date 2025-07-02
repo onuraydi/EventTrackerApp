@@ -147,7 +147,14 @@ fun AppNavGraph(
             }
 
             composable("preferences"){
-                PreferencesScreen(navController)
+                val uid = auth.currentUser?.uid
+                LaunchedEffect(Unit){
+                    profileViewModel.getById(uid ?: "")
+                }
+
+                val profile by profileViewModel.profile.collectAsStateWithLifecycle()
+
+                PreferencesScreen(navController,profile,profileViewModel)
             }
 
             composable("my_events"){
