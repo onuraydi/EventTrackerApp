@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -76,11 +77,22 @@ fun AppNavGraph(
             }
 
             composable("home") {backStackEntry ->
-                LaunchedEffect(Unit) {
-                    eventViewModel.getAllEvents()
-                }
-                val eventList by eventViewModel.eventList.collectAsState()
                 val uid = auth.currentUser?.uid!!
+                LaunchedEffect(Unit) {
+                    profileViewModel.getById(uid)
+                }
+
+                val profile by profileViewModel.profile.collectAsStateWithLifecycle()
+
+                var tags = rememberSaveable{ mutableStateOf(profile.selectedTagList.orEmpty().toList()) }
+                LaunchedEffect(Unit) {
+
+                    eventViewModel.getEventBySelectedTag(tags.value)
+
+                }
+                println(profile.selectedTagList)
+                val eventList by eventViewModel.eventWithTag.collectAsState()
+
                 HomeScreen(eventList = eventList, navController = navController,commentViewModel,likeViewModel,uid) }
 
 
@@ -124,6 +136,9 @@ fun AppNavGraph(
 
 
             composable("explorer"){
+                LaunchedEffect(Unit) {
+                    eventViewModel.getAllEvents()
+                }
                 val eventList by eventViewModel.eventList.collectAsStateWithLifecycle()
                 ExploreScreen(eventList,navController)
             }
