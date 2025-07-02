@@ -11,6 +11,7 @@ import androidx.room.driver.SupportSQLiteConnection
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.eventtrackerapp.model.Category
+import com.example.eventtrackerapp.model.Comment
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.model.EventTagCrossRef
 import com.example.eventtrackerapp.model.Profile
@@ -19,7 +20,7 @@ import com.example.eventtrackerapp.model.Tag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Database(entities = [Category::class, Tag::class,Event::class,Profile::class,EventTagCrossRef::class,ProfileEventCrossRef::class], version = 5)
+@Database(entities = [Category::class, Tag::class,Event::class,Profile::class,Comment::class,EventTagCrossRef::class,ProfileEventCrossRef::class], version = 5)
 @TypeConverters(Converter::class)
 abstract class EventTrackerDatabase : RoomDatabase(){
 
@@ -28,6 +29,7 @@ abstract class EventTrackerDatabase : RoomDatabase(){
     abstract fun profileDao(): ProfileDao
     abstract fun tagDao(): TagDao
     abstract fun profileEventDao():ProfileEventDao
+    abstract fun commentDao():CommentDao
     //bu fonksiyon çağrıldığı yerde eğer database objesi oluşturulduysa aynı
     //obje üzerinden süreç işler.
 
