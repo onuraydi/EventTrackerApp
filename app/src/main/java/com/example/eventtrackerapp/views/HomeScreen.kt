@@ -28,23 +28,25 @@ import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.model.Event
+import com.example.eventtrackerapp.model.EventWithTags
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.BottomNavBar
 import com.example.eventtrackerapp.utils.CommentBottomSheet
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
+import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    eventList: List<Event>,
+    eventList: List<EventWithTags>,
     navController: NavController,
     commentViewModel: CommentViewModel,
+    likeViewModel: LikeViewModel,
     profileId:String
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-
 
     Scaffold(
         modifier = Modifier
@@ -82,8 +84,8 @@ fun HomeScreen(
 
             items(eventList)
             {
-                var commentList = commentViewModel.getComments(eventId = it.id)
-                EventRow(it, navController,commentList,commentViewModel,profileId)
+                var commentList = commentViewModel.getComments(eventId = it.event.id)
+                EventRow(it, navController,commentList,commentViewModel,profileId,likeViewModel)
             }
         }
     }
@@ -91,20 +93,17 @@ fun HomeScreen(
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-private fun EventRow(event:Event,navController: NavController, commentList:Flow<List<CommentWithProfileAndEvent>>,commentViewModel:CommentViewModel,profileId:String)
+private fun EventRow(event:EventWithTags,navController: NavController, commentList:Flow<List<CommentWithProfileAndEvent>>,commentViewModel:CommentViewModel,profileId:String,likeViewModel: LikeViewModel)
 {
     var eventViewModel: EventViewModel = viewModel()
 
 
     var showBottomSheet by remember { mutableStateOf(false ) }
 
+    val likeCount by likeViewModel.getLikeCount(event.event.id).collectAsState(initial = 0)
+    val isLiked by likeViewModel.isLikedByUser(event.event.id, profileId).collectAsState(initial = false)
 
-    // TODO Bu kısımda bir sıkıntı var icon tutulmuyor çözümü ise kullanıcı ekledikten sonra ilişki
-    //  ile kullanıcının like durumunu tutmak
-    val isLikeState = rememberSaveable {mutableStateOf(false)}
-    var likeCount = remember(event.likeCount) { mutableStateOf(event.likeCount) }
-
-    val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(initial = 0)
+    val commentCount by commentViewModel.getCommentCount(event.event.id).collectAsState(initial = 0)
 
 
     Column (modifier = Modifier
@@ -113,37 +112,33 @@ private fun EventRow(event:Event,navController: NavController, commentList:Flow<
         .border(BorderStroke(2.dp, Color.Black), shape = RoundedCornerShape(20.dp))
         )
     {
-        Image(painterResource(event.image), null, modifier = Modifier
+        Image(painterResource(event.event.image), null, modifier = Modifier
             .fillMaxWidth()
             .height(220.dp)
             .align(Alignment.CenterHorizontally)
-            .clickable { navController.navigate("detail/${event.id}") }
+            .clickable { navController.navigate("detail/${event.event.id}") }
             .clip(RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)),
 
             contentScale = ContentScale.Crop)
 
 
         Row() {
-            if(isLikeState.value == false)
+            if(isLiked == false)
             {
                 Icon(Icons.Filled.FavoriteBorder,null, modifier = Modifier
                     .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
                     .clickable {
-                        isLikeState.value = true;
-                        likeCount.value++;
-                        eventViewModel.incrementLike(eventId = event.id)
+                        likeViewModel.likeEvent(eventId = event.event.id,profileId);
                     })
-                Text(text = "${likeCount.value}",Modifier.align(Alignment.CenterVertically))
+                Text(text = "${likeCount}",Modifier.align(Alignment.CenterVertically))
             }else
             {
                 Icon(Icons.Filled.Favorite,null, modifier = Modifier
                     .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
                     .clickable {
-                        isLikeState.value = false;
-                        likeCount.value--;
-                        eventViewModel.decrementLike(eventId = event.id)
+                        likeViewModel.unlikeEvent(event.event.id,profileId)
                     })
-                Text(text = "${likeCount.value}",Modifier.align(Alignment.CenterVertically))
+                Text(text = "${likeCount}",Modifier.align(Alignment.CenterVertically))
             }
 
             Icon(painterResource(R.drawable.baseline_chat_bubble_outline_24),null, modifier = Modifier
@@ -156,10 +151,10 @@ private fun EventRow(event:Event,navController: NavController, commentList:Flow<
         }
 
 
-        event.name?.let {
+        event.event.name?.let {
             Text(text= it, modifier = Modifier
                 .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
-                .clickable {  navController.navigate("detail/${event.id}") },
+                .clickable {  navController.navigate("detail/${event.event.id}") },
                 fontWeight = W500, fontSize = 20.sp
             )
         }
@@ -171,7 +166,7 @@ private fun EventRow(event:Event,navController: NavController, commentList:Flow<
             currentUserImage = painterResource(R.drawable.ic_launcher_foreground),
             commentViewModel = commentViewModel,
             profileId = profileId,
-            eventId = event.id
+            eventId = event.event.id
             )
         }
     }

@@ -8,7 +8,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -20,6 +22,7 @@ import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
+import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -35,6 +38,7 @@ fun AppNavGraph(
     authViewModel: AuthViewModel = viewModel(),
     profileViewModel: ProfileViewModel = viewModel(),
     commentViewModel: CommentViewModel = viewModel(),
+    likeViewModel: LikeViewModel = viewModel(),
     auth: FirebaseAuth,
     userPreferences: UserPreferences,
 ){
@@ -73,12 +77,23 @@ fun AppNavGraph(
             }
 
             composable("home") {backStackEntry ->
-                LaunchedEffect(Unit) {
-                    eventViewModel.getAllEvents()
-                }
-                val eventList by eventViewModel.eventList.collectAsState()
                 val uid = auth.currentUser?.uid!!
-                HomeScreen(eventList = eventList, navController = navController,commentViewModel,uid) }
+                LaunchedEffect(Unit) {
+                    profileViewModel.getById(uid)
+                }
+
+                val profile by profileViewModel.profile.collectAsStateWithLifecycle()
+
+                var tags = rememberSaveable{ mutableStateOf(profile.selectedTagList.orEmpty().toList()) }
+                LaunchedEffect(Unit) {
+
+                    eventViewModel.getEventBySelectedTag(tags.value)
+
+                }
+                println(profile.selectedTagList)
+                val eventList by eventViewModel.eventWithTag.collectAsState()
+
+                HomeScreen(eventList = eventList, navController = navController,commentViewModel,likeViewModel,uid) }
 
 
             composable("addEvent") {
@@ -116,11 +131,14 @@ fun AppNavGraph(
                 }
                 var uid = auth.currentUser?.uid!!
                 var commentList = commentViewModel.getComments(eventId = event.id)
-                DetailScreen(event = event, navController = navController, category = category, commentList,commentViewModel,uid)
+                DetailScreen(event = event, navController = navController, category = category, commentList,commentViewModel,likeViewModel,uid)
             }
 
 
             composable("explorer"){
+                LaunchedEffect(Unit) {
+                    eventViewModel.getAllEvents()
+                }
                 val eventList by eventViewModel.eventList.collectAsStateWithLifecycle()
                 ExploreScreen(eventList,navController)
             }

@@ -29,12 +29,6 @@ interface EventDao {
     @Delete
     suspend fun delete(event: Event)
 
-    @Query("UPDATE events SET likeCount = likeCount + 1 WHERE id = :eventId")
-    suspend fun incrementLike(eventId:Int)
-
-    @Query("UPDATE events SET likeCount = likeCount + 1 WHERE id = :eventId")
-    suspend fun decrementLike(eventId:Int)
-
     @Insert
     suspend fun insertEventTags(crossRef: List<EventTagCrossRef>)
 
@@ -45,6 +39,11 @@ interface EventDao {
 
     // TODO ??
     @Transaction
-    @Query("SELECT E.* FROM events E INNER JOIN EventTagCrossRef ETC ON E.id = ETC.eventId WHERE ETC.tagId IN (:tagIds)")
+    @Query("""
+    SELECT DISTINCT E.*
+    FROM events E
+    INNER JOIN EventTagCrossRef ETC ON E.id = ETC.eventId
+    WHERE ETC.tagId IN (:tagIds)
+""")
     suspend fun getEventBySelectedTag(tagIds:List<Tag>):List<EventWithTags>
 }
