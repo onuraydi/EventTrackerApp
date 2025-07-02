@@ -40,7 +40,7 @@ import kotlinx.coroutines.flow.Flow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    eventList: List<EventWithTags>,
+    eventList: List<Event>,
     navController: NavController,
     commentViewModel: CommentViewModel,
     likeViewModel: LikeViewModel,
@@ -84,7 +84,7 @@ fun HomeScreen(
 
             items(eventList)
             {
-                var commentList = commentViewModel.getComments(eventId = it.event.id)
+                var commentList = commentViewModel.getComments(eventId = it.id)
                 EventRow(it, navController,commentList,commentViewModel,profileId,likeViewModel)
             }
         }
@@ -93,17 +93,17 @@ fun HomeScreen(
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-private fun EventRow(event:EventWithTags,navController: NavController, commentList:Flow<List<CommentWithProfileAndEvent>>,commentViewModel:CommentViewModel,profileId:String,likeViewModel: LikeViewModel)
+private fun EventRow(event:Event,navController: NavController, commentList:Flow<List<CommentWithProfileAndEvent>>,commentViewModel:CommentViewModel,profileId:String,likeViewModel: LikeViewModel)
 {
     var eventViewModel: EventViewModel = viewModel()
 
 
     var showBottomSheet by remember { mutableStateOf(false ) }
 
-    val likeCount by likeViewModel.getLikeCount(event.event.id).collectAsState(initial = 0)
-    val isLiked by likeViewModel.isLikedByUser(event.event.id, profileId).collectAsState(initial = false)
+    val likeCount by likeViewModel.getLikeCount(event.id).collectAsState(initial = 0)
+    val isLiked by likeViewModel.isLikedByUser(event.id, profileId).collectAsState(initial = false)
 
-    val commentCount by commentViewModel.getCommentCount(event.event.id).collectAsState(initial = 0)
+    val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(initial = 0)
 
 
     Column (modifier = Modifier
@@ -112,11 +112,11 @@ private fun EventRow(event:EventWithTags,navController: NavController, commentLi
         .border(BorderStroke(2.dp, Color.Black), shape = RoundedCornerShape(20.dp))
         )
     {
-        Image(painterResource(event.event.image), null, modifier = Modifier
+        Image(painterResource(event.image), null, modifier = Modifier
             .fillMaxWidth()
             .height(220.dp)
             .align(Alignment.CenterHorizontally)
-            .clickable { navController.navigate("detail/${event.event.id}") }
+            .clickable { navController.navigate("detail/${event.id}") }
             .clip(RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)),
 
             contentScale = ContentScale.Crop)
@@ -128,7 +128,7 @@ private fun EventRow(event:EventWithTags,navController: NavController, commentLi
                 Icon(Icons.Filled.FavoriteBorder,null, modifier = Modifier
                     .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
                     .clickable {
-                        likeViewModel.likeEvent(eventId = event.event.id,profileId);
+                        likeViewModel.likeEvent(eventId = event.id,profileId);
                     })
                 Text(text = "${likeCount}",Modifier.align(Alignment.CenterVertically))
             }else
@@ -136,7 +136,7 @@ private fun EventRow(event:EventWithTags,navController: NavController, commentLi
                 Icon(Icons.Filled.Favorite,null, modifier = Modifier
                     .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
                     .clickable {
-                        likeViewModel.unlikeEvent(event.event.id,profileId)
+                        likeViewModel.unlikeEvent(event.id,profileId)
                     })
                 Text(text = "${likeCount}",Modifier.align(Alignment.CenterVertically))
             }
@@ -151,10 +151,10 @@ private fun EventRow(event:EventWithTags,navController: NavController, commentLi
         }
 
 
-        event.event.name?.let {
+        event.name?.let {
             Text(text= it, modifier = Modifier
                 .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
-                .clickable {  navController.navigate("detail/${event.event.id}") },
+                .clickable {  navController.navigate("detail/${event.id}") },
                 fontWeight = W500, fontSize = 20.sp
             )
         }
@@ -166,7 +166,7 @@ private fun EventRow(event:EventWithTags,navController: NavController, commentLi
             currentUserImage = painterResource(R.drawable.ic_launcher_foreground),
             commentViewModel = commentViewModel,
             profileId = profileId,
-            eventId = event.event.id
+            eventId = event.id
             )
         }
     }
