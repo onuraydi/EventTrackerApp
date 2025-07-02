@@ -7,7 +7,8 @@ import androidx.room.PrimaryKey
 //uid, katılınan etkinlikler, beğenilen etkinlikler,tercihler(cat, tag, bildirimler, darkMode)
 @Entity(tableName = "profiles")
 data class Profile(
-    @PrimaryKey var id:String = "", //TODO???
+    @PrimaryKey var id:String = "",
+    val email:String? = "",
     val fullName:String? = "",
     val userName:String? = "",
     val gender:String? = "",
