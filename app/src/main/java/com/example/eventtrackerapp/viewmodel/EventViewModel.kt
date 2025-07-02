@@ -58,21 +58,6 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
         }
     }
 
-    fun incrementLike(eventId:Int){
-        viewModelScope.launch(Dispatchers.IO) {
-            eventDao.incrementLike(eventId)
-            _event.value = eventDao.getById(eventId)
-            _eventList.value = eventDao.getAll()
-        }
-    }
-
-    fun decrementLike(eventId:Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            eventDao.decrementLike(eventId)
-            _event.value = eventDao.getById(eventId)
-            _eventList.value = eventDao.getAll()
-        }
-    }
 
     fun getEventBySelectedTag(tagIds :List<Tag>){
         viewModelScope.launch(Dispatchers.IO) {

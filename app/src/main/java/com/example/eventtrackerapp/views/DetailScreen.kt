@@ -68,6 +68,7 @@ import com.example.eventtrackerapp.utils.CommentBottomSheet
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
+import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import kotlinx.coroutines.flow.Flow
 
 
@@ -80,16 +81,16 @@ fun DetailScreen(
     category: Category,
     commentList: Flow<List<CommentWithProfileAndEvent>>,
     commentViewModel: CommentViewModel,
+    likeViewModel:LikeViewModel,
     profileId:String
 )
 {
     var showBottomSheet by remember { mutableStateOf(false) }
-    val isLikeState = rememberSaveable {mutableStateOf(false)}
-    var likeCount = remember(event.likeCount) { mutableStateOf(event.likeCount) }
 
+    val likeCount by likeViewModel.getLikeCount(event.id).collectAsState(initial = 0)
+    val isLiked by likeViewModel.isLikedByUser(event.id, profileId).collectAsState(initial = false)
 
     val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(initial = 0)
-    var eventViewModel: EventViewModel = viewModel()
 
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -115,7 +116,7 @@ fun DetailScreen(
             .padding(8.dp)
             .verticalScroll(rememberScrollState())) {
             Column() {
-                /* resim yüklendiğinde sayfayı yüklemek için if kullanmadğımda hata veriyor*/
+
                 if (event != null && event.image != null && event.image != 0) {
                     Image(
                         painter = painterResource(id = event.image),
@@ -207,28 +208,24 @@ fun DetailScreen(
 
                     ) {
                     Row(Modifier.weight(1f),horizontalArrangement = Arrangement.Center){
-                        if (isLikeState.value == false) {
+                        if (isLiked == false) {
                             Icon(Icons.Filled.FavoriteBorder, null, modifier = Modifier
                                 .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
                                 .clickable {
-                                    isLikeState.value = true;
-                                    likeCount.value++;
-                                    eventViewModel.incrementLike(eventId = event.id)
+                                    likeViewModel.likeEvent(event.id,profileId)
                                 })
                             Text(
-                                text = "${likeCount.value}",
+                                text = "${likeCount}",
                                 Modifier.align(Alignment.CenterVertically)
                             )
                         } else {
                             Icon(Icons.Filled.Favorite, null, modifier = Modifier
                                 .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
                                 .clickable {
-                                    isLikeState.value = false;
-                                    likeCount.value--;
-                                    eventViewModel.decrementLike(eventId = event.id)
+                                    likeViewModel.unlikeEvent(event.id,profileId)
                                 })
                             Text(
-                                text = "${likeCount.value}",
+                                text = "${likeCount}",
                                 Modifier.align(Alignment.CenterVertically)
                             )
                         }
