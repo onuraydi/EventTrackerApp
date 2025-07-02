@@ -84,13 +84,13 @@ fun AppNavGraph(
 
                 val profile by profileViewModel.profile.collectAsStateWithLifecycle()
 
-                var tags = rememberSaveable{ mutableStateOf(profile.selectedTagList.orEmpty().toList()) }
+
                 LaunchedEffect(Unit) {
 
-                    eventViewModel.getEventBySelectedTag(tags.value)
+                    eventViewModel.getEventBySelectedTag(profile.selectedTagList!!)
 
                 }
-                println(profile.selectedTagList)
+                println("selectedTagList"+profile.selectedTagList)
                 val eventList by eventViewModel.eventWithTag.collectAsState()
 
                 HomeScreen(eventList = eventList, navController = navController,commentViewModel,likeViewModel,uid) }
@@ -103,11 +103,9 @@ fun AppNavGraph(
                 AddEventScreen(
                     navController = navController,
                     tagViewModel,
-                    categoryViewModel
-                ){
-                    eventViewModel.addEvent(it)
-                    navController.popBackStack()
-                }
+                    categoryViewModel,
+                    eventViewModel
+                )
             }
 
             composable("detail/{id}") { backStackEntry ->

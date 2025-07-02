@@ -3,6 +3,7 @@ package com.example.eventtrackerapp.data.source.local
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
@@ -10,6 +11,7 @@ import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.model.EventTagCrossRef
 import com.example.eventtrackerapp.model.EventWithTags
 import com.example.eventtrackerapp.model.Tag
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EventDao {
@@ -21,7 +23,7 @@ interface EventDao {
     suspend fun getById(id:Int):Event
 
     @Insert
-    suspend fun add(event: Event)
+    suspend fun add(event: Event):Long
 
     @Update
     suspend fun update(event: Event)
@@ -29,12 +31,12 @@ interface EventDao {
     @Delete
     suspend fun delete(event: Event)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertEventTags(crossRef: List<EventTagCrossRef>)
 
     @Transaction
     @Query("SELECT * FROM events")
-    suspend fun getAllEventsWithTags():List<EventWithTags>
+    fun getAllEventsWithTags(): Flow<List<EventWithTags>>
 
 
     // TODO ??
@@ -45,5 +47,5 @@ interface EventDao {
     INNER JOIN EventTagCrossRef ETC ON E.id = ETC.eventId
     WHERE ETC.tagId IN (:tagIds)
 """)
-    suspend fun getEventBySelectedTag(tagIds:List<Tag>):List<EventWithTags>
+    suspend fun getEventBySelectedTag(tagIds:List<Tag>):List<Event>
 }

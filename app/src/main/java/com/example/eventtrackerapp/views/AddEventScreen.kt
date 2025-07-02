@@ -70,12 +70,16 @@ import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.eventtrackerapp.model.EventWithTags
+import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
+import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
+import kotlinx.coroutines.flow.first
 import java.util.Date
 import java.util.Locale
 
@@ -85,7 +89,7 @@ fun AddEventScreen(
     navController: NavController,
     tagViewModel: TagViewModel = viewModel(),
     categoryViewModel: CategoryViewModel = viewModel(),
-    insert : (Event) -> Unit
+    eventViewModel: EventViewModel
 ) {
     LaunchedEffect(Unit) {
         tagViewModel.resetTag()
@@ -95,6 +99,8 @@ fun AddEventScreen(
     val chosenTags by tagViewModel.chosenTags.collectAsStateWithLifecycle()
 
     val selectedCategoryName = remember { mutableStateOf("") }
+
+    val events by eventViewModel.allEventsWithTags.collectAsState(initial = emptyList())
 
     EventTrackerAppTheme {
         Scaffold(
@@ -401,9 +407,10 @@ fun AddEventScreen(
                                     //participants = arrayListOf(),
 //                                category = Category(),
 //                                tagList = arrayListOf()
-                                )
-                                insert(event) // Insert the event using the provided function
-                            }
+                            )
+                            eventViewModel.insertEventWithTags(event = event, tags = chosenTags)
+                            println(eventViewModel.allEventsWithTags)
+                            navController.popBackStack()
                         }
                     )
                 }

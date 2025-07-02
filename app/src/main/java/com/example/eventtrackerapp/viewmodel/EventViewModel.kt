@@ -6,11 +6,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
 import com.example.eventtrackerapp.model.Event
+import com.example.eventtrackerapp.model.EventTagCrossRef
 import com.example.eventtrackerapp.model.EventWithTags
 import com.example.eventtrackerapp.model.Tag
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.lang.Thread.State
 
@@ -21,12 +24,12 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
     private val _eventList = MutableStateFlow<List<Event>>(arrayListOf())
     private val _event = MutableStateFlow<Event>(Event())
 
-    private val _eventWithTag = MutableStateFlow<List<EventWithTags>>(arrayListOf())
+    private val _eventWithTag = MutableStateFlow<List<Event>>(arrayListOf())
 
     val eventList:StateFlow<List<Event>> = _eventList
     val event:StateFlow<Event> = _event
 
-    val eventWithTag:StateFlow<List<EventWithTags>> = _eventWithTag
+    val eventWithTag:StateFlow<List<Event>> = _eventWithTag
 
     fun getAllEvents(){
         viewModelScope.launch(Dispatchers.IO) {
@@ -64,4 +67,25 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
             _eventWithTag.value = eventDao.getEventBySelectedTag(tagIds)
         }
     }
+
+
+    fun getFilteredEvents(selectedTagIds: List<Tag>): Flow<List<EventWithTags>> {
+        return eventDao.getAllEventsWithTags().map { allEvents ->
+            allEvents.filter { event ->
+                event.tags.any { tag -> tag in selectedTagIds }
+            }
+        }
+    }
+
+    fun insertEventWithTags(event: Event,tags: List<Tag>){
+        viewModelScope.launch(Dispatchers.IO) {
+            val eventId = eventDao.add(event).toInt()
+            val refs = tags.map { tag ->
+                EventTagCrossRef(eventId = eventId,tagId = tag.id)
+            }
+            eventDao.insertEventTags(refs)
+        }
+    }
+
+    val allEventsWithTags: Flow<List<EventWithTags>> = eventDao.getAllEventsWithTags()
 }
