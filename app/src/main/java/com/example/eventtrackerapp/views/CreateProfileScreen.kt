@@ -81,7 +81,8 @@ fun CreateProfileScreen(
     profileViewModel: ProfileViewModel = viewModel(),
     userPreferences: UserPreferences,
     categoryWithTags:List<CategoryWithTag>,
-    uid:String?=""
+    uid:String?="",
+    email:String?=""
 ) {
     val selectedTag by tagViewModel.selectedTag.collectAsStateWithLifecycle()
     val chosenTags by tagViewModel.chosenTags.collectAsStateWithLifecycle()
@@ -398,6 +399,7 @@ fun CreateProfileScreen(
                             }
                             val profile = Profile(
                                 id = uid ?: "",
+                                email = email,
                                 fullName = fullNameState.value,
                                 userName = userNameState.value,
                                 gender = gender.value,
