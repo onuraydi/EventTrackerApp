@@ -158,7 +158,7 @@ fun EditEventScreen(navController:NavHostController){
 
                 Spacer(Modifier.padding(vertical = 12.dp))
 
-                ShowDateModal(Modifier,selectedDate, showModal)
+                //ShowDateModal(Modifier,selectedDate, showModal)
 
                 Spacer(Modifier.padding(vertical = 12.dp))
 
