@@ -20,7 +20,8 @@ import com.example.eventtrackerapp.model.Tag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Database(entities = [Category::class, Tag::class,Event::class,Profile::class,Comment::class,EventTagCrossRef::class,ProfileEventCrossRef::class], version = 5)
+@Database(entities = [Category::class, Tag::class,Event::class,Profile::class,Comment::class,EventTagCrossRef::class,ProfileEventCrossRef::class],
+    version = 6)
 @TypeConverters(Converter::class)
 abstract class EventTrackerDatabase : RoomDatabase(){
 

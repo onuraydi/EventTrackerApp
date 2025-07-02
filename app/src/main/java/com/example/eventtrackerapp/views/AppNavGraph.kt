@@ -18,6 +18,7 @@ import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.data.source.local.UserPreferences
 import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
+import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
@@ -33,6 +34,7 @@ fun AppNavGraph(
     tagViewModel: TagViewModel = viewModel(),
     authViewModel: AuthViewModel = viewModel(),
     profileViewModel: ProfileViewModel = viewModel(),
+    commentViewModel: CommentViewModel = viewModel(),
     auth: FirebaseAuth,
     userPreferences: UserPreferences,
 ){
@@ -70,12 +72,13 @@ fun AppNavGraph(
                 CreateProfileScreen(navController,tagViewModel,profileViewModel,userPreferences,categoryWithTags,uid,email)
             }
 
-            composable("home") {
+            composable("home") {backStackEntry ->
                 LaunchedEffect(Unit) {
                     eventViewModel.getAllEvents()
                 }
                 val eventList by eventViewModel.eventList.collectAsState()
-                HomeScreen(eventList = eventList, navController = navController) }
+                val uid = auth.currentUser?.uid!!
+                HomeScreen(eventList = eventList, navController = navController,commentViewModel,uid) }
 
 
             composable("addEvent") {
@@ -111,8 +114,9 @@ fun AppNavGraph(
                         categoryViewModel.getCategoryById(categoryID)
                     }
                 }
-
-                DetailScreen(event = event, navController = navController, category = category)
+                var uid = auth.currentUser?.uid!!
+                var commentList = commentViewModel.getComments(eventId = event.id)
+                DetailScreen(event = event, navController = navController, category = category, commentList,commentViewModel,uid)
             }
 
 

@@ -26,17 +26,22 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.BottomNavBar
 import com.example.eventtrackerapp.utils.CommentBottomSheet
+import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
+import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     eventList: List<Event>,
-    navController: NavController
+    navController: NavController,
+    commentViewModel: CommentViewModel,
+    profileId:String
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
@@ -77,7 +82,8 @@ fun HomeScreen(
 
             items(eventList)
             {
-                EventRow(it, navController)
+                var commentList = commentViewModel.getComments(eventId = it.id)
+                EventRow(it, navController,commentList,commentViewModel,profileId)
             }
         }
     }
@@ -85,7 +91,7 @@ fun HomeScreen(
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-private fun EventRow(event:Event,navController: NavController)
+private fun EventRow(event:Event,navController: NavController, commentList:Flow<List<CommentWithProfileAndEvent>>,commentViewModel:CommentViewModel,profileId:String)
 {
     var eventViewModel: EventViewModel = viewModel()
 
@@ -161,10 +167,11 @@ private fun EventRow(event:Event,navController: NavController)
         CommentBottomSheet(
             showSheet = showBottomSheet,
             onDismiss = {showBottomSheet = false},
-            comments = arrayListOf(),
-            onSendComment = {},
+            comments = commentList,
             currentUserImage = painterResource(R.drawable.ic_launcher_foreground),
-            currentUserName = "deneme"
+            commentViewModel = commentViewModel,
+            profileId = profileId,
+            eventId = event.id
             )
         }
     }

@@ -61,11 +61,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Category
+import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.CommentBottomSheet
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
+import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
+import kotlinx.coroutines.flow.Flow
 
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -74,7 +77,10 @@ import com.example.eventtrackerapp.viewmodel.EventViewModel
 fun DetailScreen(
     event: Event,
     navController: NavController,
-    category: Category
+    category: Category,
+    commentList: Flow<List<CommentWithProfileAndEvent>>,
+    commentViewModel: CommentViewModel,
+    profileId:String
 )
 {
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -245,10 +251,11 @@ fun DetailScreen(
                 CommentBottomSheet(
                     showSheet = showBottomSheet,
                     onDismiss = {showBottomSheet = false},
-                    comments = arrayListOf(),
-                    onSendComment = {},
+                    comments = commentList,
                     currentUserImage = painterResource(R.drawable.ic_launcher_foreground),
-                    currentUserName = "deneme"
+                    commentViewModel = commentViewModel,
+                    profileId = profileId,
+                    eventId = event.id
                 )
             }
         }
