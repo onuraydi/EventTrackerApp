@@ -16,4 +16,7 @@ interface CommentDao {
     @Transaction
     @Query("SELECT * FROM comments WHERE eventId = :eventId")
     fun getCommentsForEvent(eventId:Int):Flow<List<CommentWithProfileAndEvent>>
+
+    @Query("SELECT COUNT(*) FROM comments WHERE eventId = :eventId")
+    fun getCommentCount(eventId: Int):Flow<Int>
 }

@@ -104,8 +104,8 @@ private fun EventRow(event:Event,navController: NavController, commentList:Flow<
     val isLikeState = rememberSaveable {mutableStateOf(false)}
     var likeCount = remember(event.likeCount) { mutableStateOf(event.likeCount) }
 
+    val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(initial = 0)
 
-    val commentCount = rememberSaveable { mutableStateOf(0) }  // TODO buraya daha sonra event.comment count gelecek
 
     Column (modifier = Modifier
         .fillMaxWidth()
@@ -149,7 +149,7 @@ private fun EventRow(event:Event,navController: NavController, commentList:Flow<
             Icon(painterResource(R.drawable.baseline_chat_bubble_outline_24),null, modifier = Modifier
                 .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end = 5.dp)
                 .clickable { showBottomSheet = true })
-            Text(text = "${commentCount.value}",Modifier.align(Alignment.CenterVertically))
+            Text(text = "${commentCount}",Modifier.align(Alignment.CenterVertically))
             Icon(Icons.Filled.Share ,null, modifier = Modifier
                 .padding(15.dp)
                 .clickable {  })

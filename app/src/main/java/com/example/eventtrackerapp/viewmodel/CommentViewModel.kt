@@ -40,4 +40,9 @@ class CommentViewModel(application: Application):AndroidViewModel(application) {
     fun getComments(eventId: Int):Flow<List<CommentWithProfileAndEvent>>{
             return commentDao.getCommentsForEvent(eventId)
     }
+
+    fun getCommentCount(eventId: Int):Flow<Int>
+    {
+        return commentDao.getCommentCount(eventId)
+    }
 }
