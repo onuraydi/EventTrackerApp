@@ -18,6 +18,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,86 +58,95 @@ fun OnBoardingSceen(navController: NavHostController, userPreferences: UserPrefe
         )
     )
 
-
-    val pagerState = rememberPagerState(pageCount = {pages.size})
-    val corouitineScope = rememberCoroutineScope()
-
-
-    Column(Modifier
-        .fillMaxSize()
-        .padding(16.dp)) {
+    Scaffold {
+        innerPadding ->
+        val pagerState = rememberPagerState(pageCount = {pages.size})
+        val corouitineScope = rememberCoroutineScope()
 
 
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxWidth().weight(1f)
-        ) {
-            page -> OnBoardingItem(pages[page])
-        }
+        Column(Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .padding(innerPadding)) {
 
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(10.dp)
-        ) {
-            Text("skip", style = TextStyle(
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal,
-            ),
-                modifier = Modifier.clickable {
-                    val skipPage = pagerState.pageCount - 1
-                    corouitineScope.launch {
-                        pagerState.animateScrollToPage(skipPage)
-                        userPreferences.setHasSeenOnboarding(value = true)
-                    }
-                    navController.navigate("sign_up")
-                }
-            )
+
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxWidth().weight(1f)
+            ) {
+                    page -> OnBoardingItem(pages[page])
+            }
 
             Row(
                 horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.weight(1f)
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(10.dp)
             ) {
-                repeat(pages.size){
-                    index ->
-                    val isSelected = pagerState.currentPage == index
-                    Box(modifier = Modifier
-                        .padding(4.dp)
-                        .width(if (isSelected) 18.dp else 8.dp)
-                        .height(if(isSelected) 18.dp else 8 .dp)
-                        .border(
-                            width = 1.dp, color = Color.Black, shape = RoundedCornerShape(10.dp)
-                        )
-                        .background(
-                            color = if (isSelected) Color(0xFF3B6C64) else Color(0xFFFFFFFF),
-                            shape = CircleShape
-                        )
-                    )
-                }
-            }
-
-            Text("Next", style = TextStyle(
-                color = Color(0xFF333333),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal
-            ),
-                modifier = Modifier.clickable {
-                    if (pagerState.currentPage < 2){
-                        val nextPage = pagerState.currentPage + 1
-                        corouitineScope.launch { pagerState.animateScrollToPage(nextPage) }
-                    }
-                    else{
-                        navController.navigate("sign_up")
+                Text("skip", style = TextStyle(
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal,
+                ),
+                    modifier = Modifier.clickable {
+                        val skipPage = pagerState.pageCount - 1
                         corouitineScope.launch {
-                            userPreferences.setHasSeenOnboarding(true)
+                            pagerState.animateScrollToPage(skipPage)
+                            userPreferences.setHasSeenOnboarding(value = true)
+                        }
+                        navController.navigate("login_screen")
+                    }
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    repeat(pages.size){
+                            index ->
+                        val isSelected = pagerState.currentPage == index
+                        Box(modifier = Modifier
+                            .padding(4.dp)
+                            .width(if (isSelected) 18.dp else 8.dp)
+                            .height(if(isSelected) 18.dp else 8 .dp)
+                            .border(
+                                width = 1.dp, color = Color.Black, shape = RoundedCornerShape(10.dp)
+                            )
+                            .background(
+                                color = if (isSelected) Color(0xFF3B6C64) else Color(0xFFFFFFFF),
+                                shape = CircleShape
+                            )
+                        )
+                    }
+                }
+
+                Text("Next", style = TextStyle(
+                    color = Color(0xFF333333),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal
+                ),
+                    modifier = Modifier.clickable {
+                        if (pagerState.currentPage < 2){
+                            val nextPage = pagerState.currentPage + 1
+                            corouitineScope.launch { pagerState.animateScrollToPage(nextPage) }
+                        }
+                        else{
+                            corouitineScope.launch {
+                                userPreferences.setHasSeenOnboarding(true)
+                            }
+                            navController.navigate("login_screen"){
+                                popUpTo("onboarding_screen") {inclusive= true}
+                                launchSingleTop = true
+                            }
+
                         }
                     }
-                }
-            )
+                )
+            }
         }
     }
-}
+    }
+
+
 
 
 
