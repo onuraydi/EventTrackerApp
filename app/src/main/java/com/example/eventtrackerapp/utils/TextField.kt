@@ -40,6 +40,7 @@ fun EventTrackerAppOutlinedTextField(txt:String,
 
 @Composable
 fun EventTrackerAppAuthTextField(
+    modifier: Modifier = Modifier,
     txt: String,
     state: MutableState<String>,
     leadingIcon: @Composable (()->Unit)? = null,
@@ -53,7 +54,7 @@ fun EventTrackerAppAuthTextField(
 )
 {
     OutlinedTextField(
-        modifier = Modifier.widthIn(max = 280.dp),
+        modifier = modifier.widthIn(max = 280.dp),
         value = state.value,
         onValueChange = onValueChange,
         singleLine = isSingleLine,

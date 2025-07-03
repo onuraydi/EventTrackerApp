@@ -1,6 +1,10 @@
 package com.example.eventtrackerapp.views
 
+import android.content.Context
 import android.icu.text.SimpleDateFormat
+import android.os.Build
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -61,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -80,9 +85,12 @@ import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import kotlinx.coroutines.flow.first
+import java.time.LocalDate
+import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddEventScreen(
@@ -91,13 +99,11 @@ fun AddEventScreen(
     categoryViewModel: CategoryViewModel = viewModel(),
     eventViewModel: EventViewModel
 ) {
-    LaunchedEffect(Unit) {
-        tagViewModel.resetTag()
-    }
     val categoryWithTags by categoryViewModel.categoryWithTags.collectAsState()
     val selectedTag by tagViewModel.selectedTag.collectAsStateWithLifecycle()
     val chosenTags by tagViewModel.chosenTags.collectAsStateWithLifecycle()
 
+    val context = LocalContext.current
     val selectedCategoryName = remember { mutableStateOf("") }
 
     val events by eventViewModel.allEventsWithTags.collectAsState(initial = emptyList())
@@ -194,6 +200,7 @@ fun AddEventScreen(
                     //Event Detail
                     Spacer(Modifier.padding(vertical = 8.dp))
                     EventTrackerAppAuthTextField(
+                        modifier = Modifier.heightIn(min = 120.dp, max = 200.dp),
                         txt = "Event Detail",
                         state = eventDetail,
                         onValueChange = {
@@ -202,15 +209,16 @@ fun AddEventScreen(
                         },
                         isError = detailError.value,
                         supportingText = {
-                            if(categoryError.value){
+                            if(detailError.value){
                                 Text("Bu alanı boş bırakamazsınız")
                             }
-                        }
+                        },
+                        isSingleLine = false
                     )
 
                     //Event Date
                     Spacer(Modifier.padding(vertical = 8.dp))
-                    ShowDateModal(Modifier, selectedDate, showModal, dateError)
+                    ShowDateModal(Modifier, selectedDate, showModal, dateError,context)
 
                     //Event Duration
                     Spacer(Modifier.padding(vertical = 8.dp))
@@ -422,9 +430,11 @@ fun AddEventScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DatePickerModal(
+    context: Context,
     onDateSelected: (Long?)->Unit,
     onDismiss: ()-> Unit
 ) {
@@ -435,8 +445,15 @@ private fun DatePickerModal(
         confirmButton = {
             TextButton(
                 onClick = {
-                    onDateSelected(datePickerState.selectedDateMillis)
-                    onDismiss()
+                    val selectedDate = datePickerState.selectedDateMillis
+                    val currentDate = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+                    if(selectedDate!=null && selectedDate >= currentDate){
+                        onDateSelected(selectedDate)
+                        onDismiss()
+                    }else{
+                        Toast.makeText(context,"Geçersiz tarih seçimi",Toast.LENGTH_LONG).show()
+                    }
                 }
             ){
                 Text("OK")
@@ -454,12 +471,14 @@ private fun DatePickerModal(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ShowDateModal(
     modifier: Modifier = Modifier,
     dateState : MutableState<Long?>,
     modalState : MutableState<Boolean>,
-    dateErrorState: MutableState<Boolean>
+    dateErrorState: MutableState<Boolean>,
+    context: Context
 ){
 
 
@@ -477,7 +496,7 @@ fun ShowDateModal(
         isError = dateErrorState.value,
         supportingText = {
             if(dateErrorState.value){
-                Text("Bu alan boş bırakılamaz")
+                Text("Bu alanı boş bırakamazsınız")
             }
         },
         modifier = modifier
@@ -496,6 +515,7 @@ fun ShowDateModal(
 
     if(modalState.value){
         DatePickerModal(
+            context = context,
             onDateSelected = {
                 dateState.value = it
                 dateErrorState.value = it == null
