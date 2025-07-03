@@ -34,6 +34,7 @@ abstract class EventTrackerDatabase : RoomDatabase(){
     abstract fun commentDao():CommentDao
     abstract fun likeDao():LikeDao
     abstract fun participationDao():ParticipationDao
+    abstract fun exploreDao():ExploreDao
     //bu fonksiyon çağrıldığı yerde eğer database objesi oluşturulduysa aynı
     //obje üzerinden süreç işler.
 

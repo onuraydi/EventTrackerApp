@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
@@ -23,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,17 +36,23 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.BottomNavBar
+import com.example.eventtrackerapp.viewmodel.ExploreViewModel
 
 @Composable
 fun ExploreScreen(
     eventList:List<Event>,
-    navController:NavController
+    navController:NavController,
+    exploreViewModel: ExploreViewModel = viewModel()
 ){
+    val searchResult by exploreViewModel.searchList.collectAsStateWithLifecycle()
+
     EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -51,7 +60,7 @@ fun ExploreScreen(
         ) { innerPadding ->
             val query = rememberSaveable { mutableStateOf("") }
             val active = rememberSaveable { mutableStateOf(false) }
-            val searchList = remember { mutableStateListOf<String?>() }
+            val searchHistoryList = remember { mutableStateListOf<String?>() }
 
             Column(
                 modifier = Modifier.padding(innerPadding)
@@ -69,7 +78,8 @@ fun ExploreScreen(
                         active.value = it
                     },
                     onSearch = {
-                        searchList.add(query.value.trim())
+                        exploreViewModel.searchEvents(query.value.trim())
+                        searchHistoryList.add(query.value.trim())
                         active.value = false
                     },
                     placeHolder = { Text("Search") },
@@ -90,7 +100,7 @@ fun ExploreScreen(
                             )
                         }
                     },
-                    searchResult = searchList.filterNotNull()
+                    searchResult = searchResult
                 )
                 LazyVerticalStaggeredGrid(
                     modifier = Modifier
@@ -143,7 +153,7 @@ fun SimpleSearchBar(
     placeHolder: @Composable (()->Unit)? = null,
     leadingIcon: @Composable (()->Unit)? = null,
     trailingIcon: @Composable (()->Unit)? = null,
-    searchResult: List<String>
+    searchResult: List<Event>
 ){
     //ekranın genişlemesini tutan state
     SearchBar(
@@ -157,12 +167,12 @@ fun SimpleSearchBar(
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon
     ){
-        searchResult.forEach {
-            Row {
-                Icon(
-                    painterResource(R.drawable.history_icon),"History"
-                )
-                Text(it)
+        LazyColumn {
+            items(searchResult){event->
+                Row {
+                    Icon(painterResource(R.drawable.history_icon),"History")
+                    Text(event.name?:"",Modifier.weight(1f))
+                }
             }
         }
     }

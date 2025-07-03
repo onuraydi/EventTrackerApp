@@ -22,6 +22,7 @@ import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
+import com.example.eventtrackerapp.viewmodel.ExploreViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
@@ -41,6 +42,7 @@ fun AppNavGraph(
     commentViewModel: CommentViewModel = viewModel(),
     likeViewModel: LikeViewModel = viewModel(),
     participantsViewModel: ParticipantsViewModel = viewModel(),
+    exploreViewModel: ExploreViewModel = viewModel(),
     auth: FirebaseAuth,
     userPreferences: UserPreferences,
 ){
@@ -140,7 +142,7 @@ fun AppNavGraph(
                     eventViewModel.getAllEvents()
                 }
                 val eventList by eventViewModel.eventList.collectAsStateWithLifecycle()
-                ExploreScreen(eventList,navController)
+                ExploreScreen(eventList,navController,exploreViewModel)
             }
 
             composable("profile") {
