@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,15 +53,18 @@ fun ExploreScreen(
     exploreViewModel: ExploreViewModel = viewModel()
 ){
     val searchResult by exploreViewModel.searchList.collectAsStateWithLifecycle()
+    val historyList by exploreViewModel.historyList.collectAsStateWithLifecycle()
 
     EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {BottomNavBar(navController = navController)}
         ) { innerPadding ->
+
             val query = rememberSaveable { mutableStateOf("") }
             val active = rememberSaveable { mutableStateOf(false) }
-            val searchHistoryList = remember { mutableStateListOf<String?>() }
+
+            val displayedEvents = if(query.value.trim().isEmpty()) eventList else searchResult
 
             Column(
                 modifier = Modifier.padding(innerPadding)
@@ -72,14 +76,19 @@ fun ExploreScreen(
                     query = query.value,
                     onQueryChange = {
                         query.value = it
+                        exploreViewModel.searchEvents(it)
                     },
                     active = active.value,
                     onActiveChange = {
                         active.value = it
                     },
                     onSearch = {
-                        exploreViewModel.searchEvents(query.value.trim())
-                        searchHistoryList.add(query.value.trim())
+                        if(query.value.trim().isNotEmpty()){
+                            query.value = it.trim()
+                            exploreViewModel.searchEvents(query.value) //arama yap
+                            exploreViewModel.insertHistory(query.value) //geçmişe ekle
+                            active.value = false
+                        }
                         active.value = false
                     },
                     placeHolder = { Text("Search") },
@@ -100,8 +109,19 @@ fun ExploreScreen(
                             )
                         }
                     },
-                    searchResult = searchResult
+                    searchResult = searchResult,
+                    onHistoryClick = {
+                        query.value = it
+                        exploreViewModel.searchEvents(it)
+                        exploreViewModel.insertHistory(it)
+                        active.value = false
+                    },
+                    searchHistoryList = historyList.map{it.keyword},
+                    deleteItem = {
+                        exploreViewModel.deleteHistoryItem(it)
+                    }
                 )
+
                 LazyVerticalStaggeredGrid(
                     modifier = Modifier
                         .padding(top = 16.dp, start = 8.dp, end = 8.dp),
@@ -109,7 +129,7 @@ fun ExploreScreen(
                     verticalItemSpacing = 8.dp,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     content = {
-                        items(eventList) {
+                        items(displayedEvents){
                             MyImage(it,navController)
                         }
                     }
@@ -153,7 +173,10 @@ fun SimpleSearchBar(
     placeHolder: @Composable (()->Unit)? = null,
     leadingIcon: @Composable (()->Unit)? = null,
     trailingIcon: @Composable (()->Unit)? = null,
-    searchResult: List<Event>
+    searchResult: List<Event>,
+    searchHistoryList: List<String>,
+    onHistoryClick: (String)->Unit,
+    deleteItem: (String)-> Unit
 ){
     //ekranın genişlemesini tutan state
     SearchBar(
@@ -167,11 +190,50 @@ fun SimpleSearchBar(
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon
     ){
-        LazyColumn {
-            items(searchResult){event->
-                Row {
-                    Icon(painterResource(R.drawable.history_icon),"History")
-                    Text(event.name?:"",Modifier.weight(1f))
+        LazyColumn(
+            contentPadding = PaddingValues(4.dp)
+        ) {
+            if(query.isEmpty()){
+                items(searchHistoryList){historyItem->
+                    Row(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth()
+                            .clickable {
+                                onHistoryClick(historyItem)
+                            }
+                    ){
+                        Icon(
+                            painterResource(R.drawable.history_icon),
+                            "HistoryItem",
+                            Modifier.weight(1f)
+                            )
+                        Text(historyItem, modifier = Modifier.weight(4f).padding(start = 4.dp))
+                        Icon(
+                            Icons.Default.Clear,
+                            "Clear",
+                            Modifier
+                                .weight(1f)
+                                .clickable {
+                                    deleteItem(historyItem)
+                                }
+                            )
+                    }
+                }
+            }
+            else{
+                items(searchResult){event->
+                    Row(
+                        Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth()
+                            .clickable {
+                                onSearch(event.name ?: "")
+                            }
+                    ){
+                        Icon(painterResource(R.drawable.baseline_event_24),"HistoryItem")
+                        Text(event.name ?: "", modifier = Modifier.padding(start = 4.dp))
+                    }
                 }
             }
         }

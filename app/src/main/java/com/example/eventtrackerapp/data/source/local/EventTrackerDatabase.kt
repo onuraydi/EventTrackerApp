@@ -17,12 +17,13 @@ import com.example.eventtrackerapp.model.EventTagCrossRef
 import com.example.eventtrackerapp.model.Like
 import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.model.ProfileEventCrossRef
+import com.example.eventtrackerapp.model.SearchHistory
 import com.example.eventtrackerapp.model.Tag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Database(entities = [Category::class, Tag::class,Event::class,Profile::class,Comment::class,Like::class,EventTagCrossRef::class,ProfileEventCrossRef::class],
-    version = 8)
+@Database(entities = [Category::class, Tag::class,Event::class,Profile::class,Comment::class,Like::class,EventTagCrossRef::class,ProfileEventCrossRef::class,SearchHistory::class],
+    version = 10)
 @TypeConverters(Converter::class)
 abstract class EventTrackerDatabase : RoomDatabase(){
 
@@ -35,6 +36,7 @@ abstract class EventTrackerDatabase : RoomDatabase(){
     abstract fun likeDao():LikeDao
     abstract fun participationDao():ParticipationDao
     abstract fun exploreDao():ExploreDao
+    abstract fun historyDao():HistoryDao
     //bu fonksiyon çağrıldığı yerde eğer database objesi oluşturulduysa aynı
     //obje üzerinden süreç işler.
 
