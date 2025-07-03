@@ -40,7 +40,7 @@ import kotlinx.coroutines.flow.Flow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    eventList: List<Event>,
+    eventList: List<EventWithTags>,
     navController: NavController,
     commentViewModel: CommentViewModel,
     likeViewModel: LikeViewModel,
@@ -84,8 +84,8 @@ fun HomeScreen(
 
             items(eventList)
             {
-                var commentList = commentViewModel.getComments(eventId = it.id)
-                EventRow(it, navController,commentList,commentViewModel,profileId,likeViewModel)
+                var commentList = commentViewModel.getComments(eventId = it.event.id)
+                EventRow(it.event, navController,commentList,commentViewModel,profileId,likeViewModel)
             }
         }
     }

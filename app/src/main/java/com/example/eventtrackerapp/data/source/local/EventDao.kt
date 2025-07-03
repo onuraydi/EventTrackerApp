@@ -11,6 +11,7 @@ import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.model.EventTagCrossRef
 import com.example.eventtrackerapp.model.EventWithTags
 import com.example.eventtrackerapp.model.Tag
+import com.google.android.gms.auth.api.accounttransfer.AuthenticatorTransferCompletionStatus
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -47,5 +48,5 @@ interface EventDao {
     INNER JOIN EventTagCrossRef ETC ON E.id = ETC.eventId
     WHERE ETC.tagId IN (:tagIds)
 """)
-    suspend fun getEventBySelectedTag(tagIds:List<Tag>):List<Event>
+    suspend fun getEventBySelectedTag(tagIds:List<Int>):List<EventWithTags>
 }

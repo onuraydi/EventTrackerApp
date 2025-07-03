@@ -409,7 +409,9 @@ fun AddEventScreen(
 //                                tagList = arrayListOf()
                                 )
                                 eventViewModel.insertEventWithTags(event = event, tags = chosenTags)
-                                println(eventViewModel.allEventsWithTags)
+
+
+                                println("etkinlik tagları"+events)
                                 navController.popBackStack()
                             }
                         })

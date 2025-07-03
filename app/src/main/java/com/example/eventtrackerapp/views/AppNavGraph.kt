@@ -86,10 +86,9 @@ fun AppNavGraph(
 
                 val profile by profileViewModel.profile.collectAsStateWithLifecycle()
 
-
                 LaunchedEffect(Unit) {
-
-                    eventViewModel.getEventBySelectedTag(profile.selectedTagList!!)
+                    val tagIds = profile.selectedTagList?.map { it.id } ?: emptyList()
+                    eventViewModel.getEventBySelectedTag(tagIds)
 
                 }
                 println("selectedTagList"+profile.selectedTagList)
@@ -198,7 +197,7 @@ fun AppNavGraph(
             composable("participants_screen") {backStackEntry ->
 
                 val eventId = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: 0
-
+                // TODO Event Id değeri gelmiyor o yüzden crash yiyoruz
                 ParticipantsScreen(navController,participantsViewModel, eventId)
             }
 
