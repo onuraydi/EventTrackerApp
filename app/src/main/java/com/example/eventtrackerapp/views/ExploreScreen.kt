@@ -117,6 +117,7 @@ fun ExploreScreen(
                         active.value = false
                     },
                     searchHistoryList = historyList.map{it.keyword},
+                    navController = navController,
                     deleteItem = {
                         exploreViewModel.deleteHistoryItem(it)
                     }
@@ -174,6 +175,7 @@ fun SimpleSearchBar(
     leadingIcon: @Composable (()->Unit)? = null,
     trailingIcon: @Composable (()->Unit)? = null,
     searchResult: List<Event>,
+    navController: NavController,
     searchHistoryList: List<String>,
     onHistoryClick: (String)->Unit,
     deleteItem: (String)-> Unit
@@ -229,6 +231,7 @@ fun SimpleSearchBar(
                             .fillMaxWidth()
                             .clickable {
                                 onSearch(event.name ?: "")
+                                navController.navigate("detail/${event.id}")
                             }
                     ){
                         Icon(painterResource(R.drawable.baseline_event_24),"HistoryItem")
