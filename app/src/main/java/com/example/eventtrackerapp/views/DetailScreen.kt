@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -94,6 +95,8 @@ fun DetailScreen(
 
     val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(initial = 0)
 
+    val state by participantsViewModel.getParticipationState(event.id,profileId).collectAsState(initial = false)
+
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
@@ -157,12 +160,11 @@ fun DetailScreen(
                 Spacer(Modifier.padding(top = 20.dp))
                 Text("Katılımcılar", fontSize = 30.sp, fontWeight = FontWeight.W500, modifier = Modifier
                     .clickable {
-                        // TODO buraya id ya da liste ile bir yönlendirme yapılmalı
-                        navController.navigate("participants_screen")
+                        navController.navigate("participants_screen/${event.id}")
                 })
                 Spacer(Modifier.padding(top = 5.dp))
                 Row(modifier = Modifier
-                    .clickable { navController.navigate("participants_screen") }) {
+                    .clickable { navController.navigate("participants_screen/${event.id}") }) {
                     /*TODO: Buraya katılımcıların fotoğrafları gelecek ilk 4 tanesinin*/
                     Image(
                         painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
@@ -189,11 +191,23 @@ fun DetailScreen(
                     .fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                    ExtendedFloatingActionButton(onClick = {participantsViewModel.joinEvent(profileId = profileId, eventId = event.id) },
-                        icon = { Icon(Icons.Default.Add,null)},
-                        text = { Text("Katıl")},
-                        modifier = Modifier.weight(1f)
-                    )
+                    // TODO etkinliğe katılıp katılmadığının kontorlü yapılarak butonun görünümü vb. değişecek
+                    if (!state)
+                    {
+                        ExtendedFloatingActionButton(onClick = {participantsViewModel.joinEvent(profileId = profileId, eventId = event.id) },
+                            icon = { Icon(Icons.Default.Add,null)},
+                            text = { Text("Katıl")},
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    else{
+                        ExtendedFloatingActionButton(onClick = {participantsViewModel.deleteParticipation(event.id,profileId)},
+                            icon = {Icon(Icons.Default.Clear,null)},
+                            text = { Text("Vazgeç")},
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
 
                     // TODO Buraya şimdilik bir atama yapılmayacak zaman kalırsa uygulanır
                     ExtendedFloatingActionButton(onClick = { },

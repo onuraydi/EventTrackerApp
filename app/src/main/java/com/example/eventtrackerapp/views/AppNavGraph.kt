@@ -129,6 +129,7 @@ fun AppNavGraph(
                     }
                 }
                 var uid = auth.currentUser?.uid!!
+
                 var commentList = commentViewModel.getComments(eventId = event.id)
                 DetailScreen(event = event, navController = navController, category = category, commentList,commentViewModel,likeViewModel,uid,participantsViewModel)
             }
@@ -194,10 +195,11 @@ fun AppNavGraph(
                 SplashScreen(navController)
             }
 
-            composable("participants_screen") {backStackEntry ->
+            composable("participants_screen/{id}") {backStackEntry ->
 
                 val eventId = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: 0
                 // TODO Event Id değeri gelmiyor o yüzden crash yiyoruz
+                println("eventId:" + eventId)
                 ParticipantsScreen(navController,participantsViewModel, eventId)
             }
 
