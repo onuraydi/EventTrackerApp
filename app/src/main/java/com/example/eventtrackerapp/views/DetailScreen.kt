@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -97,6 +99,8 @@ fun DetailScreen(
 
     val state by participantsViewModel.getParticipationState(event.id,profileId).collectAsState(initial = false)
 
+    val participantsCount by participantsViewModel.getParticipantsCount(event.id).collectAsState(initial = 0)
+
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
@@ -165,26 +169,32 @@ fun DetailScreen(
                 Spacer(Modifier.padding(top = 5.dp))
                 Row(modifier = Modifier
                     .clickable { navController.navigate("participants_screen/${event.id}") }) {
-                    /*TODO: Buraya katılımcıların fotoğrafları gelecek ilk 4 tanesinin*/
-                    Image(
-                        painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                        Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
-                            .size(60.dp))
-                    Spacer(Modifier.padding(start = 10.dp))
-                    Image(
-                        painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                        Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
-                            .size(60.dp))
-                    Spacer(Modifier.padding(start = 10.dp))
-                    Image(
-                        painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                        Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
-                            .size(60.dp))
-                    Spacer(Modifier.padding(start = 10.dp))
-
-                    /*TODO: Buraya katılımıcıların sayısı gelecek*/
-                    Text("+12 Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier
-                        .align(Alignment.CenterVertically))
+                    if(participantsCount < 4)
+                    {
+                        repeat(participantsCount)
+                        {
+                            Image(
+                                // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
+                                painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
+                                Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
+                                    .size(60.dp))
+                            Spacer(Modifier.padding(start = 10.dp))
+                        }
+                    }
+                    else
+                    {
+                        repeat(3)
+                        {
+                            Image(
+                                // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
+                                painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
+                                Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
+                                    .size(60.dp))
+                            Spacer(Modifier.padding(start = 10.dp))
+                        }
+                        Text("+${participantsCount - 3} Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier
+                            .align(Alignment.CenterVertically))
+                    }
                 }
                 Spacer(Modifier.padding(top = 20.dp))
                 Row(Modifier

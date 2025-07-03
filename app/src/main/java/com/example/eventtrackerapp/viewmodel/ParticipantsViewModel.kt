@@ -31,6 +31,10 @@ class ParticipantsViewModel(application: Application):AndroidViewModel(applicati
         return participationDao.getParticipationState(profileId,eventId)
     }
 
+    fun getParticipantsCount(eventId: Int):Flow<Int>{
+        return participationDao.getParticipantsCount(eventId)
+    }
+
     fun joinEvent(eventId:Int,profileId:String)
     {
         viewModelScope.launch(Dispatchers.IO) {
