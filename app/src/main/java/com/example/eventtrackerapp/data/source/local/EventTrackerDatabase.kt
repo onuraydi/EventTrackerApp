@@ -22,7 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Database(entities = [Category::class, Tag::class,Event::class,Profile::class,Comment::class,Like::class,EventTagCrossRef::class,ProfileEventCrossRef::class],
-    version = 7)
+    version = 8)
 @TypeConverters(Converter::class)
 abstract class EventTrackerDatabase : RoomDatabase(){
 
@@ -33,6 +33,7 @@ abstract class EventTrackerDatabase : RoomDatabase(){
     abstract fun profileEventDao():ProfileEventDao
     abstract fun commentDao():CommentDao
     abstract fun likeDao():LikeDao
+    abstract fun participationDao():ParticipationDao
     //bu fonksiyon çağrıldığı yerde eğer database objesi oluşturulduysa aynı
     //obje üzerinden süreç işler.
 

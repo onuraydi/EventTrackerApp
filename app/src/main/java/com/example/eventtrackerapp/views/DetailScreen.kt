@@ -69,6 +69,7 @@ import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
+import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 import kotlinx.coroutines.flow.Flow
 
 
@@ -82,7 +83,8 @@ fun DetailScreen(
     commentList: Flow<List<CommentWithProfileAndEvent>>,
     commentViewModel: CommentViewModel,
     likeViewModel:LikeViewModel,
-    profileId:String
+    profileId:String,
+    participantsViewModel: ParticipantsViewModel
 )
 {
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -187,7 +189,7 @@ fun DetailScreen(
                     .fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                    ExtendedFloatingActionButton(onClick = { },
+                    ExtendedFloatingActionButton(onClick = {participantsViewModel.joinEvent(profileId = profileId, eventId = event.id) },
                         icon = { Icon(Icons.Default.Add,null)},
                         text = { Text("Katıl")},
                         modifier = Modifier.weight(1f)

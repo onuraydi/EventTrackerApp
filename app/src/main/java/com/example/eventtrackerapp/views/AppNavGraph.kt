@@ -23,6 +23,7 @@ import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
+import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -39,6 +40,7 @@ fun AppNavGraph(
     profileViewModel: ProfileViewModel = viewModel(),
     commentViewModel: CommentViewModel = viewModel(),
     likeViewModel: LikeViewModel = viewModel(),
+    participantsViewModel: ParticipantsViewModel = viewModel(),
     auth: FirebaseAuth,
     userPreferences: UserPreferences,
 ){
@@ -129,7 +131,7 @@ fun AppNavGraph(
                 }
                 var uid = auth.currentUser?.uid!!
                 var commentList = commentViewModel.getComments(eventId = event.id)
-                DetailScreen(event = event, navController = navController, category = category, commentList,commentViewModel,likeViewModel,uid)
+                DetailScreen(event = event, navController = navController, category = category, commentList,commentViewModel,likeViewModel,uid,participantsViewModel)
             }
 
 
@@ -193,8 +195,11 @@ fun AppNavGraph(
                 SplashScreen(navController)
             }
 
-            composable("participants_screen") {
-                ParticipantsScreen(navController)
+            composable("participants_screen") {backStackEntry ->
+
+                val eventId = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: 0
+
+                ParticipantsScreen(navController,participantsViewModel, eventId)
             }
 
             composable("edit_event_screen") {

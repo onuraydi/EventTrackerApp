@@ -377,7 +377,7 @@ fun AddEventScreen(
                     EventTrackerAppPrimaryButton(
                         text = "Add Event",
                         onClick = {
-                            if(
+                            if (
                                 eventName.value.isBlank() ||
                                 eventDetail.value.isBlank() ||
                                 eventDuration.value.isBlank() ||
@@ -385,7 +385,7 @@ fun AddEventScreen(
                                 selectedCategoryName.value.isBlank() ||
                                 selectedDate.value == null ||
                                 chosenTags.isEmpty()
-                            ){
+                            ) {
                                 nameError.value = eventName.value.isBlank()
                                 detailError.value = eventDetail.value.isBlank()
                                 durationError.value = eventDuration.value.isBlank()
@@ -393,7 +393,7 @@ fun AddEventScreen(
                                 dateError.value = selectedDate.value == null
                                 categoryError.value = selectedCategoryName.value.isBlank()
                                 return@EventTrackerAppPrimaryButton
-                            }else{
+                            } else {
                                 val event = Event(
                                     name = eventName.value,
                                     detail = eventDetail.value,
@@ -407,12 +407,12 @@ fun AddEventScreen(
                                     //participants = arrayListOf(),
 //                                category = Category(),
 //                                tagList = arrayListOf()
-                            )
-                            eventViewModel.insertEventWithTags(event = event, tags = chosenTags)
-                            println(eventViewModel.allEventsWithTags)
-                            navController.popBackStack()
-                        }
-                    )
+                                )
+                                eventViewModel.insertEventWithTags(event = event, tags = chosenTags)
+                                println(eventViewModel.allEventsWithTags)
+                                navController.popBackStack()
+                            }
+                        })
                 }
             }
 

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -29,6 +30,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,11 +46,18 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ParticipantsScreen(navController: NavController)
+fun ParticipantsScreen(
+    navController: NavController,
+    participantsViewModel: ParticipantsViewModel,
+    eventId:Int
+)
 {
+    val participants by participantsViewModel.getParticipants(eventId).collectAsState(initial = emptyList())
+
     Scaffold(modifier = Modifier
         .fillMaxSize(),
         topBar = {
@@ -78,8 +88,12 @@ fun ParticipantsScreen(navController: NavController)
             contentPadding = PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
 
-            items(15){
-                user(R.drawable.ic_launcher_background,"Onur Aydı","deneme@gmail.com")
+            items(participants){
+                it.photo?.let { it1 -> it.fullName?.let { it2 -> it.email?.let { it3 ->
+                    user(it1, it2,
+                        it3
+                    )
+                } } }
             }
         }
         }
@@ -107,7 +121,8 @@ fun user(image:Int,nameSurname:String, email:String)
             .padding(horizontal = 8.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Image(painterResource(userImage.value),null, modifier = Modifier
+            // TODO resim veri tabanından daha sonra gelecek
+            Image(painterResource(R.drawable.ic_launcher_foreground),null, modifier = Modifier
                 .clip(CircleShape)
                 .size(70.dp))
 
