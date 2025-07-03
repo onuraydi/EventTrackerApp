@@ -99,6 +99,10 @@ fun AddEventScreen(
     categoryViewModel: CategoryViewModel = viewModel(),
     eventViewModel: EventViewModel
 ) {
+    LaunchedEffect(Unit) {
+        tagViewModel.resetTag()
+    }
+    
     val categoryWithTags by categoryViewModel.categoryWithTags.collectAsState()
     val selectedTag by tagViewModel.selectedTag.collectAsStateWithLifecycle()
     val chosenTags by tagViewModel.chosenTags.collectAsStateWithLifecycle()
