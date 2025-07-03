@@ -32,11 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.data.source.local.UserPreferences
 import com.example.eventtrackerapp.model.OnBoardingModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun OnBoardingSceen(navController: NavHostController){
+fun OnBoardingSceen(navController: NavHostController, userPreferences: UserPreferences){
 
     val pages = listOf(
         OnBoardingModel(
@@ -53,13 +54,9 @@ fun OnBoardingSceen(navController: NavHostController){
             title = "Üçüncü Sayfa",
             description = "üçüncü sayfadaki detaylar buraya yazılacak",
             ImageRes = R.drawable.ic_launcher_background
-        ),
-        OnBoardingModel(
-            title = "dördüncü sayfa",
-            description = "Dördüncü sayfadaki detaylar buuraya yazılacak",
-            ImageRes = R.drawable.ic_launcher_background
         )
     )
+
 
     val pagerState = rememberPagerState(pageCount = {pages.size})
     val corouitineScope = rememberCoroutineScope()
@@ -89,7 +86,10 @@ fun OnBoardingSceen(navController: NavHostController){
             ),
                 modifier = Modifier.clickable {
                     val skipPage = pagerState.pageCount - 1
-                    corouitineScope.launch { pagerState.animateScrollToPage(skipPage) }
+                    corouitineScope.launch {
+                        pagerState.animateScrollToPage(skipPage)
+                        userPreferences.setHasSeenOnboarding(value = true)
+                    }
                     navController.navigate("sign_up")
                 }
             )
@@ -122,12 +122,15 @@ fun OnBoardingSceen(navController: NavHostController){
                 fontWeight = FontWeight.Normal
             ),
                 modifier = Modifier.clickable {
-                    if (pagerState.currentPage < 3){
+                    if (pagerState.currentPage < 2){
                         val nextPage = pagerState.currentPage + 1
                         corouitineScope.launch { pagerState.animateScrollToPage(nextPage) }
                     }
                     else{
                         navController.navigate("sign_up")
+                        corouitineScope.launch {
+                            userPreferences.setHasSeenOnboarding(true)
+                        }
                     }
                 }
             )

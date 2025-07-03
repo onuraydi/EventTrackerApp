@@ -64,7 +64,7 @@ fun AppNavGraph(
     {
         NavHost(navController=navController, startDestination = startDestination) {
             composable("onboarding_screen") {
-                OnBoardingSceen(navController)
+                OnBoardingSceen(navController,userPreferences)
             }
 
             composable("create_profile_screen") {
