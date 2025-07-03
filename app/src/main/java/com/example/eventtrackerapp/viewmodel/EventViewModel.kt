@@ -24,12 +24,12 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
     private val _eventList = MutableStateFlow<List<Event>>(arrayListOf())
     private val _event = MutableStateFlow<Event>(Event())
 
-    private val _eventWithTag = MutableStateFlow<List<Event>>(arrayListOf())
+    private val _eventWithTag = MutableStateFlow<List<EventWithTags>>(arrayListOf())
 
     val eventList:StateFlow<List<Event>> = _eventList
     val event:StateFlow<Event> = _event
 
-    val eventWithTag:StateFlow<List<Event>> = _eventWithTag
+    val eventWithTag:StateFlow<List<EventWithTags>> = _eventWithTag
 
     fun getAllEvents(){
         viewModelScope.launch(Dispatchers.IO) {
@@ -62,7 +62,7 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
     }
 
 
-    fun getEventBySelectedTag(tagIds :List<Tag>){
+    fun getEventBySelectedTag(tagIds :List<Int>){
         viewModelScope.launch(Dispatchers.IO) {
             _eventWithTag.value = eventDao.getEventBySelectedTag(tagIds)
         }

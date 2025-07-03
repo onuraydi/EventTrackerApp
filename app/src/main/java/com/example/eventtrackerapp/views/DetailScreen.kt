@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -94,6 +97,10 @@ fun DetailScreen(
 
     val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(initial = 0)
 
+    val state by participantsViewModel.getParticipationState(event.id,profileId).collectAsState(initial = false)
+
+    val participantsCount by participantsViewModel.getParticipantsCount(event.id).collectAsState(initial = 0)
+
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
@@ -157,43 +164,60 @@ fun DetailScreen(
                 Spacer(Modifier.padding(top = 20.dp))
                 Text("Katılımcılar", fontSize = 30.sp, fontWeight = FontWeight.W500, modifier = Modifier
                     .clickable {
-                        // TODO buraya id ya da liste ile bir yönlendirme yapılmalı
-                        navController.navigate("participants_screen")
+                        navController.navigate("participants_screen/${event.id}")
                 })
                 Spacer(Modifier.padding(top = 5.dp))
                 Row(modifier = Modifier
-                    .clickable { navController.navigate("participants_screen") }) {
-                    /*TODO: Buraya katılımcıların fotoğrafları gelecek ilk 4 tanesinin*/
-                    Image(
-                        painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                        Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
-                            .size(60.dp))
-                    Spacer(Modifier.padding(start = 10.dp))
-                    Image(
-                        painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                        Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
-                            .size(60.dp))
-                    Spacer(Modifier.padding(start = 10.dp))
-                    Image(
-                        painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                        Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
-                            .size(60.dp))
-                    Spacer(Modifier.padding(start = 10.dp))
-
-                    /*TODO: Buraya katılımıcıların sayısı gelecek*/
-                    Text("+12 Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier
-                        .align(Alignment.CenterVertically))
+                    .clickable { navController.navigate("participants_screen/${event.id}") }) {
+                    if(participantsCount < 4)
+                    {
+                        repeat(participantsCount)
+                        {
+                            Image(
+                                // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
+                                painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
+                                Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
+                                    .size(60.dp))
+                            Spacer(Modifier.padding(start = 10.dp))
+                        }
+                    }
+                    else
+                    {
+                        repeat(3)
+                        {
+                            Image(
+                                // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
+                                painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
+                                Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
+                                    .size(60.dp))
+                            Spacer(Modifier.padding(start = 10.dp))
+                        }
+                        Text("+${participantsCount - 3} Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier
+                            .align(Alignment.CenterVertically))
+                    }
                 }
                 Spacer(Modifier.padding(top = 20.dp))
                 Row(Modifier
                     .fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                    ExtendedFloatingActionButton(onClick = {participantsViewModel.joinEvent(profileId = profileId, eventId = event.id) },
-                        icon = { Icon(Icons.Default.Add,null)},
-                        text = { Text("Katıl")},
-                        modifier = Modifier.weight(1f)
-                    )
+                    // TODO etkinliğe katılıp katılmadığının kontorlü yapılarak butonun görünümü vb. değişecek
+                    if (!state)
+                    {
+                        ExtendedFloatingActionButton(onClick = {participantsViewModel.joinEvent(profileId = profileId, eventId = event.id) },
+                            icon = { Icon(Icons.Default.Add,null)},
+                            text = { Text("Katıl")},
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    else{
+                        ExtendedFloatingActionButton(onClick = {participantsViewModel.deleteParticipation(event.id,profileId)},
+                            icon = {Icon(Icons.Default.Clear,null)},
+                            text = { Text("Vazgeç")},
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
 
                     // TODO Buraya şimdilik bir atama yapılmayacak zaman kalırsa uygulanır
                     ExtendedFloatingActionButton(onClick = { },
