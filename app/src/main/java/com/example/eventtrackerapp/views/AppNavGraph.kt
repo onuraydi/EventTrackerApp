@@ -56,7 +56,7 @@ fun AppNavGraph(
         val isLoggedIn = auth.currentUser != null
 
         startDestination = when{
-//            !hasSeenOnboarding -> "onboarding"
+            !hasSeenOnboarding -> "onboarding_screen"
             !isLoggedIn -> "login_screen"
             !isProfileCompleted -> "create_profile_screen"
             else -> "home"
@@ -65,9 +65,9 @@ fun AppNavGraph(
     if (startDestination != "splash_screen")
     {
         NavHost(navController=navController, startDestination = startDestination) {
-//            Composable("onboarding"){
-//                // Onboarding
-//            }
+            composable("onboarding_screen") {
+                OnBoardingSceen(navController,userPreferences)
+            }
 
             composable("create_profile_screen") {
                 LaunchedEffect(Unit) {
@@ -208,6 +208,8 @@ fun AppNavGraph(
             composable("edit_event_screen") {
                 EditEventScreen(navController)
             }
+
+
         }
     }
 }
