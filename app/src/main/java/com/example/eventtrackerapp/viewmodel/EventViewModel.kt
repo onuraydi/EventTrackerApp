@@ -58,9 +58,9 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
         }
     }
 
-    fun deleteEvent(event: Event) {
+    fun deleteEvent(eventId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            eventDao.delete(event)
+            eventDao.delete(eventId)
         }
     }
 

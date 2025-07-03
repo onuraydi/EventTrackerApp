@@ -187,7 +187,9 @@ fun AppNavGraph(
                     eventViewModel.getEventByOwner(uid ?: "")
                 }
                 val myEvents by eventViewModel.eventsByOwner.collectAsStateWithLifecycle()
-                MyEventsScreen(navController,myEvents)
+                MyEventsScreen(navController,myEvents){
+                    eventViewModel.deleteEvent(it)
+                }
             }
 
             composable("notification") {

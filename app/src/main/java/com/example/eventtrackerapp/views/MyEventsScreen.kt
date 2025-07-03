@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.eventtrackerapp.views
 
 import androidx.compose.foundation.Image
@@ -24,15 +26,23 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +53,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
@@ -52,8 +64,12 @@ import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 @Composable
 fun MyEventsScreen(
     navController: NavController,
-    myEvents:List<Event>
+    myEvents:List<Event>,
+    deleteEvent:(id:Int)->Unit
 ){
+    val showDialog = remember { mutableStateOf(false) }
+    val selectedEventId = remember { mutableIntStateOf(0) }
+
     EventTrackerAppTheme {
         Scaffold(
             Modifier.fillMaxSize(),
@@ -155,7 +171,8 @@ fun MyEventsScreen(
                                             Icon(Icons.Default.Delete, "Delete")
                                         },
                                         onClick = {
-
+                                            selectedEventId.intValue = it.id
+                                            showDialog.value = true
                                         }
                                     )
                                 }
@@ -163,8 +180,64 @@ fun MyEventsScreen(
                         }
                     }
                 }
+                if(showDialog.value){
+                    ShowAlertDialog(
+                        dialogTitle = "Etkinlik Silinecek",
+                        dialogText = "Eğer onaylarsan eklediğin etkinliği silmiş olacaksın." +
+                                " Sildiğin etkinliği bir daha geri alamazsın",
+                        onConfirmation = {deleteEvent(selectedEventId.value)},
+                        onDismissRequest = {showDialog.value = false}
+                    )
+                }
             }
 
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ShowAlertDialog(
+    onConfirmation:()->Unit,
+    onDismissRequest: ()->Unit,
+    dialogTitle:String,
+    dialogText:String
+){
+    BasicAlertDialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties()
+    ){
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            tonalElevation = 6.dp
+        ) {
+            Column(Modifier.padding(16.dp)){
+                Text(text = dialogTitle, style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.padding(vertical = 12.dp))
+                Text(text = dialogText)
+                Spacer(Modifier.padding(vertical = 16.dp))
+                Row(
+                    Modifier.fillMaxWidth(1f),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(
+                        onClick = {
+                            onDismissRequest()
+                        }
+                    ){
+                        Text("İptal")
+                    }
+
+                    TextButton(
+                        onClick = {
+                            onConfirmation()
+                            onDismissRequest()
+                        }
+                    ){
+                        Text("Sil", color = Color.Red)
+                    }
+                }
+            }
         }
     }
 }

@@ -29,8 +29,8 @@ interface EventDao {
     @Update
     suspend fun update(event: Event)
 
-    @Delete
-    suspend fun delete(event: Event)
+    @Query("delete from events where id = :eventId")
+    suspend fun delete(eventId: Int)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertEventTags(crossRef: List<EventTagCrossRef>)
