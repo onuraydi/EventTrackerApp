@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "events")
 data class Event(
+    val ownerId:String? = "",
     var name:String? = "",
     var detail: String? = "",
     var date:Long? = 0,

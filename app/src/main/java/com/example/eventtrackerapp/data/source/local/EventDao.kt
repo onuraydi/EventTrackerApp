@@ -39,6 +39,9 @@ interface EventDao {
     @Query("SELECT * FROM events")
     fun getAllEventsWithTags(): Flow<List<EventWithTags>>
 
+    @Query("select * from events where ownerId = :ownerId")
+    fun getEventsByOwner(ownerId:String):Flow<List<Event>>
+
 
     // TODO ??
     @Transaction

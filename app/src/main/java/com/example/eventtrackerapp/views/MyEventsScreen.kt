@@ -45,11 +45,15 @@ import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyEventsScreen(navController: NavController){
+fun MyEventsScreen(
+    navController: NavController,
+    myEvents:List<Event>
+){
     EventTrackerAppTheme {
         Scaffold(
             Modifier.fillMaxSize(),
@@ -74,18 +78,12 @@ fun MyEventsScreen(navController: NavController){
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                /*TODO VERİLER SENKRON GELDİKTEN SONRA NAVİGASYONLAR YAPILACAK*/
-                val eventList : List<Map<String,String>> = listOf(
-                    mapOf("isim" to "EtkinlikasdasdAdsaD ASDADas1", "detay" to "Detay1"),
-                    mapOf("isim" to "Etkinlik2", "detay" to "Detay2"),
-                    mapOf("isim" to "Etkinlik3", "detay" to "Detay3"),
-                )
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(eventList){
+                    items(myEvents){
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -106,7 +104,7 @@ fun MyEventsScreen(navController: NavController){
                                         .clip(CircleShape)
                                         .background(Color.Red)
                                         .size(60.dp),
-                                    painter = painterResource(R.drawable.ic_launcher_foreground),
+                                    painter = painterResource(it.image),
                                     contentDescription = "Profile",
                                 )
 
@@ -117,13 +115,13 @@ fun MyEventsScreen(navController: NavController){
                                         .padding(start = 12.dp)
                                 ) {
                                     Text(
-                                        text = it["isim"] ?: "",
+                                        text = it.name ?: "",
                                         fontSize = 18.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
-                                        text = it["detay"] ?: "",
+                                        text = it.detail ?: "",
                                         fontSize = 16.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -141,20 +139,24 @@ fun MyEventsScreen(navController: NavController){
                                             Icon(Icons.Default.Info, "Detail")
                                         },
                                         onClick = {
-
+                                            navController.navigate("detail/${it.id}")
                                         }
                                     )
                                     IconButton(
                                         content = {
                                             Icon(Icons.Default.Edit, "Edit")
                                         },
-                                        onClick = {}
+                                        onClick = {
+
+                                        }
                                     )
                                     IconButton(
                                         content = {
-                                            Icon(Icons.Default.Delete, "Edit")
+                                            Icon(Icons.Default.Delete, "Delete")
                                         },
-                                        onClick = {}
+                                        onClick = {
+
+                                        }
                                     )
                                 }
                             }

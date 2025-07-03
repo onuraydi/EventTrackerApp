@@ -102,6 +102,7 @@ fun AppNavGraph(
 
 
             composable("addEvent") {
+                val uid = auth.currentUser?.uid
                 LaunchedEffect(Unit) {
                     categoryViewModel.getAllCategoryWithTags()
                 }
@@ -109,7 +110,8 @@ fun AppNavGraph(
                     navController = navController,
                     tagViewModel,
                     categoryViewModel,
-                    eventViewModel
+                    eventViewModel,
+                    uid ?: ""
                 )
             }
 
@@ -180,7 +182,12 @@ fun AppNavGraph(
             }
 
             composable("my_events"){
-                MyEventsScreen(navController)
+                val uid = auth.currentUser?.uid
+                LaunchedEffect(Unit) {
+                    eventViewModel.getEventByOwner(uid ?: "")
+                }
+                val myEvents by eventViewModel.eventsByOwner.collectAsStateWithLifecycle()
+                MyEventsScreen(navController,myEvents)
             }
 
             composable("notification") {
@@ -210,8 +217,6 @@ fun AppNavGraph(
             composable("edit_event_screen") {
                 EditEventScreen(navController)
             }
-
-
         }
     }
 }

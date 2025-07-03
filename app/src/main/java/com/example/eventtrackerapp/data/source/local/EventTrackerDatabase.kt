@@ -23,7 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Database(entities = [Category::class, Tag::class,Event::class,Profile::class,Comment::class,Like::class,EventTagCrossRef::class,ProfileEventCrossRef::class,SearchHistory::class],
-    version = 10)
+    version = 11)
 @TypeConverters(Converter::class)
 abstract class EventTrackerDatabase : RoomDatabase(){
 

@@ -97,7 +97,8 @@ fun AddEventScreen(
     navController: NavController,
     tagViewModel: TagViewModel = viewModel(),
     categoryViewModel: CategoryViewModel = viewModel(),
-    eventViewModel: EventViewModel
+    eventViewModel: EventViewModel,
+    ownerId:String
 ) {
     LaunchedEffect(Unit) {
         tagViewModel.resetTag()
@@ -407,6 +408,7 @@ fun AddEventScreen(
                                 return@EventTrackerAppPrimaryButton
                             } else {
                                 val event = Event(
+                                    ownerId = ownerId,
                                     name = eventName.value,
                                     detail = eventDetail.value,
                                     image = R.drawable.ic_launcher_background,

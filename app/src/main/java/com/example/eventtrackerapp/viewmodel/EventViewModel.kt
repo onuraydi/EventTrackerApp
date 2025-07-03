@@ -31,6 +31,9 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
 
     val eventWithTag:StateFlow<List<EventWithTags>> = _eventWithTag
 
+    private val _eventsByOwner = MutableStateFlow<List<Event>>(arrayListOf())
+    val eventsByOwner:StateFlow<List<Event>> = _eventsByOwner
+
     fun getAllEvents(){
         viewModelScope.launch(Dispatchers.IO) {
             _eventList.value = eventDao.getAll()
@@ -88,4 +91,12 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
     }
 
     val allEventsWithTags: Flow<List<EventWithTags>> = eventDao.getAllEventsWithTags()
+
+    fun getEventByOwner(ownerId:String){
+        viewModelScope.launch {
+            eventDao.getEventsByOwner(ownerId).collect{data->
+                _eventsByOwner.value = data
+            }
+        }
+    }
 }
