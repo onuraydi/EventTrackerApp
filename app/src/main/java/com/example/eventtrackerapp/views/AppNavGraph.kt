@@ -1,5 +1,6 @@
 package com.example.eventtrackerapp.views
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import com.example.eventtrackerapp.viewmodel.TagViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 
+@SuppressLint("NewApi")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AppNavGraph(
@@ -190,7 +192,7 @@ fun AppNavGraph(
             }
 
             composable("login_screen") {
-                LoginScreen(navController, authViewModel)
+                LoginScreen(navController, authViewModel, userPreferences)
             }
 
             composable("splash_screen"){
