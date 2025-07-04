@@ -25,11 +25,13 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
     private val _event = MutableStateFlow<Event>(Event())
 
     private val _eventWithTag = MutableStateFlow<List<EventWithTags>>(arrayListOf())
+    private val _eventWithTagItem = MutableStateFlow<EventWithTags>(EventWithTags(Event(), emptyList()))
 
     val eventList:StateFlow<List<Event>> = _eventList
     val event:StateFlow<Event> = _event
 
     val eventWithTag:StateFlow<List<EventWithTags>> = _eventWithTag
+    val eventWithTagItem:StateFlow<EventWithTags> = _eventWithTagItem
 
     private val _eventsByOwner = MutableStateFlow<List<Event>>(arrayListOf())
     val eventsByOwner:StateFlow<List<Event>> = _eventsByOwner
@@ -64,6 +66,15 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
         }
     }
 
+    fun getEventWithTagByEventId(eventId: Int)
+    {
+        viewModelScope.launch(Dispatchers.IO) {
+            _eventWithTagItem.value = eventDao.getEventWithTagsByEventId(eventId)
+        }
+    }
+
+
+
 
     fun getEventBySelectedTag(tagIds :List<Int>){
         viewModelScope.launch(Dispatchers.IO) {
@@ -85,6 +96,17 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
             val eventId = eventDao.add(event).toInt()
             val refs = tags.map { tag ->
                 EventTagCrossRef(eventId = eventId,tagId = tag.id)
+            }
+            eventDao.insertEventTags(refs)
+        }
+    }
+
+    fun updateEventWithTags(event: Event, tags: List<Tag>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            eventDao.update(event)
+            eventDao.deleteTagsForEvent(event.id)
+            val refs = tags.map { tag ->
+                EventTagCrossRef(eventId = event.id, tagId = tag.id)
             }
             eventDao.insertEventTags(refs)
         }

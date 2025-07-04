@@ -27,13 +27,16 @@ interface EventDao {
     suspend fun add(event: Event):Long
 
     @Update
-    suspend fun update(event: Event)
+    suspend fun update(event: Event):Int
 
     @Query("delete from events where id = :eventId")
     suspend fun delete(eventId: Int)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertEventTags(crossRef: List<EventTagCrossRef>)
+
+    @Update
+    suspend fun updateEventWithTags(crossRef: List<EventTagCrossRef>)
 
     @Transaction
     @Query("SELECT * FROM events")
@@ -42,6 +45,9 @@ interface EventDao {
     @Query("select * from events where ownerId = :ownerId")
     fun getEventsByOwner(ownerId:String):Flow<List<Event>>
 
+    @Transaction
+    @Query("SELECT * FROM events WHERE id = :eventId")
+    suspend fun getEventWithTagsByEventId(eventId:Int):EventWithTags
 
     // TODO ??
     @Transaction
@@ -52,4 +58,7 @@ interface EventDao {
     WHERE ETC.tagId IN (:tagIds)
 """)
     suspend fun getEventBySelectedTag(tagIds:List<Int>):List<EventWithTags>
+
+    @Query("DELETE FROM EventTagCrossRef WHERE eventId = :eventId")
+    suspend fun deleteTagsForEvent(eventId: Int)
 }
