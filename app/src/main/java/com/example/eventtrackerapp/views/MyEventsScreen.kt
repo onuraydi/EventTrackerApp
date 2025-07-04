@@ -163,7 +163,7 @@ fun MyEventsScreen(
                                             Icon(Icons.Default.Edit, "Edit")
                                         },
                                         onClick = {
-
+                                            navController.navigate("edit_event_screen/${it.id}")
                                         }
                                     )
                                     IconButton(

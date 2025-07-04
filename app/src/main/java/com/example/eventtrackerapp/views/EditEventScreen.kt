@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
@@ -71,7 +72,10 @@ import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 @ExperimentalLayoutApi
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditEventScreen(navController:NavHostController){
+fun EditEventScreen(
+    navController:NavHostController,
+    event: Event
+){
     Scaffold(Modifier
         .fillMaxSize(),
         topBar = {
@@ -91,12 +95,12 @@ fun EditEventScreen(navController:NavHostController){
                 .padding(innerPadding)
                 .fillMaxSize()
         ){
-            val eventName = rememberSaveable { mutableStateOf("Teknofest") }
-            val eventDetail = rememberSaveable { mutableStateOf("etkinlik ile ilgili detayların gözükeceği kısım") }
+            val eventName = rememberSaveable { mutableStateOf(event.name ?: "sssss88") }
+            val eventDetail = rememberSaveable { mutableStateOf(event.detail ?: "") }
             val selectedDate = rememberSaveable { mutableStateOf<Long?>(null) }
             val showModal = rememberSaveable { mutableStateOf(false)}
-            val eventDuration = rememberSaveable { mutableStateOf("3 saat") }
-            val eventLocation = rememberSaveable { mutableStateOf("İstanbul") }
+            val eventDuration = rememberSaveable { mutableStateOf(event.duration ?: "") }
+            val eventLocation = rememberSaveable { mutableStateOf(event.location ?: "") }
             val tagIsSelected = rememberSaveable { mutableStateOf(false) }
             val category = rememberSaveable { mutableStateOf("Teknoloji") }
             val selectedTagList = remember { mutableStateListOf<String>() }

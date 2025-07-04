@@ -216,8 +216,13 @@ fun AppNavGraph(
                 ParticipantsScreen(navController,participantsViewModel, eventId)
             }
 
-            composable("edit_event_screen") {
-                EditEventScreen(navController)
+            composable("edit_event_screen/{id}") {backStackEntry ->
+                val eventId = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: 0
+                LaunchedEffect(Unit) {
+                    eventViewModel.getEventById(eventId)
+                }
+                val event by eventViewModel.event.collectAsStateWithLifecycle()
+                EditEventScreen(navController,event)
             }
         }
     }
