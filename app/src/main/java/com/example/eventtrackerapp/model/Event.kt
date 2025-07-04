@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "events")
 data class Event(
+    @PrimaryKey(autoGenerate = true) var id:Int = 0,
     val ownerId:String? = "",
     var name:String? = "",
     var detail: String? = "",
@@ -20,5 +21,5 @@ data class Event(
 
     //TODO Yorumlar eklenecek
 ){
-    @PrimaryKey(autoGenerate = true) var id:Int = 0;
+
 }
