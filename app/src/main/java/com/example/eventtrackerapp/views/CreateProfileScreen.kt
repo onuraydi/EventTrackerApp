@@ -1,5 +1,15 @@
 package com.example.eventtrackerapp.views
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.provider.MediaStore
+import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,6 +53,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,15 +62,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.data.source.local.UserPreferences
 import com.example.eventtrackerapp.model.Category
@@ -69,6 +86,7 @@ import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import kotlinx.coroutines.launch
@@ -79,6 +97,7 @@ fun CreateProfileScreen(
     navController: NavController,
     tagViewModel: TagViewModel = viewModel(),
     profileViewModel: ProfileViewModel = viewModel(),
+    permissionViewModel: PermissionViewModel = viewModel(),
     userPreferences: UserPreferences,
     categoryWithTags:List<CategoryWithTag>,
     uid:String?="",
@@ -92,6 +111,37 @@ fun CreateProfileScreen(
     val isShow = rememberSaveable { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
+
+    //Media Permission
+    val context = LocalContext.current
+    val permission = permissionViewModel.getPermissionName()
+
+    val imageUri by permissionViewModel.profileImageUri.collectAsStateWithLifecycle()
+
+    //galeriye gidip fotoğraf seçmemizi sağlacyacak
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result->
+        if(result.resultCode == Activity.RESULT_OK && result.data != null){
+            //kullanıcı fotoğrafı seçtiyse ve gelen intent boş değilse
+            val data = result.data?.data
+            //kullanıcının seçtiği resmi viewModel
+            // tarafında doldurup burada imageUri ile aldık
+            permissionViewModel.setImageUri(data)
+        }
+
+    }
+
+    //izin olaylarını tutacak
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted->
+        if(granted){
+            openGallery(imagePickerLauncher)
+        }else{
+            Toast.makeText(context,"İzin kalıcı olarak reddedildi. Lütfen ayarlardan izin verin",Toast.LENGTH_LONG).show()
+        }
+    }
 
     EventTrackerAppTheme {
         Scaffold(
@@ -133,16 +183,35 @@ fun CreateProfileScreen(
                             .size(80.dp, 80.dp)
                             .border(border = BorderStroke(2.dp, Color.Black), shape = CircleShape)
                             .clickable {
-                            }
+                                requestPermission(
+                                    context = context,
+                                    permission = permission,
+                                    viewModel = permissionViewModel,
+                                    imagePickerLauncher = imagePickerLauncher,
+                                    permissionLauncher = permissionLauncher
+                                )
+                            },
                     ) {
-                        Image(
-                            modifier = Modifier
-                                .fillMaxSize(0.8f)
-                                .align(Alignment.Center)
-                                .padding(start = 5.dp),
-                            painter = painterResource(R.drawable.profile_photo_add_icon),
-                            contentDescription = "PhotoAdd",
+                        if(imageUri!=null){
+                            AsyncImage(
+                                model = imageUri,
+                                contentDescription = "Selected Photo",
+                                Modifier
+                                    .fillMaxSize(1f)
+                                    .align(Alignment.Center)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.FillBounds,
                             )
+                        }else{
+                            Image(
+                                painterResource(R.drawable.profile_photo_add_icon),
+                                modifier = Modifier
+                                    .fillMaxSize(1f)
+                                    .align(Alignment.Center)
+                                    .padding(start = 5.dp),
+                                contentDescription = "PhotoAdd",
+                            )
+                        }
                     }
 
                     Spacer(Modifier.padding(vertical = 5.dp))
@@ -274,43 +343,6 @@ fun CreateProfileScreen(
                         }
                     }
 
-                    /*Spacer(Modifier.padding(vertical = 5.dp))
-                    Box(
-                        Modifier
-                            .fillMaxWidth(0.9f)
-                            .wrapContentHeight()
-                            .defaultMinSize(minHeight = 80.dp)
-                            .heightIn(max = 150.dp)
-                            .verticalScroll(rememberScrollState())
-                            .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
-                    ) {
-                        FlowRow(
-                            Modifier.padding(5.dp),
-                            maxItemsInEachRow = 4,
-                        ) {
-                            selectedTag.forEach {tag->
-                                val isSelected = chosenTags.any { it.id == tag.id }
-
-                                FilterChip(
-                                    modifier = Modifier.padding(end = 3.dp),
-                                    label = { Text(tag.name?:"", fontSize = 12.sp, maxLines = 1) },
-                                    selected = isSelected,
-                                    onClick = {
-                                        if(isSelected){
-                                            tagViewModel.toggleTag(tag)
-                                            selectedCompleteTagList.remove(tag)
-                                        }else{
-                                            selectedCompleteTagList.add(tag)
-                                        }
-                                    },
-                                    trailingIcon = {
-                                        Icon(Icons.Default.Clear, "Clear")
-                                    }
-                                )
-                            }
-                        }
-                    }*/
-
                     Spacer(Modifier.padding(vertical = 12.dp))
 
                     if(isShow.value){
@@ -422,6 +454,33 @@ fun CreateProfileScreen(
     }
 }
 
+fun requestPermission(
+    context: Context,
+    permission:String,
+    viewModel: PermissionViewModel,
+    permissionLauncher:ManagedActivityResultLauncher<String,Boolean>,
+    imagePickerLauncher:ManagedActivityResultLauncher<Intent,ActivityResult>
+){
+    if(ContextCompat.checkSelfPermission(context,permission)!= PackageManager.PERMISSION_GRANTED){
+        //izin reddedildi, sebebini göster ve izin iste
+        if(viewModel.shouldShowRationale(context)){
+            Toast.makeText(context,"Fotoğraf yüklemek için galeri izni lazım",Toast.LENGTH_LONG).show()
+            permissionLauncher.launch(permission)
+        }else{
+            //sebebi gösterilmedi, izin iste
+            permissionLauncher.launch(permission)
+        }
+    }else{
+        //izin verildi
+        openGallery(imagePickerLauncher)
+    }
+}
+
+fun openGallery(launcher:ManagedActivityResultLauncher<Intent,ActivityResult>){
+    val intent = Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+    launcher.launch(intent)
+}
+
 @Preview(showBackground = true)
 @Composable
 fun Preview(){
@@ -429,3 +488,58 @@ fun Preview(){
 //        CreateProfileScreen()
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*Spacer(Modifier.padding(vertical = 5.dp))
+                    Box(
+                        Modifier
+                            .fillMaxWidth(0.9f)
+                            .wrapContentHeight()
+                            .defaultMinSize(minHeight = 80.dp)
+                            .heightIn(max = 150.dp)
+                            .verticalScroll(rememberScrollState())
+                            .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
+                    ) {
+                        FlowRow(
+                            Modifier.padding(5.dp),
+                            maxItemsInEachRow = 4,
+                        ) {
+                            selectedTag.forEach {tag->
+                                val isSelected = chosenTags.any { it.id == tag.id }
+
+                                FilterChip(
+                                    modifier = Modifier.padding(end = 3.dp),
+                                    label = { Text(tag.name?:"", fontSize = 12.sp, maxLines = 1) },
+                                    selected = isSelected,
+                                    onClick = {
+                                        if(isSelected){
+                                            tagViewModel.toggleTag(tag)
+                                            selectedCompleteTagList.remove(tag)
+                                        }else{
+                                            selectedCompleteTagList.add(tag)
+                                        }
+                                    },
+                                    trailingIcon = {
+                                        Icon(Icons.Default.Clear, "Clear")
+                                    }
+                                )
+                            }
+                        }
+                    }*/

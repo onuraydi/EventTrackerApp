@@ -26,6 +26,7 @@ import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.ExploreViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
+import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -45,6 +46,7 @@ fun AppNavGraph(
     likeViewModel: LikeViewModel = viewModel(),
     participantsViewModel: ParticipantsViewModel = viewModel(),
     exploreViewModel: ExploreViewModel = viewModel(),
+    permissionViewModel:PermissionViewModel = viewModel(),
     auth: FirebaseAuth,
     userPreferences: UserPreferences,
 ){
@@ -79,7 +81,7 @@ fun AppNavGraph(
                     .categoryWithTags.collectAsStateWithLifecycle(initialValue = emptyList())
                 val uid = auth.currentUser?.uid
                 val email = auth.currentUser?.email
-                CreateProfileScreen(navController,tagViewModel,profileViewModel,userPreferences,categoryWithTags,uid,email)
+                CreateProfileScreen(navController,tagViewModel,profileViewModel,permissionViewModel,userPreferences,categoryWithTags,uid,email)
             }
 
             composable("home") {backStackEntry ->
@@ -111,6 +113,7 @@ fun AppNavGraph(
                     tagViewModel,
                     categoryViewModel,
                     eventViewModel,
+                    permissionViewModel,
                     uid ?: ""
                 )
             }

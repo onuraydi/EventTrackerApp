@@ -1,11 +1,21 @@
 package com.example.eventtrackerapp.views
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
 import android.os.Build
+import android.provider.MediaStore
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -70,11 +80,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.model.EventWithTags
 import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
@@ -83,6 +95,7 @@ import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
+import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
@@ -97,7 +110,8 @@ fun AddEventScreen(
     navController: NavController,
     tagViewModel: TagViewModel = viewModel(),
     categoryViewModel: CategoryViewModel = viewModel(),
-    eventViewModel: EventViewModel,
+    eventViewModel: EventViewModel = viewModel(),
+    permissionViewModel: PermissionViewModel = viewModel(),
     ownerId:String
 ) {
     LaunchedEffect(Unit) {
@@ -112,6 +126,35 @@ fun AddEventScreen(
     val selectedCategoryName = remember { mutableStateOf("") }
 
     val events by eventViewModel.allEventsWithTags.collectAsState(initial = emptyList())
+
+    //TODO BU KISIM REFACTOR EDİLECEK: SEALED CLASS KULLANACAĞIM
+    //Media Permission
+    val permission = permissionViewModel.getPermissionName()
+
+    val imageUri by permissionViewModel.profileImageUri.collectAsState()
+
+    //galeriye gidip fotoğraf seçmemizi sağlayacak
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {result->
+        if(result.resultCode == Activity.RESULT_OK && result.data!=null){
+            //kullanıcı resim seçti ve gelen intent boş değilse
+            val data = result.data?.data
+            permissionViewModel.setImageUri(data)
+        }
+    }
+
+    //izin olaylarını ele alan launcher
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) {granted->
+        if(granted){
+            //kullanıcı izin verdi
+            goToGallery(imagePickerLauncher)
+        }else{
+            Toast.makeText(context,"İzin kalıcı olarak reddedildi. Lütfen ayarlardan izni verin",Toast.LENGTH_LONG).show()
+        }
+    }
 
     EventTrackerAppTheme {
         Scaffold(
@@ -172,16 +215,40 @@ fun AddEventScreen(
                     Spacer(Modifier.padding(vertical = 12.dp))
 
                     //Profil Fotoğrafı
-                    Icon(
-                        painter = painterResource(R.drawable.image_icon),
-                        contentDescription = "Add Image",
-                        modifier = Modifier
-                            .size(180.dp, 160.dp)
-                            .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
+                    Box(
+                        Modifier
+                            .size(180.dp,160.dp)
+                            .border(border = BorderStroke(2.dp, Color.Black), shape = RoundedCornerShape(12.dp))
                             .clickable {
-                                /*TODO(Buraya fotoğraf yükleme gelecek)*/
+                                doRequestPermission(
+                                    context = context,
+                                    permission = permission,
+                                    viewModel = permissionViewModel,
+                                    permissionLauncher = permissionLauncher,
+                                    imagePickerLauncher = imagePickerLauncher
+                                )
                             }
-                    )
+                    ){
+                        if(imageUri!=null){
+                            AsyncImage(
+                                model = imageUri,
+                                contentDescription = "Selected Photo",
+                                Modifier
+                                    .fillMaxSize(1f)
+                                    .align(Alignment.Center)
+                            )
+                        }else{
+                            Icon(
+                                painter = painterResource(R.drawable.image_icon),
+                                contentDescription = "Add Image",
+                                modifier = Modifier
+                                    .fillMaxSize(1f)
+                                    .align(Alignment.Center)
+                                    .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
+                            )
+                        }
+                    }
+
                     Spacer(Modifier.padding(vertical = 5.dp))
                     Text("Please add event photo")
 
@@ -434,6 +501,32 @@ fun AddEventScreen(
 
         }
     }
+}
+
+fun doRequestPermission(
+    context: Context,
+    permission:String,
+    viewModel: PermissionViewModel,
+    permissionLauncher:ManagedActivityResultLauncher<String,Boolean>,
+    imagePickerLauncher:ManagedActivityResultLauncher<Intent,ActivityResult>
+){
+    if(ContextCompat.checkSelfPermission(context,permission)!=PackageManager.PERMISSION_GRANTED){
+        //izin reddedildi
+        if(viewModel.shouldShowRationale(context)){
+            Toast.makeText(context,"Fotoğraf yüklemek için galeri izni lazım",Toast.LENGTH_LONG).show()
+            permissionLauncher.launch(permission)
+        }else{
+            permissionLauncher.launch(permission)
+        }
+    }else{
+        //izin verildi
+        goToGallery(imagePickerLauncher)
+    }
+}
+
+fun goToGallery(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>){
+    val intent = Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+    launcher.launch(intent)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
