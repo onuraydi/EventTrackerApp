@@ -84,13 +84,13 @@ fun AppNavGraph(
 
             composable("home") {backStackEntry ->
                 val uid = auth.currentUser?.uid!!
-                LaunchedEffect(Unit) {
+                LaunchedEffect(uid) {
                     profileViewModel.getById(uid)
                 }
 
                 val profile by profileViewModel.profile.collectAsStateWithLifecycle()
 
-                LaunchedEffect(Unit) {
+                LaunchedEffect(profile.selectedTagList) {
                     val tagIds = profile.selectedTagList?.map { it.id } ?: emptyList()
                     eventViewModel.getEventBySelectedTag(tagIds)
 
