@@ -67,7 +67,6 @@ import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 
 
-
 @SuppressLint("NewApi")
 @ExperimentalLayoutApi
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,8 +81,7 @@ fun EditEventScreen(
 ) {
     val context = LocalContext.current
 
-    // Kategori verisini güvenli şekilde yüklüyoruz
-    // Composable ilk oluşturulduğunda bir kez tetiklenir.
+    // Kategori verisini yükle
     LaunchedEffect(Unit) {
         categoryViewModel.getAllCategoryWithTags()
     }
@@ -91,32 +89,39 @@ fun EditEventScreen(
     // ViewModel'den state'ler
     val categoryId = rememberSaveable { mutableStateOf(eventWithTag.event.categoryId) }
     val categoryWithTags by categoryViewModel.categoryWithTags.collectAsState()
-    val category by categoryViewModel.category.collectAsStateWithLifecycle() // Kullanım amacını gözden geçirin, tüm kategoriler categoryWithTags içinde.
+    val category by categoryViewModel.category.collectAsStateWithLifecycle()
 
-    // Etkinliğin mevcut tag'ları ve seçilen tag'lar
-    val initialTags = remember { mutableStateListOf<Tag>().apply { addAll(eventWithTag.tags) } }
-    val chosenTags = remember { mutableStateListOf<Tag>().apply { addAll(initialTags) } }
+    // Seçili kategori adı ve tag'lar için state'ler
+    val selectedCategoryName = rememberSaveable { mutableStateOf("") }
+    val chosenTags = remember { mutableStateListOf<Tag>() }
 
+    // Kategori ve tag verisi geldiğinde state'leri güncelle
+    LaunchedEffect(categoryWithTags) {
+        if (categoryWithTags.isNotEmpty()) {
+            val selectedCategory = categoryWithTags.firstOrNull { it.category.id == eventWithTag.event.categoryId }
+            if (selectedCategory != null) {
+                selectedCategoryName.value = selectedCategory.category.name ?: ""
+                categoryId.value = selectedCategory.category.id
+                chosenTags.clear()
+                chosenTags.addAll(eventWithTag.tags)
+            }
+        }
+    }
+
+    // KategoriId veya categoryWithTags değişince, seçili kategoriye ait tag'ları güncelle
     val currentCategoryTags = remember(categoryId.value, categoryWithTags) {
         categoryWithTags.firstOrNull { it.category.id == categoryId.value }?.tags ?: emptyList()
     }
 
-    // Kategori adı null gelirse uygulama çökmemesi için güvenli şekilde al
-    val selectedCategoryName = rememberSaveable {
-        mutableStateOf(categoryWithTags.firstOrNull { it.category.id == categoryId.value }?.category?.name ?: "")
-    }
-
-    // KategoriId değiştiğinde kategori adını ve seçili tagları güncelle
-    // categoryWithTags değeri değiştiğinde de bu bloğun tetiklenmesini sağlayarak
-    // başlangıçtaki categoryWithTags yüklemesi tamamlandığında da selectedCategoryName'in güncellenmesini garanti ederiz.
+    // KategoriId veya categoryWithTags değişince, seçili kategori adı ve tag'ları güncelle
     LaunchedEffect(categoryId.value, categoryWithTags) {
-        selectedCategoryName.value = categoryWithTags.firstOrNull { it.category.id == categoryId.value }?.category?.name ?: ""
-
+        val selected = categoryWithTags.firstOrNull { it.category.id == categoryId.value }
+        selectedCategoryName.value = selected?.category?.name ?: ""
         if (categoryId.value != eventWithTag.event.categoryId) {
             chosenTags.clear()
         } else {
             chosenTags.clear()
-            chosenTags.addAll(initialTags)
+            chosenTags.addAll(eventWithTag.tags)
         }
         tagViewModel.resetTag()
     }
@@ -124,15 +129,13 @@ fun EditEventScreen(
     val isExpanded = rememberSaveable { mutableStateOf(false) }
 
     // Yükleme ekranı göster (kategori verisi gelmeden önce)
-    // Eğer categoryWithTags hala boşsa ve bu durum yükleniyor anlamına geliyorsa (örneğin ViewModel'den bir isLoading state'i ile kontrol edilebilir),
-    // yükleme göstergesini göstermeye devam et.
-    // Mevcut yapınızda doğrudan categoryWithTags'in boş olup olmadığını kontrol ediyoruz.
-    if (categoryWithTags.isEmpty()) { // Sadece categoryWithTags'e bağımlı hale getirildi
+    if (categoryWithTags.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
         return
     }
+
     EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -285,7 +288,7 @@ fun EditEventScreen(
 
                         OutlinedTextField(
                             modifier = Modifier.menuAnchor(),
-                            value = selectedCategoryName.value.toString(),
+                            value = selectedCategoryName.value,
                             onValueChange = {},
                             readOnly = true,
                             placeholder = {
@@ -331,7 +334,6 @@ fun EditEventScreen(
                     }
 
                     Spacer(Modifier.padding(vertical = 12.dp))
-                    /*TODO(BURADA KULLANILAN ROW VE BOX REFACTOR EDİLMELİ)*/
                     Text("Update event tag")
                     LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
                         items(currentCategoryTags) { tag ->
