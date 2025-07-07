@@ -1,5 +1,6 @@
 package com.example.eventtrackerapp.views
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -46,6 +47,7 @@ import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.BottomNavBar
 import com.example.eventtrackerapp.viewmodel.ExploreViewModel
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun ExploreScreen(
     eventList:List<Event>,

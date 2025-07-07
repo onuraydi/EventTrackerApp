@@ -143,15 +143,15 @@ fun CreateProfileScreen(
         }
     }
 
-    EventTrackerAppTheme(darkTheme = true) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                CenterAlignedTopAppBar(
+                CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
                     title = { Text(text = "Complete Your Profile", color = Color.White) },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    )
+
                 )
             }
         ) { innerPadding ->
@@ -452,7 +452,7 @@ fun CreateProfileScreen(
 
         }
     }
-}
+
 
 fun requestPermission(
     context: Context,

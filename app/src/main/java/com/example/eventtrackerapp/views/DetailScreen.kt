@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -41,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -103,11 +105,10 @@ fun DetailScreen(
 
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
-                ),
+            CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                titleContentColor = MaterialTheme.colorScheme.primary,
+            ),
                 title = {
                     Text("Etkinlik Detay Sayfası", fontSize = 25.sp)
                 },
@@ -176,7 +177,7 @@ fun DetailScreen(
                             Image(
                                 // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
                                 painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                                Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
+                                Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer), shape = CircleShape)
                                     .size(60.dp))
                             Spacer(Modifier.padding(start = 10.dp))
                         }
@@ -188,7 +189,7 @@ fun DetailScreen(
                             Image(
                                 // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
                                 painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                                Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
+                                Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer), shape = CircleShape)
                                     .size(60.dp))
                             Spacer(Modifier.padding(start = 10.dp))
                         }
@@ -230,7 +231,7 @@ fun DetailScreen(
                 Spacer(Modifier.padding(top = 20.dp))
                 Row(Modifier
                     .fillMaxWidth()
-                    .border(BorderStroke(2.dp, color = Color.Black), shape = RoundedCornerShape(8.dp)),
+                    .border(BorderStroke(2.dp, color = MaterialTheme.colorScheme.primaryContainer), shape = RoundedCornerShape(8.dp)),
 
                     ) {
                     Row(Modifier.weight(1f),horizontalArrangement = Arrangement.Center){
