@@ -18,7 +18,7 @@ object CategoryMapper {
         )
     }
 
-    fun toEntityLis(firebaseCategories: List<FirebaseCategory>):List<Category>{
+    fun toEntityList(firebaseCategories: List<FirebaseCategory>):List<Category>{
         return firebaseCategories.map { toEntity(it) }
     }
 
