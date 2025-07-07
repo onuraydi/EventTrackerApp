@@ -193,10 +193,10 @@ fun ProfileScreen(
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun ProfilePreview() {
-    EventTrackerAppTheme {
-//        ProfileScreen();
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun ProfilePreview() {
+//    EventTrackerAppTheme {
+////        ProfileScreen();
+//    }
+//}

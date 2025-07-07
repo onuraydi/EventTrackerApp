@@ -286,10 +286,10 @@ fun DetailScreen(
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun DetailScreenPreview() {
-    EventTrackerAppTheme {
-        //DetailScreen();
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun DetailScreenPreview() {
+//    EventTrackerAppTheme {
+//        //DetailScreen();
+//    }
+//}

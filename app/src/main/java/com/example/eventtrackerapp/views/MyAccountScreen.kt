@@ -228,10 +228,10 @@ fun MyAccountScreen(
 
 
 
-@Preview(showBackground = true)
-@Composable
-fun MyAccountScreenPrev() {
-    EventTrackerAppTheme {
-        //MyAccountScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun MyAccountScreenPrev() {
+//    EventTrackerAppTheme {
+//        //MyAccountScreen()
+//    }
+//}

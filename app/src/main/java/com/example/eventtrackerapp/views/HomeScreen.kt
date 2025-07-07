@@ -172,10 +172,10 @@ private fun EventRow(event:Event,navController: NavController, commentList:Flow<
     }
 
 
-@Preview(showBackground = true)
-@Composable
-fun HomePreview() {
-    EventTrackerAppTheme {
-       // HomeScreen(eventList = listOf());
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun HomePreview() {
+//    EventTrackerAppTheme {
+//       // HomeScreen(eventList = listOf());
+//    }
+//}

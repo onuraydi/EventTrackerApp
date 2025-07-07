@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
-            EventTrackerAppTheme {
+            EventTrackerAppTheme(darkTheme = true) {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                 ) { contentPadding ->

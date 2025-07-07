@@ -154,10 +154,10 @@ fun LoginScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewLoginScreen(){
-    EventTrackerAppTheme {
-//        LoginScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewLoginScreen(){
+//    EventTrackerAppTheme {
+////        LoginScreen()
+//    }
+//}

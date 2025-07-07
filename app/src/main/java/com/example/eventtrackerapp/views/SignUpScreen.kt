@@ -249,10 +249,10 @@ private fun painterResource(isObscure:Boolean):Painter
     return icon
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    EventTrackerAppTheme {
-//        SignUpScreen();
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun GreetingPreview() {
+//    EventTrackerAppTheme {
+////        SignUpScreen();
+//    }
+//}

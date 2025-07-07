@@ -68,7 +68,7 @@ fun PreferencesScreen(
     profile:Profile,
     profileViewModel: ProfileViewModel = viewModel()
 ){
-    EventTrackerAppTheme {
+    EventTrackerAppTheme(darkTheme = true) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -230,10 +230,10 @@ fun CardRow(
     }
 
 }
-@Preview(showBackground = true)
-@Composable
-fun ShowMyScreen(){
-    EventTrackerAppTheme {
-        //PreferencesScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun ShowMyScreen(){
+//    EventTrackerAppTheme {
+//        //PreferencesScreen()
+//    }
+//}

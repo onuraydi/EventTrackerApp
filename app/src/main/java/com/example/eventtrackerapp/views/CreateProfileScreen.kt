@@ -143,7 +143,7 @@ fun CreateProfileScreen(
         }
     }
 
-    EventTrackerAppTheme {
+    EventTrackerAppTheme(darkTheme = true) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -481,13 +481,13 @@ fun openGallery(launcher:ManagedActivityResultLauncher<Intent,ActivityResult>){
     launcher.launch(intent)
 }
 
-@Preview(showBackground = true)
-@Composable
-fun Preview(){
-    EventTrackerAppTheme {
-//        CreateProfileScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun Preview(){
+//    EventTrackerAppTheme {
+////        CreateProfileScreen()
+//    }
+//}
 
 
 

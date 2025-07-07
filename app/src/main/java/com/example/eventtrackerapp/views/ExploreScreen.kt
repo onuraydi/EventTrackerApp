@@ -55,7 +55,7 @@ fun ExploreScreen(
     val searchResult by exploreViewModel.searchList.collectAsStateWithLifecycle()
     val historyList by exploreViewModel.historyList.collectAsStateWithLifecycle()
 
-    EventTrackerAppTheme {
+    EventTrackerAppTheme(darkTheme = true) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {BottomNavBar(navController = navController)}
@@ -243,10 +243,10 @@ fun SimpleSearchBar(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewScreen(){
-    EventTrackerAppTheme {
-        //ExploreScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewScreen(){
+//    EventTrackerAppTheme {
+//        //ExploreScreen()
+//    }
+//}

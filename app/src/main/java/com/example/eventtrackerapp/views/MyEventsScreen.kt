@@ -70,7 +70,7 @@ fun MyEventsScreen(
     val showDialog = remember { mutableStateOf(false) }
     val selectedEventId = remember { mutableIntStateOf(0) }
 
-    EventTrackerAppTheme {
+    EventTrackerAppTheme(darkTheme = true) {
         Scaffold(
             Modifier.fillMaxSize(),
             topBar = {
@@ -242,10 +242,10 @@ fun ShowAlertDialog(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewMyScreen(){
-    EventTrackerAppTheme {
-        //MyEventsScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewMyScreen(){
+//    EventTrackerAppTheme {
+//        //MyEventsScreen()
+//    }
+//}

@@ -152,11 +152,11 @@ fun user(image:Int,nameSurname:String, email:String)
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun previewParticipans()
-{
-    EventTrackerAppTheme {
-        //ParticipantsScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun previewParticipans()
+//{
+//    EventTrackerAppTheme {
+//        //ParticipantsScreen()
+//    }
+//}

@@ -155,8 +155,8 @@ fun AddEventScreen(
             Toast.makeText(context,"İzin kalıcı olarak reddedildi. Lütfen ayarlardan izni verin",Toast.LENGTH_LONG).show()
         }
     }
-
-    EventTrackerAppTheme {
+    // TODO DEĞİŞECEK
+    EventTrackerAppTheme(darkTheme = true) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -632,10 +632,10 @@ fun convertMillisToDate(millis:Long) :String{
     return formatter.format(Date(millis))
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewPage(){
-    EventTrackerAppTheme {
-        //AddEventScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewPage(){
+//    EventTrackerAppTheme {
+//        //AddEventScreen()
+//    }
+//}
