@@ -2,6 +2,7 @@ package com.example.eventtrackerapp.data.source.local
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.example.eventtrackerapp.model.roommodels.Category
@@ -12,10 +13,13 @@ import kotlinx.coroutines.flow.Flow
 interface CategoryDao {
 
     @Query("SELECT * FROM categories")
-    suspend fun getAll():List<Category>
+    fun getAll():Flow<List<Category>>
 
     @Query("SELECT * FROM categories WHERE id = :id ")
-    suspend fun getById(id:Int): Category
+    fun getById(id:String): Flow<Category>
+
+    @Query("SELECT * FROM categories")
+    suspend fun getAllCategoriesOnce():List<Category>
 
     @Transaction
     @Query("SELECT * FROM categories")
@@ -23,4 +27,7 @@ interface CategoryDao {
 
     @Insert
     suspend fun insert(category: Category):Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllCategories(categories: List<Category>)
 }
