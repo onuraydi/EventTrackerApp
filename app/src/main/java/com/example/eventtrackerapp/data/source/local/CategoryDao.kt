@@ -4,8 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
-import com.example.eventtrackerapp.model.Category
-import com.example.eventtrackerapp.model.CategoryWithTag
+import com.example.eventtrackerapp.model.roommodels.Category
+import com.example.eventtrackerapp.model.roommodels.CategoryWithTag
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -15,7 +15,7 @@ interface CategoryDao {
     suspend fun getAll():List<Category>
 
     @Query("SELECT * FROM categories WHERE id = :id ")
-    suspend fun getById(id:Int):Category
+    suspend fun getById(id:Int): Category
 
     @Transaction
     @Query("SELECT * FROM categories")

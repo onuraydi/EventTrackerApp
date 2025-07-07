@@ -4,14 +4,14 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
-import com.example.eventtrackerapp.model.Comment
-import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
+import com.example.eventtrackerapp.model.roommodels.Comment
+import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CommentDao {
     @Insert
-    suspend fun insertComment(comment:Comment)
+    suspend fun insertComment(comment: Comment)
 
     @Transaction
     @Query("SELECT * FROM comments WHERE eventId = :eventId")

@@ -1,7 +1,6 @@
-package com.example.eventtrackerapp.model
+package com.example.eventtrackerapp.model.roommodels
 
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 

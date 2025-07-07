@@ -2,7 +2,7 @@ package com.example.eventtrackerapp.data.source.local
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.example.eventtrackerapp.model.Event
+import com.example.eventtrackerapp.model.roommodels.Event
 import kotlinx.coroutines.flow.Flow
 
 @Dao

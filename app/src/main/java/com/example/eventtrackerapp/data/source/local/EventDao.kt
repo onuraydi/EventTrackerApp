@@ -1,17 +1,14 @@
 package com.example.eventtrackerapp.data.source.local
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import com.example.eventtrackerapp.model.Event
-import com.example.eventtrackerapp.model.EventTagCrossRef
-import com.example.eventtrackerapp.model.EventWithTags
-import com.example.eventtrackerapp.model.Tag
-import com.google.android.gms.auth.api.accounttransfer.AuthenticatorTransferCompletionStatus
+import com.example.eventtrackerapp.model.roommodels.Event
+import com.example.eventtrackerapp.model.roommodels.EventTagCrossRef
+import com.example.eventtrackerapp.model.roommodels.EventWithTags
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -21,7 +18,7 @@ interface EventDao {
     suspend fun getAll():List<Event>
 
     @Query("Select * FROM events WHERE id = :id")
-    suspend fun getById(id:Int):Event
+    suspend fun getById(id:Int): Event
 
     @Insert
     suspend fun add(event: Event):Long
@@ -47,7 +44,7 @@ interface EventDao {
 
     @Transaction
     @Query("SELECT * FROM events WHERE id = :eventId")
-    suspend fun getEventWithTagsByEventId(eventId:Int):EventWithTags
+    suspend fun getEventWithTagsByEventId(eventId:Int): EventWithTags
 
     // TODO ??
     @Transaction

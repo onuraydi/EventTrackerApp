@@ -4,9 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
-import com.example.eventtrackerapp.model.Category
-import com.example.eventtrackerapp.model.Profile
-import com.example.eventtrackerapp.model.Tag
+import com.example.eventtrackerapp.model.roommodels.Profile
+import com.example.eventtrackerapp.model.roommodels.Tag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +33,7 @@ class ProfileViewModel(application: Application): AndroidViewModel(application) 
         }
     }
 
-    fun insertProfile(profile:Profile){
+    fun insertProfile(profile: Profile){
         viewModelScope.launch(Dispatchers.IO) {
             profileDao.add(profile)
         }
@@ -59,13 +58,13 @@ class ProfileViewModel(application: Application): AndroidViewModel(application) 
         updateProfile(updatedProfile)
     }
 
-    fun updateProfile(profile:Profile){
+    fun updateProfile(profile: Profile){
         viewModelScope.launch(Dispatchers.IO) {
             profileDao.update(profile)
         }
     }
 
-    fun deleteProfile(profile:Profile){
+    fun deleteProfile(profile: Profile){
         viewModelScope.launch(Dispatchers.IO) {
             profileDao.delete(profile)
         }

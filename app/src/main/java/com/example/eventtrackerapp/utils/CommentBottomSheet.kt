@@ -33,7 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,11 +45,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
-import com.example.eventtrackerapp.model.Event
+import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import kotlinx.coroutines.flow.Flow
-import org.w3c.dom.Comment
 
 
 // TODO yorum kısmı dinamikleştirildikten sonra buradaki parametreler vb düzeltilecek

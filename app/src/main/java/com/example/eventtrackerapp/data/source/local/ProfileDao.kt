@@ -5,7 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.example.eventtrackerapp.model.Profile
+import com.example.eventtrackerapp.model.roommodels.Profile
 
 @Dao
 interface ProfileDao {

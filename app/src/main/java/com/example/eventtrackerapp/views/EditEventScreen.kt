@@ -58,10 +58,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.Event
-import com.example.eventtrackerapp.model.EventWithTags
-import com.example.eventtrackerapp.model.Tag
-import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.model.roommodels.Event
+import com.example.eventtrackerapp.model.roommodels.EventWithTags
+import com.example.eventtrackerapp.model.roommodels.Tag
 import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
