@@ -25,6 +25,11 @@ interface CategoryDao {
     @Query("SELECT * FROM categories")
     fun getCategoryWithTags(): Flow<List<CategoryWithTag>>
 
+    @Transaction
+    @Query("SELECT * FROM categories WHERE id = :categoryId")
+    fun getCategoryWithTagsById(categoryId:String):Flow<CategoryWithTag>
+
+
     @Insert
     suspend fun insert(category: Category):Long
 
