@@ -7,12 +7,14 @@ data class CommentWithProfileAndEvent(
     @Embedded val comment: Comment,
     @Relation(
         parentColumn = "profileId",
-        entityColumn = "id"
+        entityColumn = "id",
+        entity = Profile::class
     )
     val profile: Profile,
     @Relation(
         parentColumn = "eventId",
-        entityColumn = "id"
+        entityColumn = "id",
+        entity = Event::class
     )
     val event: Event
 ) {

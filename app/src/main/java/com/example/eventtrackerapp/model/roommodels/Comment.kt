@@ -24,9 +24,10 @@ import androidx.room.PrimaryKey
     indices = [Index("eventId"), Index("profileId")]
 )
 data class Comment(
-    @PrimaryKey(autoGenerate = true) val id:Int = 0,
+    @PrimaryKey
+    val id:String = "",
     val profileId:String = "",
-    val eventId:Int = 0,
+    val eventId:String = "",
     val comment:String = ""
 ) {
 }
