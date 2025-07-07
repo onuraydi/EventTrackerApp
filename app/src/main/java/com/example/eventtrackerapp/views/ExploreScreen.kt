@@ -55,7 +55,6 @@ fun ExploreScreen(
     val searchResult by exploreViewModel.searchList.collectAsStateWithLifecycle()
     val historyList by exploreViewModel.historyList.collectAsStateWithLifecycle()
 
-    EventTrackerAppTheme(darkTheme = true) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {BottomNavBar(navController = navController)}
@@ -138,7 +137,6 @@ fun ExploreScreen(
             }
         }
     }
-}
 
 @Composable
 fun MyImage(event:Event,navController: NavController){

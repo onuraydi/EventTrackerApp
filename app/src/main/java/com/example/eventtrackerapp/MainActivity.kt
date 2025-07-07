@@ -33,21 +33,23 @@ import androidx.navigation.compose.rememberNavController
 import com.example.eventtrackerapp.data.source.local.UserPreferences
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.viewmodel.EventViewModel
+import com.example.eventtrackerapp.viewmodel.ThemeViewModel
 import com.example.eventtrackerapp.views.AppNavGraph
 import com.example.eventtrackerapp.views.HomeScreen
 import com.google.firebase.auth.FirebaseAuth
 
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalLayoutApi::class)
 
-    val viewModel: EventViewModel by viewModels<EventViewModel>()
+    private val themeViewModel: ThemeViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
-            EventTrackerAppTheme(darkTheme = true) {
+            val isDark = themeViewModel.isDarkTheme.collectAsState().value
+
+            EventTrackerAppTheme(darkTheme = isDark) {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                 ) { contentPadding ->

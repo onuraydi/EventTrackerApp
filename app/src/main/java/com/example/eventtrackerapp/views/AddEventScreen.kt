@@ -156,7 +156,6 @@ fun AddEventScreen(
         }
     }
     // TODO DEĞİŞECEK
-    EventTrackerAppTheme(darkTheme = true) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -501,7 +500,6 @@ fun AddEventScreen(
 
         }
     }
-}
 
 fun doRequestPermission(
     context: Context,

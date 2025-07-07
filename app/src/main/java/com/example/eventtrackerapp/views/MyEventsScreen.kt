@@ -70,7 +70,6 @@ fun MyEventsScreen(
     val showDialog = remember { mutableStateOf(false) }
     val selectedEventId = remember { mutableIntStateOf(0) }
 
-    EventTrackerAppTheme(darkTheme = true) {
         Scaffold(
             Modifier.fillMaxSize(),
             topBar = {
@@ -193,7 +192,7 @@ fun MyEventsScreen(
 
         }
     }
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -202,16 +201,16 @@ fun ShowAlertDialog(
     onDismissRequest: ()->Unit,
     dialogTitle:String,
     dialogText:String
-){
+) {
     BasicAlertDialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties()
-    ){
+    ) {
         Surface(
             shape = MaterialTheme.shapes.medium,
             tonalElevation = 6.dp
         ) {
-            Column(Modifier.padding(16.dp)){
+            Column(Modifier.padding(16.dp)) {
                 Text(text = dialogTitle, style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.padding(vertical = 12.dp))
                 Text(text = dialogText)
@@ -224,7 +223,7 @@ fun ShowAlertDialog(
                         onClick = {
                             onDismissRequest()
                         }
-                    ){
+                    ) {
                         Text("İptal")
                     }
 
@@ -233,7 +232,7 @@ fun ShowAlertDialog(
                             onConfirmation()
                             onDismissRequest()
                         }
-                    ){
+                    ) {
                         Text("Sil", color = Color.Red)
                     }
                 }

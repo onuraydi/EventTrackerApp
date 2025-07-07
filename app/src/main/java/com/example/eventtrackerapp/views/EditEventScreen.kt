@@ -136,7 +136,6 @@ fun EditEventScreen(
         return
     }
 
-    EventTrackerAppTheme(darkTheme = true) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -444,4 +443,3 @@ fun EditEventScreen(
 
         }
     }
-}
