@@ -41,17 +41,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
+import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.BottomNavBar
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
+import com.example.eventtrackerapp.viewmodel.ProfileViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 
 @Composable
-fun ProfileScreen(navController: NavController)
+fun ProfileScreen(
+    navController: NavController,
+    authViewModel:AuthViewModel,
+    profile:Profile
+    )
 {
+
+
+
     Scaffold(Modifier
         .fillMaxSize(),
         bottomBar = { BottomNavBar(navController = navController)}
@@ -70,8 +83,8 @@ fun ProfileScreen(navController: NavController)
 
                 Spacer(Modifier.padding(10.dp))
 
-                Text("isim - Soyisim", fontSize = 20.sp)
-                Text("isimsoyisim@gmail.com", fontSize = 14.sp, fontWeight = FontWeight.Light)
+                Text("${profile.fullName}", fontSize = 20.sp)
+                Text("${profile.email}", fontSize = 14.sp, fontWeight = FontWeight.Light)
 
             // Hesabım
 
@@ -152,7 +165,12 @@ fun ProfileScreen(navController: NavController)
 
             ExtendedFloatingActionButton(
                 onClick = {
-                    /*TODO(Firebase Auth Logout)*/
+                    authViewModel.logOut()
+                    navController.navigate("login_screen"){
+                        popUpTo("profile"){
+                            inclusive = true
+                        }
+                    }
             },
                 Modifier
                 .fillMaxWidth()
@@ -175,10 +193,10 @@ fun ProfileScreen(navController: NavController)
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun ProfilePreview() {
-    EventTrackerAppTheme {
-//        ProfileScreen();
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun ProfilePreview() {
+//    EventTrackerAppTheme {
+////        ProfileScreen();
+//    }
+//}

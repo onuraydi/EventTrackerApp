@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
@@ -29,7 +30,10 @@ fun BottomNavBar(navController: NavController){
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    NavigationBar(windowInsets = NavigationBarDefaults.windowInsets, modifier = Modifier) {
+    NavigationBar(windowInsets = NavigationBarDefaults.windowInsets, modifier = Modifier,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.primary)
+    {
         NavigationBarItem(
             selected = currentRoute == "home",
             icon ={ Icon(Icons.Filled.Home,"Home") },

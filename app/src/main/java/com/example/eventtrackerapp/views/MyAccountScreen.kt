@@ -45,14 +45,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun MyAccountScreen(navController:NavController) {
+fun MyAccountScreen(
+    navController:NavController,
+    profile:Profile,
+    profileViewModel: ProfileViewModel
+) {
     Scaffold(modifier = Modifier
         .fillMaxSize(),
         topBar = {
@@ -83,11 +89,11 @@ fun MyAccountScreen(navController:NavController) {
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            var fullNameState = rememberSaveable { mutableStateOf("") }
-            var userNameState = rememberSaveable { mutableStateOf("") }
-            var emailState = rememberSaveable { mutableStateOf("deneme@gmail.com") }
-            var passwordState = rememberSaveable { mutableStateOf("deneme1234") }
-            var gender = rememberSaveable { mutableStateOf("") }
+            var fullNameState = rememberSaveable { mutableStateOf(profile.fullName!!) }
+            var userNameState = rememberSaveable { mutableStateOf(profile.userName!!) }
+            var emailState = rememberSaveable { mutableStateOf(profile.email!!) }
+            var passwordState = rememberSaveable { mutableStateOf("") }  // burası düzeltilececk
+            var gender = rememberSaveable { mutableStateOf(profile.gender!!) }
             var isExpanded = rememberSaveable { mutableStateOf(false) }
             var profilePhotoState =
                 rememberSaveable { mutableStateOf(R.drawable.profile_photo_add_icon) }
@@ -146,17 +152,19 @@ fun MyAccountScreen(navController:NavController) {
                     expanded = isExpanded.value,
                     onExpandedChange = { isExpanded.value = it }
                 ) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .menuAnchor(),
-                        value = gender.value,
-                        onValueChange = {},
-                        placeholder = { Text("Gender") },
-                        readOnly = true,
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded.value)
-                        },
-                    )
+                    gender.value?.let {
+                        OutlinedTextField(
+                            modifier = Modifier
+                                .menuAnchor(),
+                            value = it,
+                            onValueChange = {},
+                            placeholder = { Text("Gender") },
+                            readOnly = true,
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded.value)
+                            },
+                        )
+                    }
 
                     ExposedDropdownMenu(
                         expanded = isExpanded.value,
@@ -200,7 +208,18 @@ fun MyAccountScreen(navController:NavController) {
             }
             Spacer(Modifier.padding(vertical = 20.dp))
             Box(Modifier.align(Alignment.BottomCenter).padding(bottom = 20.dp)){
-                EventTrackerAppPrimaryButton("Complete") { }
+                EventTrackerAppPrimaryButton("Complete") {
+                    val updatedProfile = Profile(
+                        id = profile.id,
+                        email = profile.email,
+                        fullName = fullNameState.value,
+                        userName = userNameState.value,
+                        gender = gender.value,
+                        photo = profilePhotoState.value
+                    )
+                    profileViewModel.updateProfile(updatedProfile)
+                    navController.popBackStack()
+                }
             }
         }
     }
@@ -209,10 +228,10 @@ fun MyAccountScreen(navController:NavController) {
 
 
 
-@Preview(showBackground = true)
-@Composable
-fun MyAccountScreenPrev() {
-    EventTrackerAppTheme {
-        //MyAccountScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun MyAccountScreenPrev() {
+//    EventTrackerAppTheme {
+//        //MyAccountScreen()
+//    }
+//}

@@ -44,10 +44,10 @@ fun SplashScreen(navController: NavController)
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun SplashScreenPreview() {
-    EventTrackerAppTheme {
-//        SplashScreen();
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun SplashScreenPreview() {
+//    EventTrackerAppTheme {
+////        SplashScreen();
+//    }
+//}

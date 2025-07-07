@@ -158,10 +158,10 @@ private fun Notification(text:String){
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun NotificationPreview() {
-    EventTrackerAppTheme {
-//        NotificationScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun NotificationPreview() {
+//    EventTrackerAppTheme {
+////        NotificationScreen()
+//    }
+//}

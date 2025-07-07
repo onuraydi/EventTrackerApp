@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.eventtrackerapp.views
 
 import androidx.compose.foundation.Image
@@ -24,15 +26,24 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,18 +54,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyEventsScreen(navController: NavController){
-    EventTrackerAppTheme {
+fun MyEventsScreen(
+    navController: NavController,
+    myEvents:List<Event>,
+    deleteEvent:(id:Int)->Unit
+){
+    val showDialog = remember { mutableStateOf(false) }
+    val selectedEventId = remember { mutableIntStateOf(0) }
+
         Scaffold(
             Modifier.fillMaxSize(),
             topBar = {
-                CenterAlignedTopAppBar(
+                CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
                     title = {Text("My Events")},
                     navigationIcon = {
                         IconButton(
@@ -74,18 +97,12 @@ fun MyEventsScreen(navController: NavController){
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                /*TODO VERİLER SENKRON GELDİKTEN SONRA NAVİGASYONLAR YAPILACAK*/
-                val eventList : List<Map<String,String>> = listOf(
-                    mapOf("isim" to "EtkinlikasdasdAdsaD ASDADas1", "detay" to "Detay1"),
-                    mapOf("isim" to "Etkinlik2", "detay" to "Detay2"),
-                    mapOf("isim" to "Etkinlik3", "detay" to "Detay3"),
-                )
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(eventList){
+                    items(myEvents){
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -106,7 +123,7 @@ fun MyEventsScreen(navController: NavController){
                                         .clip(CircleShape)
                                         .background(Color.Red)
                                         .size(60.dp),
-                                    painter = painterResource(R.drawable.ic_launcher_foreground),
+                                    painter = painterResource(it.image),
                                     contentDescription = "Profile",
                                 )
 
@@ -117,13 +134,13 @@ fun MyEventsScreen(navController: NavController){
                                         .padding(start = 12.dp)
                                 ) {
                                     Text(
-                                        text = it["isim"] ?: "",
+                                        text = it.name ?: "",
                                         fontSize = 18.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
-                                        text = it["detay"] ?: "",
+                                        text = it.detail ?: "",
                                         fontSize = 16.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -141,36 +158,97 @@ fun MyEventsScreen(navController: NavController){
                                             Icon(Icons.Default.Info, "Detail")
                                         },
                                         onClick = {
-
+                                            navController.navigate("detail/${it.id}")
                                         }
                                     )
                                     IconButton(
                                         content = {
                                             Icon(Icons.Default.Edit, "Edit")
                                         },
-                                        onClick = {}
+                                        onClick = {
+                                            navController.navigate("edit_event_screen/${it.id}")
+                                        }
                                     )
                                     IconButton(
                                         content = {
-                                            Icon(Icons.Default.Delete, "Edit")
+                                            Icon(Icons.Default.Delete, "Delete")
                                         },
-                                        onClick = {}
+                                        onClick = {
+                                            selectedEventId.intValue = it.id
+                                            showDialog.value = true
+                                        }
                                     )
                                 }
                             }
                         }
                     }
                 }
+                if(showDialog.value){
+                    ShowAlertDialog(
+                        dialogTitle = "Etkinlik Silinecek",
+                        dialogText = "Eğer onaylarsan eklediğin etkinliği silmiş olacaksın." +
+                                " Sildiğin etkinliği bir daha geri alamazsın",
+                        onConfirmation = {deleteEvent(selectedEventId.value)},
+                        onDismissRequest = {showDialog.value = false}
+                    )
+                }
             }
 
         }
     }
-}
 
-@Preview(showBackground = true)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PreviewMyScreen(){
-    EventTrackerAppTheme {
-        //MyEventsScreen()
+fun ShowAlertDialog(
+    onConfirmation:()->Unit,
+    onDismissRequest: ()->Unit,
+    dialogTitle:String,
+    dialogText:String
+) {
+    BasicAlertDialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties()
+    ) {
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            tonalElevation = 6.dp
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Text(text = dialogTitle, style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.padding(vertical = 12.dp))
+                Text(text = dialogText)
+                Spacer(Modifier.padding(vertical = 16.dp))
+                Row(
+                    Modifier.fillMaxWidth(1f),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(
+                        onClick = {
+                            onDismissRequest()
+                        }
+                    ) {
+                        Text("İptal")
+                    }
+
+                    TextButton(
+                        onClick = {
+                            onConfirmation()
+                            onDismissRequest()
+                        }
+                    ) {
+                        Text("Sil", color = Color.Red)
+                    }
+                }
+            }
+        }
     }
 }
+
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewMyScreen(){
+//    EventTrackerAppTheme {
+//        //MyEventsScreen()
+//    }
+//}

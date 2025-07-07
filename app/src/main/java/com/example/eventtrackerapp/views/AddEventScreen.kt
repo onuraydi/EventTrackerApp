@@ -1,7 +1,21 @@
 package com.example.eventtrackerapp.views
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
+import android.os.Build
+import android.provider.MediaStore
+import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -43,10 +57,12 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,45 +77,94 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.example.eventtrackerapp.model.EventWithTags
+import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
+import com.example.eventtrackerapp.viewmodel.EventViewModel
+import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
+import kotlinx.coroutines.flow.first
+import java.time.LocalDate
+import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddEventScreen(
     navController: NavController,
     tagViewModel: TagViewModel = viewModel(),
     categoryViewModel: CategoryViewModel = viewModel(),
-    insert : (Event) -> Unit
+    eventViewModel: EventViewModel = viewModel(),
+    permissionViewModel: PermissionViewModel = viewModel(),
+    ownerId:String
 ) {
     LaunchedEffect(Unit) {
         tagViewModel.resetTag()
     }
+    
     val categoryWithTags by categoryViewModel.categoryWithTags.collectAsState()
     val selectedTag by tagViewModel.selectedTag.collectAsStateWithLifecycle()
     val chosenTags by tagViewModel.chosenTags.collectAsStateWithLifecycle()
 
+    val context = LocalContext.current
     val selectedCategoryName = remember { mutableStateOf("") }
 
-    EventTrackerAppTheme {
+    val events by eventViewModel.allEventsWithTags.collectAsState(initial = emptyList())
+
+    //TODO BU KISIM REFACTOR EDİLECEK: SEALED CLASS KULLANACAĞIM
+    //Media Permission
+    val permission = permissionViewModel.getPermissionName()
+
+    val imageUri by permissionViewModel.profileImageUri.collectAsState()
+
+    //galeriye gidip fotoğraf seçmemizi sağlayacak
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {result->
+        if(result.resultCode == Activity.RESULT_OK && result.data!=null){
+            //kullanıcı resim seçti ve gelen intent boş değilse
+            val data = result.data?.data
+            permissionViewModel.setImageUri(data)
+        }
+    }
+
+    //izin olaylarını ele alan launcher
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) {granted->
+        if(granted){
+            //kullanıcı izin verdi
+            goToGallery(imagePickerLauncher)
+        }else{
+            Toast.makeText(context,"İzin kalıcı olarak reddedildi. Lütfen ayarlardan izni verin",Toast.LENGTH_LONG).show()
+        }
+    }
+    // TODO DEĞİŞECEK
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                CenterAlignedTopAppBar(
+                CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
                     title = { Text("Add Event", fontSize = 25.sp) },
                     navigationIcon = {
                         Icon(
@@ -122,11 +187,23 @@ fun AddEventScreen(
                 // Detayı,Etkinlik Süresi,Resim,
                 // Konum,Websitesi,Kategori, Tag(AltKategori)
                 val eventName = rememberSaveable { mutableStateOf("") }
+                val nameError = rememberSaveable{mutableStateOf(false)}
+
                 val eventDetail = rememberSaveable { mutableStateOf("") }
+                val detailError = rememberSaveable{mutableStateOf(false)}
+
                 val selectedDate = rememberSaveable { mutableStateOf<Long?>(null) }
+                val dateError = rememberSaveable{mutableStateOf(false)}
+
                 val showModal = rememberSaveable { mutableStateOf(false) }
+
                 val eventDuration = rememberSaveable { mutableStateOf("") }
+                val durationError = rememberSaveable{mutableStateOf(false)}
+
                 val eventLocation = rememberSaveable { mutableStateOf("") }
+                val locationError = rememberSaveable{mutableStateOf(false)}
+
+                val categoryError = rememberSaveable{mutableStateOf(false)}
 
                 val categoryId = rememberSaveable{ mutableStateOf(0) }
                 val isExpanded = rememberSaveable{ mutableStateOf(false)}
@@ -141,76 +218,127 @@ fun AddEventScreen(
                 ) {
                     Spacer(Modifier.padding(vertical = 12.dp))
 
-                    Icon(
-                        painter = painterResource(R.drawable.image_icon),
-                        contentDescription = "Add Image",
-                        modifier = Modifier
-                            .size(180.dp, 160.dp)
-                            .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
+                    //Profil Fotoğrafı
+                    Box(
+                        Modifier
+                            .size(180.dp,160.dp)
+                            .border(border = BorderStroke(2.dp, Color.Black), shape = RoundedCornerShape(12.dp))
                             .clickable {
-                                /*TODO(Buraya fotoğraf yükleme gelecek)*/
+                                doRequestPermission(
+                                    context = context,
+                                    permission = permission,
+                                    viewModel = permissionViewModel,
+                                    permissionLauncher = permissionLauncher,
+                                    imagePickerLauncher = imagePickerLauncher
+                                )
                             }
-                    )
+                    ){
+                        if(imageUri!=null){
+                            AsyncImage(
+                                model = imageUri,
+                                contentDescription = "Selected Photo",
+                                Modifier
+                                    .fillMaxSize(1f)
+                                    .align(Alignment.Center)
+                            )
+                        }else{
+                            Icon(
+                                painter = painterResource(R.drawable.image_icon),
+                                contentDescription = "Add Image",
+                                modifier = Modifier
+                                    .fillMaxSize(1f)
+                                    .align(Alignment.Center)
+                                    .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
+                            )
+                        }
+                    }
+
                     Spacer(Modifier.padding(vertical = 5.dp))
                     Text("Please add event photo")
 
+                    //Event Name
                     Spacer(Modifier.padding(vertical = 12.dp))
-                    EventTrackerAppOutlinedTextField(
+                    EventTrackerAppAuthTextField(
                         txt = "Event Name",
                         state = eventName,
-                        leadingIcon = {
-                            Icon(Icons.Default.Edit,"Add Event")
+                        onValueChange = {
+                            eventName.value = it
+                            nameError.value = eventName.value.isBlank()
                         },
+                        isError = nameError.value,
+                        supportingText = {
+                            if(nameError.value){
+                                Text("Bu alanı boş bırakamazsınız")
+                            }
+                        }
                     )
 
-                    Spacer(Modifier.padding(vertical = 12.dp))
-                    EventTrackerAppOutlinedTextField(
+                    //Event Detail
+                    Spacer(Modifier.padding(vertical = 8.dp))
+                    EventTrackerAppAuthTextField(
+                        modifier = Modifier.heightIn(min = 120.dp, max = 200.dp),
                         txt = "Event Detail",
                         state = eventDetail,
-                        leadingIcon = {
-                            Icon(Icons.Default.Info,"Event Detail")
+                        onValueChange = {
+                            eventDetail.value = it
+                            detailError.value = eventDetail.value.isBlank()
                         },
-
+                        isError = detailError.value,
+                        supportingText = {
+                            if(detailError.value){
+                                Text("Bu alanı boş bırakamazsınız")
+                            }
+                        },
+                        isSingleLine = false
                     )
 
-                    Spacer(Modifier.padding(vertical = 12.dp))
+                    //Event Date
+                    Spacer(Modifier.padding(vertical = 8.dp))
+                    ShowDateModal(Modifier, selectedDate, showModal, dateError,context)
 
-                    ShowDateModal(Modifier,selectedDate, showModal)
-
-                    Spacer(Modifier.padding(vertical = 12.dp))
-
-                    EventTrackerAppOutlinedTextField(
+                    //Event Duration
+                    Spacer(Modifier.padding(vertical = 8.dp))
+                    EventTrackerAppAuthTextField(
                         txt = "Event Duration",
                         state = eventDuration,
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(R.drawable.clock_icon),
-                                contentDescription = "Clock"
-                            )
+                        onValueChange = {
+                            eventDuration.value = it
+                            durationError.value = eventDuration.value.isBlank()
+                        },
+                        isError = durationError.value,
+                        supportingText = {
+                            if(durationError.value){
+                                Text("Bu alanı boş bırakamazsınız")
+                            }
                         }
                     )
 
-                    Spacer(Modifier.padding(vertical = 12.dp))
-
-                    EventTrackerAppOutlinedTextField(
+                    //Event Location
+                    Spacer(Modifier.padding(vertical = 8.dp))
+                    EventTrackerAppAuthTextField(
                         txt = "Event Location",
                         state = eventLocation,
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.LocationOn,
-                                "Location"
-                            )
+                        onValueChange = {
+                            eventLocation.value = it
+                            locationError.value = eventLocation.value.isBlank()
+                        },
+                        isError = locationError.value,
+                        supportingText = {
+                            if(locationError.value){
+                                Text("Bu alanı boş bırakamazsınız")
+                            }
                         }
                     )
 
-                    Spacer(Modifier.padding(vertical = 12.dp))
-
+                    //Select Category
+                    Spacer(Modifier.padding(vertical = 8.dp))
                     ExposedDropdownMenuBox(
                         expanded = isExpanded.value,
                         onExpandedChange = {
                             isExpanded.value = it
                         }
                     ) {
+
                         OutlinedTextField(
                             modifier = Modifier.menuAnchor(),
                             value = selectedCategoryName.value,
@@ -227,20 +355,30 @@ fun AddEventScreen(
                                     painter = painterResource(R.drawable.category_icon),
                                     contentDescription = "Category"
                                 )
+                            },
+                            isError = categoryError.value,
+                            supportingText = {
+                                if(categoryError.value){
+                                    Text("Bu alanı boş bırakamazsınız")
+                                }
                             }
                         )
 
                         ExposedDropdownMenu(
                             expanded = isExpanded.value,
-                            onDismissRequest = { isExpanded.value = false}//bu sayede menü kapanacak
-                        ) {
+                            onDismissRequest = {
+                                isExpanded.value = false
+                            }
+                        )
+                        {
                             categoryWithTags.forEach{
                                 DropdownMenuItem(
                                     text = {Text("${it.category.name}")},
                                     onClick = {
+                                        selectedCategoryName.value = it.category.name ?: ""
+                                        categoryError.value = selectedCategoryName.value.isBlank()
                                         isExpanded.value = false
                                         categoryId.value = it.category.id
-                                        selectedCategoryName.value = it.category.name ?: ""
                                         tagViewModel.updateSelectedCategoryTags(it)
                                     }
                                 )
@@ -323,32 +461,82 @@ fun AddEventScreen(
                     EventTrackerAppPrimaryButton(
                         text = "Add Event",
                         onClick = {
-                            val event = Event(
-                                name = eventName.value,
-                                detail = eventDetail.value,
-                                image = R.drawable.ic_launcher_background,
-                                date = selectedDate.value,
-                                duration = eventDuration.value,
-                                location = eventLocation.value,
-                                likeCount = 0,
-                                categoryId = categoryId.value
-                                //participants = arrayListOf(),
+                            if (
+                                eventName.value.isBlank() ||
+                                eventDetail.value.isBlank() ||
+                                eventDuration.value.isBlank() ||
+                                eventLocation.value.isBlank() ||
+                                selectedCategoryName.value.isBlank() ||
+                                selectedDate.value == null ||
+                                chosenTags.isEmpty()
+                            ) {
+                                nameError.value = eventName.value.isBlank()
+                                detailError.value = eventDetail.value.isBlank()
+                                durationError.value = eventDuration.value.isBlank()
+                                locationError.value = eventLocation.value.isBlank()
+                                dateError.value = selectedDate.value == null
+                                categoryError.value = selectedCategoryName.value.isBlank()
+                                return@EventTrackerAppPrimaryButton
+                            } else {
+                                val event = Event(
+                                    ownerId = ownerId,
+                                    name = eventName.value,
+                                    detail = eventDetail.value,
+                                    image = R.drawable.ic_launcher_background,
+                                    date = selectedDate.value,
+                                    duration = eventDuration.value,
+                                    location = eventLocation.value,
+                                    likeCount = 0,
+                                    categoryId = categoryId.value,
+
+                                    //participants = arrayListOf(),
 //                                category = Category(),
 //                                tagList = arrayListOf()
-                            )
-                            insert(event) // Insert the event using the provided function
-                        }
-                    )
+                                )
+                                eventViewModel.insertEventWithTags(event = event, tags = chosenTags)
+
+
+                                println("etkinlik tagları"+events)
+                                navController.popBackStack()
+                            }
+                        })
                 }
             }
 
         }
     }
+
+fun doRequestPermission(
+    context: Context,
+    permission:String,
+    viewModel: PermissionViewModel,
+    permissionLauncher:ManagedActivityResultLauncher<String,Boolean>,
+    imagePickerLauncher:ManagedActivityResultLauncher<Intent,ActivityResult>
+){
+    if(ContextCompat.checkSelfPermission(context,permission)!=PackageManager.PERMISSION_GRANTED){
+        //izin reddedildi
+        if(viewModel.shouldShowRationale(context)){
+            Toast.makeText(context,"Fotoğraf yüklemek için galeri izni lazım",Toast.LENGTH_LONG).show()
+            permissionLauncher.launch(permission)
+        }else{
+            permissionLauncher.launch(permission)
+        }
+    }else{
+        //izin verildi
+        goToGallery(imagePickerLauncher)
+    }
 }
 
+fun goToGallery(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>){
+    val intent = Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+    launcher.launch(intent)
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DatePickerModal(
+    context: Context,
     onDateSelected: (Long?)->Unit,
     onDismiss: ()-> Unit
 ) {
@@ -359,8 +547,15 @@ private fun DatePickerModal(
         confirmButton = {
             TextButton(
                 onClick = {
-                    onDateSelected(datePickerState.selectedDateMillis)
-                    onDismiss()
+                    val selectedDate = datePickerState.selectedDateMillis
+                    val currentDate = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+                    if(selectedDate!=null && selectedDate >= currentDate){
+                        onDateSelected(selectedDate)
+                        onDismiss()
+                    }else{
+                        Toast.makeText(context,"Geçersiz tarih seçimi",Toast.LENGTH_LONG).show()
+                    }
                 }
             ){
                 Text("OK")
@@ -378,23 +573,33 @@ private fun DatePickerModal(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ShowDateModal(
     modifier: Modifier = Modifier,
     dateState : MutableState<Long?>,
-    modalState : MutableState<Boolean>
+    modalState : MutableState<Boolean>,
+    dateErrorState: MutableState<Boolean>,
+    context: Context
 ){
+
 
     OutlinedTextField(
         value = dateState.value?.let{ convertMillisToDate(it) } ?: "",
-        onValueChange = { },
+        onValueChange = {},
         readOnly = true,
-        label = {Text("DOB")},
+        label = {Text("Event Date")},
         placeholder = {
             Text("MM/DD/YYYY")
         },
         leadingIcon = {
             Icon(Icons.Default.DateRange,"Select Date")
+        },
+        isError = dateErrorState.value,
+        supportingText = {
+            if(dateErrorState.value){
+                Text("Bu alanı boş bırakamazsınız")
+            }
         },
         modifier = modifier
             .pointerInput(dateState.value) {
@@ -412,8 +617,10 @@ fun ShowDateModal(
 
     if(modalState.value){
         DatePickerModal(
+            context = context,
             onDateSelected = {
                 dateState.value = it
+                dateErrorState.value = it == null
             },
             onDismiss = {
                 modalState.value = false
@@ -428,10 +635,10 @@ fun convertMillisToDate(millis:Long) :String{
     return formatter.format(Date(millis))
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewPage(){
-    EventTrackerAppTheme {
-        //AddEventScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewPage(){
+//    EventTrackerAppTheme {
+//        //AddEventScreen()
+//    }
+//}
