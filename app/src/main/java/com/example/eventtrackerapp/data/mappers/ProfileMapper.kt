@@ -17,7 +17,7 @@ object ProfileMapper {
             allTags.find { it.id == tagId }
         }
 
-        val addedEventIds = emptyList<Event>()  // TODO BU KISIM REPOSİTORY'DE YÖNETİLECEK <String> ??
+        val addedEventIds = emptyList<String>()
 
         return Profile(
             id = firebaseProfile.id,
@@ -28,7 +28,7 @@ object ProfileMapper {
             fullName = firebaseProfile.fullName,
             selectedCategoryList = selectedCategories,
             selectedTagList = selectedTags,
-            addedEvents = addedEventIds
+            addedEventIds = addedEventIds
         )
     }
 

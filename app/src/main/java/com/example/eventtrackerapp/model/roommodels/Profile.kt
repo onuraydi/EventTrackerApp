@@ -15,6 +15,6 @@ data class Profile(
     val selectedCategoryList: List<Category> = arrayListOf(),
     val selectedTagList:List<Tag> = arrayListOf(),
     val photo:String = "",
-    val addedEvents:List<Event> = arrayListOf(),
+    val addedEventIds:List<String> = arrayListOf(),
     ){
 }

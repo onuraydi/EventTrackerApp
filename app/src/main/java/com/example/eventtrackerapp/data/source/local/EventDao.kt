@@ -20,6 +20,9 @@ interface EventDao {
     @Query("Select * FROM events WHERE id = :id")
     suspend fun getById(id:Int): Event
 
+    @Query("SELECT * FROM events")
+    suspend fun getAllEventOnce():List<Event>
+
     @Insert
     suspend fun add(event: Event):Long
 
