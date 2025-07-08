@@ -41,7 +41,11 @@ data class FirebaseEvent(
 
     @get:PropertyName("likeCount")
     @set:PropertyName("likeCount")
-    var likeCount:Int = 0
+    var likeCount:Int = 0,
+
+    @get:PropertyName("tagIds")
+    @set:PropertyName("tagIds")
+    var tagIds:Map<String,Boolean> = emptyMap()
 ) {
-    constructor():this("","","","",0,"","","","",0)
+    constructor():this("","","","",0,"","","","",0, emptyMap())
 }

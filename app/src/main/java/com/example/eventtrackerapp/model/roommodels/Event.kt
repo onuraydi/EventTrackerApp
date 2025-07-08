@@ -36,6 +36,7 @@ data class Event(
     var categoryId:String = "",
     var imageUrl:String = "",
     var likeCount:Int = 0,
+    var tagIds:String = ""
 ){
 
 }
