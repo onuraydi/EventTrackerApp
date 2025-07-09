@@ -51,33 +51,41 @@ fun ExploreScreen(
     navController:NavController,
     exploreViewModel: ExploreViewModel = viewModel()
 ){
+
     val searchResult by exploreViewModel.searchList.collectAsStateWithLifecycle()
     val historyList by exploreViewModel.historyList.collectAsStateWithLifecycle()
 
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            bottomBar = {BottomNavBar(navController = navController)}
+            bottomBar =
+            {
+                BottomNavBar(navController = navController)
+            }
+
         ) { innerPadding ->
 
             val query = rememberSaveable { mutableStateOf("") }
             val active = rememberSaveable { mutableStateOf(false) }
-
             val displayedEvents = if(query.value.trim().isEmpty()) eventList else searchResult
 
             Column(
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier
+                    .padding(innerPadding)
             ) {
+
                 SimpleSearchBar(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 5.dp),
                     query = query.value,
-                    onQueryChange = {
+                    onQueryChange =
+                    {
                         query.value = it
                         exploreViewModel.searchEvents(it)
                     },
                     active = active.value,
-                    onActiveChange = {
+                    onActiveChange =
+                    {
                         active.value = it
                     },
                     onSearch = {
@@ -90,17 +98,26 @@ fun ExploreScreen(
                         active.value = false
                     },
                     placeHolder = { Text("Search") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, "Search")
+                    leadingIcon =
+                    {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search"
+                        )
                     },
-                    trailingIcon = {
+                    trailingIcon =
+                    {
                         if (active.value) {
                             Icon(
-                                Icons.Default.Clear, "Clear",
-                                modifier = Modifier.clickable {
-                                    if (query.value.isNotEmpty()) {
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear",
+                                modifier = Modifier.clickable
+                                {
+                                    if (query.value.isNotEmpty())
+                                    {
                                         query.value = ""
-                                    } else {
+                                    } else
+                                    {
                                         active.value = false
                                     }
                                 },
@@ -108,7 +125,8 @@ fun ExploreScreen(
                         }
                     },
                     searchResult = searchResult,
-                    onHistoryClick = {
+                    onHistoryClick =
+                    {
                         query.value = it
                         exploreViewModel.searchEvents(it)
                         exploreViewModel.insertHistory(it)
@@ -116,7 +134,8 @@ fun ExploreScreen(
                     },
                     searchHistoryList = historyList.map{it.keyword},
                     navController = navController,
-                    deleteItem = {
+                    deleteItem =
+                    {
                         exploreViewModel.deleteHistoryItem(it)
                     }
                 )
@@ -127,8 +146,10 @@ fun ExploreScreen(
                     columns = StaggeredGridCells.Fixed(2),
                     verticalItemSpacing = 8.dp,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    content = {
-                        items(displayedEvents){
+                    content =
+                    {
+                        items(displayedEvents)
+                        {
                             MyImage(it,navController)
                         }
                     }
@@ -150,7 +171,8 @@ fun MyImage(event:Event,navController: NavController){
                     Color.Black
                 )
             )
-            .clickable {
+            .clickable
+            {
                 navController.navigate("detail/${event.id}")
             },
         painter = painterResource(event.image),
@@ -216,7 +238,7 @@ fun SimpleSearchBar(
                                 .clickable {
                                     deleteItem(historyItem)
                                 }
-                            )
+                        )
                     }
                 }
             }
@@ -231,7 +253,9 @@ fun SimpleSearchBar(
                                 navController.navigate("detail/${event.id}")
                             }
                     ){
-                        Icon(painterResource(R.drawable.baseline_event_24),"HistoryItem")
+                        Icon(
+                            painter = painterResource(R.drawable.baseline_event_24),
+                            contentDescription = "HistoryItem")
                         Text(event.name ?: "", modifier = Modifier.padding(start = 4.dp))
                     }
                 }
@@ -239,11 +263,3 @@ fun SimpleSearchBar(
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewScreen(){
-//    EventTrackerAppTheme {
-//        //ExploreScreen()
-//    }
-//}
