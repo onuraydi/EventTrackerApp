@@ -25,7 +25,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -33,11 +32,9 @@ import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.Authentication.SignUpRequest
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.data.source.local.UserPreferences
-import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
-import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
-import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedButton
-import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
-import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.EventTrackerAppAuthTextField
+import com.example.eventtrackerapp.common.EventTrackerAppOutlinedButton
+import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
 
 @Composable
 fun SignUpScreen(
@@ -249,10 +246,10 @@ private fun painterResource(isObscure:Boolean):Painter
     return icon
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    EventTrackerAppTheme {
-//        SignUpScreen();
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun GreetingPreview() {
+//    EventTrackerAppTheme {
+////        SignUpScreen();
+//    }
+//}

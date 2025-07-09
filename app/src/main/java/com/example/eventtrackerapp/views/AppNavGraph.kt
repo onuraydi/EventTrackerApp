@@ -29,6 +29,7 @@ import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
+import com.example.eventtrackerapp.viewmodel.ThemeViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 
@@ -47,6 +48,7 @@ fun AppNavGraph(
     participantsViewModel: ParticipantsViewModel = viewModel(),
     exploreViewModel: ExploreViewModel = viewModel(),
     permissionViewModel:PermissionViewModel = viewModel(),
+    themeViewModel: ThemeViewModel = viewModel(),
     auth: FirebaseAuth,
     userPreferences: UserPreferences,
 ){
@@ -181,7 +183,10 @@ fun AppNavGraph(
 
                 val profile by profileViewModel.profile.collectAsStateWithLifecycle()
 
-                PreferencesScreen(navController,profile,profileViewModel)
+                val isDark = themeViewModel.isDarkTheme.collectAsState().value
+
+
+                PreferencesScreen(navController,profile,profileViewModel,isDark,themeViewModel)
             }
 
             composable("my_events"){

@@ -6,13 +6,11 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,21 +19,18 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W500
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.model.EventWithTags
-import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
-import com.example.eventtrackerapp.utils.BottomNavBar
-import com.example.eventtrackerapp.utils.CommentBottomSheet
+import com.example.eventtrackerapp.common.BottomNavBar
+import com.example.eventtrackerapp.common.CommentBottomSheet
+import com.example.eventtrackerapp.common.EventTrackerTopAppBar
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
-import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import kotlinx.coroutines.flow.Flow
 import java.io.File
@@ -55,28 +50,45 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-            ),
-                actions = {
-                    IconButton(onClick = {navController.navigate("notification")}) {
-                        Icon(Icons.Filled.Notifications, contentDescription = null)
-                    }
-                },
+
+        topBar =
+        {
+            EventTrackerTopAppBar(
+                title = "Home",
                 modifier = Modifier,
-                title = {
-                    Text(text = "Ana Sayfa")
-                })
+                showBackButton = false,
+                actions = {
+                    IconButton(
+                        onClick = {navController.navigate("notification")}
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Notifications,
+                            contentDescription = "Notifications"
+                        )
+                    }
+                }
+            )
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = {navController.navigate("addEvent")}) {
-                Icon(Icons.Filled.Add, null)
+
+        floatingActionButton =
+        {
+            FloatingActionButton(
+                onClick = { navController.navigate("addEvent") })
+            {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Add Event"
+                )
             }
         },
 
-        bottomBar = {BottomNavBar(navController = navController)}
+        bottomBar =
+        {
+            BottomNavBar(
+                navController = navController
+            )
+        }
+
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -87,7 +99,7 @@ fun HomeScreen(
 
             items(eventList)
             {
-                var commentList = commentViewModel.getComments(eventId = it.event.id)
+                val commentList = commentViewModel.getComments(eventId = it.event.id)
                 EventRow(it.event, navController,commentList,commentViewModel,profileId,likeViewModel)
             }
         }
@@ -96,12 +108,9 @@ fun HomeScreen(
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-private fun EventRow(event:Event,navController: NavController, commentList:Flow<List<CommentWithProfileAndEvent>>,commentViewModel:CommentViewModel,profileId:String,likeViewModel: LikeViewModel)
-{
-    var eventViewModel: EventViewModel = viewModel()
+private fun EventRow(event:Event,navController: NavController, commentList:Flow<List<CommentWithProfileAndEvent>>,commentViewModel:CommentViewModel,profileId:String,likeViewModel: LikeViewModel) {
 
-
-    var showBottomSheet by remember { mutableStateOf(false ) }
+    var showBottomSheet by remember { mutableStateOf(false) }
 
     val likeCount by likeViewModel.getLikeCount(event.id).collectAsState(initial = 0)
     val isLiked by likeViewModel.isLikedByUser(event.id, profileId).collectAsState(initial = false)
@@ -109,95 +118,127 @@ private fun EventRow(event:Event,navController: NavController, commentList:Flow<
     val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(initial = 0)
 
 
-    Column (modifier = Modifier
-        .fillMaxWidth()
-        .padding(20.dp)
-        .border(BorderStroke(2.dp, Color.Black), shape = RoundedCornerShape(20.dp))
-        )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp)
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .border(
+                BorderStroke(
+                    width = 2.dp,
+                    color = Color.Black  // TODO Belki bu kısımdaki renk de dark mode için standartlaştırılabilir.
+                ),
+                shape = RoundedCornerShape(20.dp),
+            )
+    )
     {
-        if(event.image!=null){
-            val imageFile = event.image?.let { File(it) }
-            if(imageFile!=null && imageFile.exists()){
-                AsyncImage(
-                    model = imageFile,
-                    null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(220.dp)
-                        .align(Alignment.CenterHorizontally)
-                        .clickable { navController.navigate("detail/${event.id}") }
-                        .clip(RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            }else{
-                Image(
-                    painter = painterResource(R.drawable.ic_launcher_background),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(220.dp)
-                        .align(Alignment.CenterHorizontally)
-                        .clickable { navController.navigate("detail/${event.id}") }
-                        .clip(RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            }
-        }
+
+        Image(
+            painter = painterResource(event.image),
+            contentDescription = "Event Image",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(220.dp)
+                .align(Alignment.CenterHorizontally)
+                .clickable { navController.navigate("detail/${event.id}") }
+                .clip(RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)),
+            contentScale = ContentScale.Crop
+        )
 
         Row {
-            if(isLiked == false)
-            {
-                Icon(Icons.Filled.FavoriteBorder,null, modifier = Modifier
-                    .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
-                    .clickable {
-                        likeViewModel.likeEvent(eventId = event.id,profileId);
-                    })
-                Text(text = "${likeCount}",Modifier.align(Alignment.CenterVertically))
-            }else
-            {
-                Icon(Icons.Filled.Favorite,null, modifier = Modifier
-                    .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
-                    .clickable {
-                        likeViewModel.unlikeEvent(event.id,profileId)
-                    })
-                Text(text = "${likeCount}",Modifier.align(Alignment.CenterVertically))
+            if (!isLiked) {
+                Icon(
+                    imageVector = Icons.Filled.FavoriteBorder,
+                    contentDescription = "Like",
+                    modifier = Modifier
+                        .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
+                        .clickable
+                        {
+                            likeViewModel.likeEvent(
+                                eventId = event.id,
+                                profileId = profileId
+                            )
+                        }
+                )
+
+                Text(
+                    text = likeCount.toString(),
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription = "Liked",
+                    modifier = Modifier
+                        .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
+                        .clickable
+                        {
+                            likeViewModel.unlikeEvent(
+                                eventId = event.id,
+                                profileId = profileId
+                            )
+                        }
+                )
+
+                Text(
+                    text = likeCount.toString(),
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                )
             }
 
-            Icon(painterResource(R.drawable.baseline_chat_bubble_outline_24),null, modifier = Modifier
-                .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end = 5.dp)
-                .clickable { showBottomSheet = true })
-            Text(text = "${commentCount}",Modifier.align(Alignment.CenterVertically))
-            Icon(Icons.Filled.Share ,null, modifier = Modifier
-                .padding(15.dp)
-                .clickable {  })
+            Icon(
+                painter = painterResource(R.drawable.baseline_chat_bubble_outline_24),
+                contentDescription = "Comments",
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
+                    .clickable
+                    {
+                        showBottomSheet = true
+                    }
+            )
+            Text(
+                text = commentCount.toString(),
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+            )
+
+            Icon(
+                imageVector = Icons.Filled.Share,
+                contentDescription = "Share",
+                modifier = Modifier
+                    .padding(15.dp)
+                    .clickable { }
+            )
         }
 
 
         event.name?.let {
-            Text(text= it, modifier = Modifier
-                .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
-                .clickable {  navController.navigate("detail/${event.id}") },
-                fontWeight = W500, fontSize = 20.sp
+            Text(
+                text = it,
+                modifier = Modifier
+                    .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
+                    .clickable
+                    {
+                        navController.navigate("detail/${event.id}")
+                    },
+                fontWeight = W500,
+                fontSize = 20.sp
             )
         }
 
         CommentBottomSheet(
             showSheet = showBottomSheet,
-            onDismiss = {showBottomSheet = false},
+            onDismiss = { showBottomSheet = false },
             comments = commentList,
             currentUserImage = painterResource(R.drawable.ic_launcher_foreground),
             commentViewModel = commentViewModel,
             profileId = profileId,
             eventId = event.id
-            )
-        }
-    }
-
-
-@Preview(showBackground = true)
-@Composable
-fun HomePreview() {
-    EventTrackerAppTheme {
-       // HomeScreen(eventList = listOf());
+        )
     }
 }

@@ -36,9 +36,11 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
@@ -60,19 +62,24 @@ import com.example.eventtrackerapp.model.Category
 import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
+import com.example.eventtrackerapp.viewmodel.ThemeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun PreferencesScreen(
     navController: NavController,
     profile:Profile,
-    profileViewModel: ProfileViewModel = viewModel()
+    profileViewModel: ProfileViewModel = viewModel(),
+    isDark:Boolean,
+    themeViewModel: ThemeViewModel
 ){
-    EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                CenterAlignedTopAppBar(
+                CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
                     title = {Text("Preferences")},
                     navigationIcon = {
                         IconButton(
@@ -105,20 +112,27 @@ fun PreferencesScreen(
                 ) {
 
                     //Bildirimler
-                    CardRow("Notifications") {
-                        Icon(Icons.Default.Notifications,
-                            "Notification",
-                            Modifier.size(32.dp)
-                        )
-                    }
+                    // TODO SONRA AÇILACAK
+//                    CardRow("Notifications") {
+//                        Icon(Icons.Default.Notifications,
+//                            "Notification",
+//                            Modifier.size(32.dp)
+//                        )
+//                    }
 
                     //DarkMode
-                    CardRow("Dark Mode"){
-                        Icon(painter = painterResource(R.drawable.dark_mode_icon),
-                            "DarkMode",
-                            Modifier.size(32.dp)
-                        )
-                    }
+                    CardRow(
+                        preference = "Dark Mode",
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(R.drawable.dark_mode_icon),
+                                contentDescription = "DarkMode",
+                                modifier = Modifier.size(32.dp)
+                            )
+                        },
+                        isChecked = isDark,
+                        onCheckedChange = { themeViewModel.toogleTheme(it) }
+                    )
 
                     Spacer(Modifier.padding(vertical = 12.dp))
 
@@ -190,50 +204,49 @@ fun PreferencesScreen(
 
         }
     }
-}
 
 @Composable
 fun CardRow(
-    preference:String,
-    leadingIcon: @Composable (() ->Unit)? = null,
-)
-{
-    val isChecked = rememberSaveable { mutableStateOf(false) }
+    preference: String,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
     Card(
-        Modifier
+        modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 72.dp),
         elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(0.5.dp,Color.LightGray)
+        border = BorderStroke(0.5.dp, Color.LightGray)
     ) {
         Row(
-            Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(horizontal = 10.dp)
                 .heightIn(min = 72.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            leadingIcon?.let { it() }
+            leadingIcon?.invoke()
 
-            Text(text = preference, fontSize = 21.sp, modifier = Modifier.weight(1f))
-
-            Switch(
-                checked = isChecked.value,
-                onCheckedChange = {
-                    isChecked.value = it
-                }
+            Text(
+                text = preference,
+                fontSize = 21.sp,
+                modifier = Modifier.weight(1f)
             )
 
+            Switch(
+                checked = isChecked,
+                onCheckedChange = onCheckedChange
+            )
         }
-
-    }
-
-}
-@Preview(showBackground = true)
-@Composable
-fun ShowMyScreen(){
-    EventTrackerAppTheme {
-        //PreferencesScreen()
     }
 }
+//@Preview(showBackground = true)
+//@Composable
+//fun ShowMyScreen(){
+//    EventTrackerAppTheme {
+//        //PreferencesScreen()
+//    }
+//}

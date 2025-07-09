@@ -46,9 +46,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -59,10 +56,12 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -79,7 +78,6 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -89,12 +87,8 @@ import com.example.eventtrackerapp.model.Event
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.eventtrackerapp.model.EventWithTags
-import com.example.eventtrackerapp.model.Tag
-import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
-import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
-import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
-import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.EventTrackerAppAuthTextField
+import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
@@ -164,12 +158,14 @@ fun AddEventScreen(
             Toast.makeText(context,"İzin kalıcı olarak reddedildi. Lütfen ayarlardan izni verin",Toast.LENGTH_LONG).show()
         }
     }
-
-    EventTrackerAppTheme {
+    // TODO DEĞİŞECEK
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                CenterAlignedTopAppBar(
+                CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
                     title = { Text("Add Event", fontSize = 25.sp) },
                     navigationIcon = {
                         Icon(
@@ -521,7 +517,6 @@ fun AddEventScreen(
 
         }
     }
-}
 
 fun doRequestPermission(
     context: Context,
@@ -674,10 +669,10 @@ fun convertMillisToDate(millis:Long) :String{
     return formatter.format(Date(millis))
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewPage(){
-    EventTrackerAppTheme {
-        //AddEventScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewPage(){
+//    EventTrackerAppTheme {
+//        //AddEventScreen()
+//    }
+//}

@@ -40,6 +40,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -73,11 +74,13 @@ fun MyEventsScreen(
     val showDialog = remember { mutableStateOf(false) }
     val selectedEventId = remember { mutableIntStateOf(0) }
 
-    EventTrackerAppTheme {
         Scaffold(
             Modifier.fillMaxSize(),
             topBar = {
-                CenterAlignedTopAppBar(
+                CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
                     title = {Text("My Events")},
                     navigationIcon = {
                         IconButton(
@@ -210,7 +213,7 @@ fun MyEventsScreen(
 
         }
     }
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -219,16 +222,16 @@ fun ShowAlertDialog(
     onDismissRequest: ()->Unit,
     dialogTitle:String,
     dialogText:String
-){
+) {
     BasicAlertDialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties()
-    ){
+    ) {
         Surface(
             shape = MaterialTheme.shapes.medium,
             tonalElevation = 6.dp
         ) {
-            Column(Modifier.padding(16.dp)){
+            Column(Modifier.padding(16.dp)) {
                 Text(text = dialogTitle, style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.padding(vertical = 12.dp))
                 Text(text = dialogText)
@@ -241,7 +244,7 @@ fun ShowAlertDialog(
                         onClick = {
                             onDismissRequest()
                         }
-                    ){
+                    ) {
                         Text("İptal")
                     }
 
@@ -250,7 +253,7 @@ fun ShowAlertDialog(
                             onConfirmation()
                             onDismissRequest()
                         }
-                    ){
+                    ) {
                         Text("Sil", color = Color.Red)
                     }
                 }
@@ -259,10 +262,10 @@ fun ShowAlertDialog(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewMyScreen(){
-    EventTrackerAppTheme {
-        //MyEventsScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewMyScreen(){
+//    EventTrackerAppTheme {
+//        //MyEventsScreen()
+//    }
+//}
