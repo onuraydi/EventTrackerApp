@@ -1,4 +1,4 @@
-package com.example.eventtrackerapp.utils
+package com.example.eventtrackerapp.common
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape

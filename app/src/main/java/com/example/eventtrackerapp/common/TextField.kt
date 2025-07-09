@@ -1,4 +1,4 @@
-package com.example.eventtrackerapp.utils
+package com.example.eventtrackerapp.common
 
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.OutlinedTextField
