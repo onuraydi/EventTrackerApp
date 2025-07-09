@@ -37,13 +37,6 @@ import coil.compose.AsyncImage
 import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Profile
-import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
-import com.example.eventtrackerapp.utils.BottomNavBar
-import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
-import com.example.eventtrackerapp.viewmodel.ProfileViewModel
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.io.File
 import com.example.eventtrackerapp.common.BottomNavBar
 import com.example.eventtrackerapp.common.EventTrackerExtendedFloatingActionButton
@@ -56,14 +49,6 @@ fun ProfileScreen(
     profile:Profile
     )
 {
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
-        bottomBar =
-        {
-            BottomNavBar(navController = navController)
-        }
-
 
     val profilePhoto = rememberSaveable { mutableStateOf(profile.photo) }
 

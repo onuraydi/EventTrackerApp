@@ -136,8 +136,8 @@ private fun EventRow(event:Event,navController: NavController, commentList:Flow<
     )
     {
 
-        Image(
-            painter = painterResource(event.image),
+        AsyncImage(
+            model = event.image,
             contentDescription = "Event Image",
             modifier = Modifier
                 .fillMaxWidth()
