@@ -2,6 +2,7 @@
 
 package com.example.eventtrackerapp.views
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -56,9 +57,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,14 +118,28 @@ fun MyEventsScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Image(
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .background(Color.Red)
-                                        .size(60.dp),
-                                    painter = painterResource(it.image),
-                                    contentDescription = "Profile",
-                                )
+                                if(it.image!=""){
+                                    val imageFile = it.image?.let{File(it)}
+                                    if(imageFile!=null && imageFile.exists()){
+                                        AsyncImage(
+                                            model = imageFile,
+                                            modifier = Modifier
+                                                .clip(CircleShape)
+                                                .background(Color.Red)
+                                                .size(60.dp),
+                                            contentDescription = "Profile",
+                                        )
+                                    }else{
+                                        Image(
+                                            painter = painterResource(R.drawable.ic_launcher_background),
+                                            modifier = Modifier
+                                                .clip(CircleShape)
+                                                .background(Color.Red)
+                                                .size(60.dp),
+                                            contentDescription = "Profile",
+                                        )
+                                    }
+                                }
 
                                 Column(
                                     Modifier

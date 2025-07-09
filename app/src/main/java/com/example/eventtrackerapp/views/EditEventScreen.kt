@@ -1,6 +1,7 @@
 package com.example.eventtrackerapp.views
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.model.EventWithTags
@@ -65,6 +67,7 @@ import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
+import java.io.File
 
 
 @SuppressLint("NewApi")
@@ -179,6 +182,8 @@ fun EditEventScreen(
 
                 val categoryError = rememberSaveable { mutableStateOf(false) }
 
+                val eventImage = rememberSaveable{mutableStateOf(eventWithTag.event.image)}
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -189,17 +194,33 @@ fun EditEventScreen(
                 ) {
                     Spacer(Modifier.padding(vertical = 12.dp))
 
-                    //Profil Fotoğrafı
-                    Icon(
-                        painter = painterResource(R.drawable.image_icon),
-                        contentDescription = "Add Image",
-                        modifier = Modifier
-                            .size(180.dp, 160.dp)
-                            .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
-                            .clickable {
-                                /*TODO(Buraya fotoğraf yükleme gelecek)*/
-                            }
-                    )
+                    //Event Fotoğrafı
+                    if(eventImage.value !=null){
+                        val imageFile = eventImage.value?.let { File(it) }
+                        if(imageFile!=null && imageFile.exists()){
+                            AsyncImage(
+                                model = imageFile,
+                                contentDescription = "Add Image",
+                                modifier = Modifier
+                                    .size(180.dp, 160.dp)
+                                    .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
+                                    .clickable {
+                                        /*TODO(Buraya fotoğraf yükleme gelecek)*/
+                                    }
+                            )
+                        }else{
+                            Image(
+                                painter = painterResource(R.drawable.ic_launcher_background),
+                                contentDescription = "Add Image",
+                                modifier = Modifier
+                                    .size(180.dp, 160.dp)
+                                    .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
+                                    .clickable {
+                                        /*TODO(Buraya fotoğraf yükleme gelecek)*/
+                                    }
+                            )
+                        }
+                    }
                     Spacer(Modifier.padding(vertical = 5.dp))
                     Text("you are updated event photo")
 
@@ -428,7 +449,7 @@ fun EditEventScreen(
                                     ownerId = ownerId,
                                     name = eventName.value,
                                     detail = eventDetail.value,
-                                    image = R.drawable.ic_launcher_background,
+                                    image = eventImage.value,
                                     date = selectedDate.value,
                                     duration = eventDuration.value,
                                     location = eventLocation.value,

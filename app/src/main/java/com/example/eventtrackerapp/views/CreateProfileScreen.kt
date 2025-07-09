@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -90,6 +91,9 @@ import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -117,6 +121,7 @@ fun CreateProfileScreen(
     val permission = permissionViewModel.getPermissionName()
 
     val imageUri by permissionViewModel.profileImageUri.collectAsStateWithLifecycle()
+    val imagePath = rememberSaveable { mutableStateOf("") }
 
     //galeriye gidip fotoğraf seçmemizi sağlacyacak
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -127,7 +132,10 @@ fun CreateProfileScreen(
             val data = result.data?.data
             //kullanıcının seçtiği resmi viewModel
             // tarafında doldurup burada imageUri ile aldık
-            permissionViewModel.setImageUri(data)
+            if(data!=null){
+                val savedUri = saveProfileImageToInternalStorage(context,data)
+                imagePath.value = savedUri.toString()
+            }
         }
 
     }
@@ -192,16 +200,29 @@ fun CreateProfileScreen(
                                 )
                             },
                     ) {
-                        if(imageUri!=null){
-                            AsyncImage(
-                                model = imageUri,
-                                contentDescription = "Selected Photo",
-                                Modifier
-                                    .fillMaxSize(1f)
-                                    .align(Alignment.Center)
-                                    .clip(CircleShape),
-                                contentScale = ContentScale.FillBounds,
-                            )
+                        if(imagePath.value != ""){
+                            val imageFile = File(imagePath.value)
+                            if(imageFile.exists()){
+                                AsyncImage(
+                                    model = imageFile,
+                                    contentDescription = "Selected Photo",
+                                    Modifier
+                                        .fillMaxSize(1f)
+                                        .align(Alignment.Center)
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.FillBounds,
+                                )
+                            }else{
+                                Image(
+                                    painter = painterResource(R.drawable.ic_launcher_background),
+                                    contentDescription = "Selected Photo",
+                                    Modifier
+                                        .fillMaxSize(1f)
+                                        .align(Alignment.Center)
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.FillBounds,
+                                )
+                            }
                         }else{
                             Image(
                                 painterResource(R.drawable.profile_photo_add_icon),
@@ -437,7 +458,7 @@ fun CreateProfileScreen(
                                 gender = gender.value,
                                 selectedCategoryList = selectedCompleteCategoryList.filterNotNull(),
                                 selectedTagList = selectedCompleteTagList.filterNotNull(),
-                                photo = R.drawable.ic_launcher_background
+                                photo = imagePath.value
                             )
                             profileViewModel.insertProfile(profile)
                             navController.navigate("home"){
@@ -473,6 +494,24 @@ fun requestPermission(
     }else{
         //izin verildi
         openGallery(imagePickerLauncher)
+    }
+}
+
+
+fun saveProfileImageToInternalStorage(context: Context, uri:Uri):String?{
+    val contentResolver = context.contentResolver
+    try {
+        val inputStream = contentResolver.openInputStream(uri)
+        val fileName = "my_image${System.currentTimeMillis()}.jpg" //benzersiz dosya adı
+        val outputFile = File(context.filesDir,fileName) // uygulamanın dahili depolama dizini
+
+        FileOutputStream(outputFile).use{ outputStream->
+            inputStream?.copyTo(outputStream)
+        }
+        return outputFile.absolutePath //kaydedilen dosyanın mutlak yolunu döndürür
+    }catch (e: IOException){
+        e.printStackTrace()
+        return null
     }
 }
 

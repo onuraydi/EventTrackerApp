@@ -1,5 +1,6 @@
 package com.example.eventtrackerapp.views
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -44,9 +45,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,7 +106,7 @@ fun ParticipantsScreen(
 }
 
 @Composable
-fun user(image:Int,nameSurname:String, email:String)
+fun user(image:String,nameSurname:String, email:String)
 {
     val userImage = remember { mutableStateOf(image) }
     val userNameSurname = remember { mutableStateOf(nameSurname) }
@@ -122,9 +125,24 @@ fun user(image:Int,nameSurname:String, email:String)
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             // TODO resim veri tabanından daha sonra gelecek
-            Image(painterResource(R.drawable.ic_launcher_foreground),null, modifier = Modifier
-                .clip(CircleShape)
-                .size(70.dp))
+            if(userImage.value!=""){
+                val imageFile = userImage.value.let { File(it) }
+                if(imageFile!=null && imageFile.exists()){
+                    AsyncImage(
+                        model = imageFile,
+                        null, modifier = Modifier
+                            .clip(CircleShape)
+                            .size(70.dp)
+                    )
+                }else{
+                    Image(
+                        painter = painterResource(R.drawable.ic_launcher_background),
+                        null, modifier = Modifier
+                            .clip(CircleShape)
+                            .size(70.dp)
+                    )
+                }
+            }
 
 
             Column(modifier = Modifier

@@ -15,7 +15,7 @@ data class Event(
     var duration:String? = "",
     var location:String? = "",
     var categoryId:Int=0,
-    var image:Int = 0,
+    var image:String? = "",
     var likeCount:Int = 0,
     //val participants:List<Profile> = arrayListOf(),
 

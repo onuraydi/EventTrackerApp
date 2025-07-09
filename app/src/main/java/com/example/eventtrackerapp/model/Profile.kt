@@ -14,7 +14,7 @@ data class Profile(
     val gender:String? = "",
     val selectedCategoryList: List<Category>? = arrayListOf(),
     val selectedTagList:List<Tag>? = arrayListOf(),
-    val photo:Int? = 0,
+    val photo:String? = "",
     val addedEvents:List<Event>? = arrayListOf(),
     ){
 }

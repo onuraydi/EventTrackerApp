@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
+import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.widget.Toast
@@ -14,6 +15,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -98,6 +100,9 @@ import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
 import kotlinx.coroutines.flow.first
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Date
@@ -131,7 +136,8 @@ fun AddEventScreen(
     //Media Permission
     val permission = permissionViewModel.getPermissionName()
 
-    val imageUri by permissionViewModel.profileImageUri.collectAsState()
+    val imageUri by permissionViewModel.eventImageUri.collectAsStateWithLifecycle()
+    val imagePath = rememberSaveable { mutableStateOf("") } //resmin yolunu tutuyoruz
 
     //galeriye gidip fotoğraf seçmemizi sağlayacak
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -140,7 +146,10 @@ fun AddEventScreen(
         if(result.resultCode == Activity.RESULT_OK && result.data!=null){
             //kullanıcı resim seçti ve gelen intent boş değilse
             val data = result.data?.data
-            permissionViewModel.setImageUri(data)
+            if(data!=null){
+                val savedUri = saveEventImageToInternalStorage(context,data)
+                imagePath.value = savedUri.toString()
+            }
         }
     }
 
@@ -229,14 +238,25 @@ fun AddEventScreen(
                                 )
                             }
                     ){
-                        if(imageUri!=null){
-                            AsyncImage(
-                                model = imageUri,
-                                contentDescription = "Selected Photo",
-                                Modifier
-                                    .fillMaxSize(1f)
-                                    .align(Alignment.Center)
-                            )
+                        if(imagePath.value != ""){
+                            val imageFile = File(imagePath.value)
+                            if(imageFile.exists()){
+                                AsyncImage(
+                                    model = imageFile,
+                                    contentDescription = "Selected Photo",
+                                    Modifier
+                                        .fillMaxSize(1f)
+                                        .align(Alignment.Center)
+                                )
+                            }else{
+                                Image(
+                                    painter = painterResource(R.drawable.ic_launcher_background),
+                                    contentDescription = "Selected Photo",
+                                    Modifier
+                                        .fillMaxSize(1f)
+                                        .align(Alignment.Center)
+                                )
+                            }
                         }else{
                             Icon(
                                 painter = painterResource(R.drawable.image_icon),
@@ -478,7 +498,7 @@ fun AddEventScreen(
                                     ownerId = ownerId,
                                     name = eventName.value,
                                     detail = eventDetail.value,
-                                    image = R.drawable.ic_launcher_background,
+                                    image = imagePath.value,
                                     date = selectedDate.value,
                                     duration = eventDuration.value,
                                     location = eventLocation.value,
@@ -525,8 +545,30 @@ fun doRequestPermission(
 }
 
 fun goToGallery(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>){
-    val intent = Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+    val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+        type = "image/*"
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) //urileri kalıcı olarak tutmak için gerekli
+    }
     launcher.launch(intent)
+}
+
+
+fun saveEventImageToInternalStorage(context: Context, uri:Uri):String?{
+    val contentResolver = context.contentResolver
+    try {
+        val inputStream = contentResolver.openInputStream(uri)
+        val fileName = "my_image${System.currentTimeMillis()}.jpg" //benzersiz dosya adı
+        val outputFile = File(context.filesDir,fileName) // uygulamanın dahili depolama dizini
+
+        FileOutputStream(outputFile).use{ outputStream->
+            inputStream?.copyTo(outputStream)
+        }
+        return outputFile.absolutePath //kaydedilen dosyanın mutlak yolunu döndürür
+    }catch (e: IOException){
+        e.printStackTrace()
+        return null
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)

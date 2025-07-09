@@ -1,6 +1,7 @@
 package com.example.eventtrackerapp.views
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.model.Event
@@ -36,6 +38,7 @@ import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import kotlinx.coroutines.flow.Flow
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -112,17 +115,36 @@ private fun EventRow(event:Event,navController: NavController, commentList:Flow<
         .border(BorderStroke(2.dp, Color.Black), shape = RoundedCornerShape(20.dp))
         )
     {
-        Image(painterResource(event.image), null, modifier = Modifier
-            .fillMaxWidth()
-            .height(220.dp)
-            .align(Alignment.CenterHorizontally)
-            .clickable { navController.navigate("detail/${event.id}") }
-            .clip(RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)),
+        if(event.image!=null){
+            val imageFile = event.image?.let { File(it) }
+            if(imageFile!=null && imageFile.exists()){
+                AsyncImage(
+                    model = imageFile,
+                    null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .clickable { navController.navigate("detail/${event.id}") }
+                        .clip(RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }else{
+                Image(
+                    painter = painterResource(R.drawable.ic_launcher_background),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .clickable { navController.navigate("detail/${event.id}") }
+                        .clip(RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
+        }
 
-            contentScale = ContentScale.Crop)
-
-
-        Row() {
+        Row {
             if(isLiked == false)
             {
                 Icon(Icons.Filled.FavoriteBorder,null, modifier = Modifier

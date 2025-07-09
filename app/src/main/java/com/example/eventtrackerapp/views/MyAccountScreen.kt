@@ -44,12 +44,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
+import java.io.File
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -96,7 +98,7 @@ fun MyAccountScreen(
             var gender = rememberSaveable { mutableStateOf(profile.gender!!) }
             var isExpanded = rememberSaveable { mutableStateOf(false) }
             var profilePhotoState =
-                rememberSaveable { mutableStateOf(R.drawable.profile_photo_add_icon) }
+                rememberSaveable { mutableStateOf(profile.photo) }
             // Buraya kullanıcının yüklediği profil gelecek
 
             Column(
@@ -118,14 +120,28 @@ fun MyAccountScreen(
                         .clickable {
                         }
                 ) {
-                    Image(
-                        modifier = Modifier
-                            .fillMaxSize(0.8f)
-                            .align(Alignment.Center)
-                            .padding(start = 5.dp),
-                        painter = painterResource(profilePhotoState.value),
-                        contentDescription = "PhotoAdd",
-                    )
+                    if(profilePhotoState.value != ""){
+                        val imageFile = profilePhotoState.value?.let { File(it) }
+                        if(imageFile!=null && imageFile.exists()){
+                            AsyncImage(
+                                model = imageFile,
+                                modifier = Modifier
+                                    .fillMaxSize(0.8f)
+                                    .align(Alignment.Center)
+                                    .padding(start = 5.dp),
+                                contentDescription = "PhotoAdd",
+                            )
+                        }else{
+                            Image(
+                                painter = painterResource(R.drawable.ic_launcher_background),
+                                modifier = Modifier
+                                    .fillMaxSize(0.8f)
+                                    .align(Alignment.Center)
+                                    .padding(start = 5.dp),
+                                contentDescription = "PhotoAdd",
+                            )
+                        }
+                    }
                 }
 
                 Spacer(Modifier.padding(vertical = 5.dp))

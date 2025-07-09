@@ -1,9 +1,11 @@
 package com.example.eventtrackerapp.views
 
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +34,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Profile
@@ -53,6 +58,7 @@ import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+import java.io.File
 
 
 @Composable
@@ -64,6 +70,7 @@ fun ProfileScreen(
 {
 
 
+    val profilePhoto = rememberSaveable { mutableStateOf(profile.photo) }
 
     Scaffold(Modifier
         .fillMaxSize(),
@@ -77,9 +84,33 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
             ) {
-                Image(painterResource(R.drawable.ic_launcher_background),null,Modifier
-                    .clip(CircleShape)
-                )
+
+            if(profilePhoto.value!=""){
+                val imageFile = profilePhoto.value?.let { File(it) }
+                if(imageFile!=null && imageFile.exists()){
+                    AsyncImage(
+                        model = imageFile,
+                        null,
+                        error = painterResource(R.drawable.clock_icon),
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .clickable {
+                                println(profilePhoto.value)
+                            }
+                    )
+                }else{
+                    Image(
+                        painter = painterResource(R.drawable.ic_launcher_background),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .clickable {
+                                println(profilePhoto.value)
+                            }
+                    )
+                }
+            }
+
 
                 Spacer(Modifier.padding(10.dp))
 

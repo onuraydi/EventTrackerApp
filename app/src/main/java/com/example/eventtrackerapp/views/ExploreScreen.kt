@@ -1,5 +1,6 @@
 package com.example.eventtrackerapp.views
 
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -40,11 +41,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.BottomNavBar
 import com.example.eventtrackerapp.viewmodel.ExploreViewModel
+import java.io.File
 
 @Composable
 fun ExploreScreen(
@@ -143,23 +146,46 @@ fun ExploreScreen(
 @Composable
 fun MyImage(event:Event,navController: NavController){
     val randomHeights = remember { (150..300).random().dp }
-    Image(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(randomHeights)
-            .border(
-                border = BorderStroke(
-                    1.dp,
-                    Color.Black
+
+    val imageFile = event.image?.let { File(it) }
+    if(imageFile!=null && imageFile.exists()){
+        AsyncImage(
+            model = imageFile,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(randomHeights)
+                .border(
+                    border = BorderStroke(
+                        1.dp,
+                        Color.Black
+                    )
                 )
-            )
-            .clickable {
-                navController.navigate("detail/${event.id}")
-            },
-        painter = painterResource(event.image),
-        contentDescription = "",
-        contentScale = ContentScale.Crop,
-    )
+                .clickable {
+                    navController.navigate("detail/${event.id}")
+                },
+            contentDescription = "",
+            contentScale = ContentScale.Crop,
+        )
+    }else{
+        Image(
+            painter = painterResource(R.drawable.ic_launcher_background),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(randomHeights)
+                .border(
+                    border = BorderStroke(
+                        1.dp,
+                        Color.Black
+                    )
+                )
+                .clickable {
+                    navController.navigate("detail/${event.id}")
+                },
+            contentScale = ContentScale.Crop,
+        )
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

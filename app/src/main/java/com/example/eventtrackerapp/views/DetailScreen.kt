@@ -1,6 +1,7 @@
 package com.example.eventtrackerapp.views
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -60,8 +61,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Category
 import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
@@ -74,6 +77,7 @@ import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 import kotlinx.coroutines.flow.Flow
+import java.io.File
 
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -101,6 +105,8 @@ fun DetailScreen(
 
     val participantsCount by participantsViewModel.getParticipantsCount(event.id).collectAsState(initial = 0)
 
+    val participants by participantsViewModel.getParticipants(event.id).collectAsStateWithLifecycle(initialValue = arrayListOf())
+
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
@@ -126,15 +132,27 @@ fun DetailScreen(
             .verticalScroll(rememberScrollState())) {
             Column() {
 
-                if (event != null && event.image != null && event.image != 0) {
-                    Image(
-                        painter = painterResource(id = event.image),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        contentScale = ContentScale.Crop
-                    )
+                if (event != null && event.image != null && event.image != "") {
+                    val imageFile = event.image?.let { File(it) }
+                    if (imageFile != null && imageFile.exists()) {
+                        AsyncImage(
+                            model = R.drawable.ic_launcher_foreground,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    }else{
+                        Image(
+                            painter = painterResource(R.drawable.ic_launcher_background),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                 }
 
                 Spacer(Modifier.padding(top = 18.dp))
@@ -173,9 +191,9 @@ fun DetailScreen(
                     {
                         repeat(participantsCount)
                         {
-                            Image(
+                            AsyncImage(
                                 // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
-                                painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
+                                model = R.drawable.ic_launcher_foreground, contentDescription = null,
                                 Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
                                     .size(60.dp))
                             Spacer(Modifier.padding(start = 10.dp))
@@ -185,9 +203,9 @@ fun DetailScreen(
                     {
                         repeat(3)
                         {
-                            Image(
+                            AsyncImage(
                                 // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
-                                painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
+                                model = R.drawable.ic_launcher_foreground, contentDescription = null,
                                 Modifier.border(BorderStroke(2.dp, Color.Black), shape = CircleShape)
                                     .size(60.dp))
                             Spacer(Modifier.padding(start = 10.dp))
