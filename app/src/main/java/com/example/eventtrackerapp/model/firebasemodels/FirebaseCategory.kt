@@ -12,5 +12,4 @@ data class FirebaseCategory(
     @set:PropertyName("name")
     var name:String = ""
 ) {
-    constructor() :this("","")
 }

@@ -45,7 +45,7 @@ data class FirebaseEvent(
 
     @get:PropertyName("tagIds")
     @set:PropertyName("tagIds")
-    var tagIds:Map<String,Boolean> = emptyMap()
+    var tagIds:List<String> = listOf()
 ) {
-    constructor():this("","","","",0,"","","","",0, emptyMap())
+
 }

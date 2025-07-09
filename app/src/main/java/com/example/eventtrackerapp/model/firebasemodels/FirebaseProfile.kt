@@ -25,19 +25,18 @@ data class FirebaseProfile(
 
     @get:PropertyName("selectedCategoryIds")
     @set:PropertyName("selectedCategoryIds")
-    var selectedCategoryIds:Map<String,Boolean> = emptyMap(),
+    var selectedCategoryIds:List<String> = listOf(),
 
     @get:PropertyName("selectedTagIds")
     @set:PropertyName("selectedTagIds")
-    var selectedTagIds:Map<String,Boolean> = emptyMap(),
+    var selectedTagIds:List<String> = listOf(),
+
+    @get:PropertyName("addedEventIds")
+    @set:PropertyName("addedEventIds")
+    var addedEventIds:List<String> = listOf(),
 
     @get:PropertyName("profileImageUrl")
     @set:PropertyName("profileImageUrl")
     var profileImageUrl:String = ""
-
-
-    /// TODO Buraya added event eklenmedi o başka bir yerde yöentilecek (userevent düğümü)
-
 ){
-    constructor() : this("", "", "", "", "", emptyMap(), emptyMap(), "")
 }
