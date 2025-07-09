@@ -7,17 +7,10 @@ import com.example.eventtrackerapp.model.roommodels.Profile
 import com.example.eventtrackerapp.model.roommodels.Tag
 
 object ProfileMapper {
-    fun toEntity(firebaseProfile: FirebaseProfile,allCategories:List<Category>,allTags:List<Tag>,allEvents:List<Event>):Profile{
-
-        val selectedCategories = firebaseProfile.selectedCategoryIds.keys.mapNotNull { categoryId ->
-            allCategories.find { it.id == categoryId }
-        }
-
-        val selectedTags = firebaseProfile.selectedTagIds.keys.mapNotNull { tagId ->
-            allTags.find { it.id == tagId }
-        }
-
-        val addedEventIds = emptyList<String>()
+    fun toEntity(firebaseProfile: FirebaseProfile,allTag:List<Tag>, allCategory:List<Category>):Profile
+    {
+        val selectedTags = allTag.filter { firebaseProfile.selectedTagIds.contains(it.id) }
+        val selectedCategories = allCategory.filter{ firebaseProfile.selectedCategoryIds.contains(it.id) }
 
         return Profile(
             id = firebaseProfile.id,
@@ -26,16 +19,14 @@ object ProfileMapper {
             gender = firebaseProfile.gender,
             userName = firebaseProfile.userName,
             fullName = firebaseProfile.fullName,
-            selectedCategoryList = selectedCategories,
             selectedTagList = selectedTags,
-            addedEventIds = addedEventIds
+            selectedCategoryList = selectedCategories,
+            addedEventIds = firebaseProfile.addedEventIds
         )
     }
 
-    fun toFirebaseModel(profile: Profile):FirebaseProfile{
-        val selectedCategoryIdsMap = profile.selectedCategoryList.associate { it.id to true }
-        val selectedTagIdsMap = profile.selectedTagList.associate { it.id to true }
-
+    fun toFirebaseModel(profile: Profile):FirebaseProfile
+    {
         return FirebaseProfile(
             id = profile.id,
             fullName = profile.fullName,
@@ -43,13 +34,9 @@ object ProfileMapper {
             email = profile.email,
             gender = profile.gender,
             profileImageUrl = profile.photo,
-            selectedCategoryIds = selectedCategoryIdsMap,
-            selectedTagIds = selectedTagIdsMap,
-
+            selectedTagIds = profile.selectedTagList.map { it.id },
+            selectedCategoryIds = profile.selectedCategoryList.map { it.id },
+            addedEventIds = profile.addedEventIds
         )
-    }
-
-    fun toEntityList(firebaseProfile: List<FirebaseProfile>,allCategories:List<Category>,allTags:List<Tag>,allEvents:List<Event>):List<Profile>{
-        return firebaseProfile.map { toEntity(it, allCategories, allTags, allEvents) }
     }
 }

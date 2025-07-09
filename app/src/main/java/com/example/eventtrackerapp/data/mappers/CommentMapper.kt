@@ -24,7 +24,8 @@ object CommentMapper {
         )
     }
 
-    fun toEntityList(firebaseComment: List<FirebaseComment>):List<Comment>{
+    fun toEntityList(firebaseComment: List<FirebaseComment>):List<Comment>
+    {
         return firebaseComment.map { toEntity(it) }
     }
 }

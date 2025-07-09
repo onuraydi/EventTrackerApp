@@ -2,15 +2,11 @@ package com.example.eventtrackerapp.data.mappers
 
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseEvent
 import com.example.eventtrackerapp.model.roommodels.Event
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
 object EventMapper {
-    private val gson = Gson()
 
-    fun toEntity(firebaseEvent: FirebaseEvent):Event{
-        var tagIds = gson.toJson(firebaseEvent.tagIds)
-
+    fun toEntity(firebaseEvent: FirebaseEvent):Event
+    {
         return Event(
             id = firebaseEvent.id,
             name = firebaseEvent.name,
@@ -21,16 +17,13 @@ object EventMapper {
             duration = firebaseEvent.duration,
             categoryId = firebaseEvent.categoryId,
             imageUrl = firebaseEvent.imageUrl,
-            ownerId = firebaseEvent.ownerId,
-            tagIds = tagIds
+            ownerId = firebaseEvent.ownerId
         )
     }
 
-    fun toFirebaseModel(event: Event):FirebaseEvent
+    // TODO IMAGEURL nasıl olacak?
+    fun toFirebaseModel(event: Event,tagIds:List<String>):FirebaseEvent
     {
-        val type = object : TypeToken<Map<String, Boolean>>() {}.type
-        val tagIdsMap = gson.fromJson<Map<String,Boolean>>(event.tagIds,type)
-
         return FirebaseEvent(
             id = event.id,
             name = event.name,
@@ -38,11 +31,11 @@ object EventMapper {
             ownerId = event.ownerId,
             location = event.location,
             duration = event.duration,
-            imageUrl = event.imageUrl,
+            imageUrl = event.imageUrl, // TODO ?
             likeCount = event.likeCount,
             categoryId = event.categoryId,
             detail = event.detail,
-            tagIds = tagIdsMap
+            tagIds = tagIds,
         )
     }
 

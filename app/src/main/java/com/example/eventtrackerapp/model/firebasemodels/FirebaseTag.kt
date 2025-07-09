@@ -10,6 +10,10 @@ data class FirebaseTag(
     @get:PropertyName("name")
     @set:PropertyName("name")
     var name:String = "",
+
+    @get:PropertyName("categoryId")
+    @set:PropertyName("categoryId")
+    var categoryId:String = "",
 )
 {
 }
