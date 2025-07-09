@@ -13,6 +13,9 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,13 +33,15 @@ import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.common.BottomNavBar
 import com.example.eventtrackerapp.common.EventTrackerExtendedFloatingActionButton
+import com.example.eventtrackerapp.model.roommodels.Profile
+import com.example.eventtrackerapp.utils.BottomNavBar
 
 
 @Composable
 fun ProfileScreen(
     navController: NavController,
     authViewModel:AuthViewModel,
-    profile:Profile
+    profile: Profile
     )
 {
     Scaffold(

@@ -3,19 +3,17 @@ package com.example.eventtrackerapp.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
-import com.example.eventtrackerapp.model.Event
-import com.example.eventtrackerapp.model.EventTagCrossRef
-import com.example.eventtrackerapp.model.EventWithTags
-import com.example.eventtrackerapp.model.Tag
+import com.example.eventtrackerapp.model.roommodels.Event
+import com.example.eventtrackerapp.model.roommodels.EventTagCrossRef
+import com.example.eventtrackerapp.model.roommodels.EventWithTags
+import com.example.eventtrackerapp.model.roommodels.Tag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import java.lang.Thread.State
 
 class EventViewModel(application:Application): AndroidViewModel(application) {
 
@@ -91,7 +89,7 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
         }
     }
 
-    fun insertEventWithTags(event: Event,tags: List<Tag>){
+    fun insertEventWithTags(event: Event, tags: List<Tag>){
         viewModelScope.launch(Dispatchers.IO) {
             val eventId = eventDao.add(event).toInt()
             val refs = tags.map { tag ->

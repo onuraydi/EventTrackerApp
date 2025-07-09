@@ -1,4 +1,4 @@
-package com.example.eventtrackerapp.model
+package com.example.eventtrackerapp.model.roommodels
 
 data class OnBoardingModel(
     val ImageRes: Int = 0,

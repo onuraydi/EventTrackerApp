@@ -82,6 +82,12 @@ import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.common.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.model.roommodels.Category
+import com.example.eventtrackerapp.model.roommodels.CategoryWithTag
+import com.example.eventtrackerapp.model.roommodels.Profile
+import com.example.eventtrackerapp.model.roommodels.Tag
+import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
+import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
