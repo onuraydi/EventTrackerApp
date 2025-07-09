@@ -1,39 +1,27 @@
 package com.example.eventtrackerapp.data.source.local
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import com.example.eventtrackerapp.model.roommodels.Event
-import com.example.eventtrackerapp.model.roommodels.EventTagCrossRef
-import com.example.eventtrackerapp.model.roommodels.EventWithTags
+import com.example.eventtrackerapp.model.Event
+import com.example.eventtrackerapp.model.EventTagCrossRef
+import com.example.eventtrackerapp.model.EventWithTags
+import com.example.eventtrackerapp.model.Tag
+import com.google.android.gms.auth.api.accounttransfer.AuthenticatorTransferCompletionStatus
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EventDao {
 
     @Query("SELECT * FROM events")
-    fun getAll():Flow<List<Event>>
+    suspend fun getAll():List<Event>
 
     @Query("Select * FROM events WHERE id = :id")
-    fun getById(id:String): Flow<Event>
-
-    @Query("SELECT * FROM events")
-    suspend fun getAllEventOnce():List<Event>
-
-    @Query("SELECT * FROM events WHERE categoryId = :categoryId")
-    fun getEventsByCategoryId(categoryId:String):Flow<List<Event>>
-
-    @Query("SELECT * FROM events WHERE tagIds= :tagId")
-    fun getEventsByTagId(tagId:String):Flow<List<Event>>
-
-    @Query("SELECT * FROM events WHERE ownerId = :ownerId")
-    suspend fun getEventsByOwnerIdOnce(ownerId: String):List<Event>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllEvents(event: List<Event>)
+    suspend fun getById(id:Int):Event
 
     @Insert
     suspend fun add(event: Event):Long
@@ -59,7 +47,7 @@ interface EventDao {
 
     @Transaction
     @Query("SELECT * FROM events WHERE id = :eventId")
-    suspend fun getEventWithTagsByEventId(eventId:Int): EventWithTags
+    suspend fun getEventWithTagsByEventId(eventId:Int):EventWithTags
 
     // TODO ??
     @Transaction

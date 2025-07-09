@@ -4,10 +4,10 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
-import com.example.eventtrackerapp.model.roommodels.Comment
-import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
-import com.example.eventtrackerapp.model.roommodels.Event
-import com.example.eventtrackerapp.model.roommodels.Profile
+import com.example.eventtrackerapp.model.Comment
+import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
+import com.example.eventtrackerapp.model.Event
+import com.example.eventtrackerapp.model.Profile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

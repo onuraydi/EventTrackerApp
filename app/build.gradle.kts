@@ -56,7 +56,6 @@ dependencies {
     implementation(libs.androidx.benchmark.common)
     implementation(libs.support.annotations)
     implementation(libs.androidx.datastore.core.android)
-    implementation(libs.firebase.database.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

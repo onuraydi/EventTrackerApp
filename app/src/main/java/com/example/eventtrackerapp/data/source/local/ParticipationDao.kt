@@ -6,9 +6,9 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import com.example.eventtrackerapp.model.roommodels.EventWithParticipants
-import com.example.eventtrackerapp.model.roommodels.ProfileEventCrossRef
-import com.example.eventtrackerapp.model.roommodels.ProfileWithEvents
+import com.example.eventtrackerapp.model.EventWithParticipants
+import com.example.eventtrackerapp.model.ProfileEventCrossRef
+import com.example.eventtrackerapp.model.ProfileWithEvents
 import kotlinx.coroutines.flow.Flow
 
 @Dao

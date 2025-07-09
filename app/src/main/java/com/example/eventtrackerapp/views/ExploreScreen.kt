@@ -42,8 +42,6 @@ import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.common.BottomNavBar
-import com.example.eventtrackerapp.model.roommodels.Event
-import com.example.eventtrackerapp.utils.BottomNavBar
 import com.example.eventtrackerapp.viewmodel.ExploreViewModel
 
 @SuppressLint("SuspiciousIndentation")
@@ -161,7 +159,7 @@ fun ExploreScreen(
     }
 
 @Composable
-fun MyImage(event: Event, navController: NavController){
+fun MyImage(event:Event,navController: NavController){
     val randomHeights = remember { (150..300).random().dp }
     Image(
         modifier = Modifier

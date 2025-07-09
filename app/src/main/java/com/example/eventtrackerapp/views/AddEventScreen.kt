@@ -81,7 +81,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.roommodels.Event
+import com.example.eventtrackerapp.model.Event
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage

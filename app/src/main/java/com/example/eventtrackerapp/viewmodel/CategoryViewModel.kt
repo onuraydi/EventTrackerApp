@@ -4,12 +4,15 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
-import com.example.eventtrackerapp.model.roommodels.Category
-import com.example.eventtrackerapp.model.roommodels.CategoryWithTag
+import com.example.eventtrackerapp.model.Category
+import com.example.eventtrackerapp.model.CategoryWithTag
+import com.example.eventtrackerapp.model.Event
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.lang.Thread.State
 
 class CategoryViewModel(application: Application): AndroidViewModel(application){
 

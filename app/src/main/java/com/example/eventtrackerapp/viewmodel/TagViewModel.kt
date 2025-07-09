@@ -4,10 +4,12 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
-import com.example.eventtrackerapp.model.roommodels.CategoryWithTag
-import com.example.eventtrackerapp.model.roommodels.Tag
+import com.example.eventtrackerapp.model.CategoryWithTag
+import com.example.eventtrackerapp.model.Tag
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class TagViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -24,7 +26,7 @@ class TagViewModel(application: Application) : AndroidViewModel(application) {
         _chosenTags.value = emptyList() //kategori değişince seçili tag'leri sıfırlar
     }
 
-    fun toggleTag(tag: Tag){
+    fun toggleTag(tag:Tag){
         val current = _chosenTags.value.toMutableList()
         if (current.any{ it.id == tag.id}){
             current.removeAll {it.id==tag.id}
@@ -34,7 +36,7 @@ class TagViewModel(application: Application) : AndroidViewModel(application) {
         _chosenTags.value = current
     }
 
-    fun removeChosenTag(tag: Tag){
+    fun removeChosenTag(tag:Tag){
         _chosenTags.value = _chosenTags.value.filter{it.id!=tag.id}
     }
 

@@ -1,4 +1,4 @@
-package com.example.eventtrackerapp.model.roommodels
+package com.example.eventtrackerapp.model
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -24,10 +24,9 @@ import androidx.room.PrimaryKey
     indices = [Index("eventId"), Index("profileId")]
 )
 data class Comment(
-    @PrimaryKey
-    val id:String = "",
+    @PrimaryKey(autoGenerate = true) val id:Int = 0,
     val profileId:String = "",
-    val eventId:String = "",
+    val eventId:Int = 0,
     val comment:String = ""
 ) {
 }

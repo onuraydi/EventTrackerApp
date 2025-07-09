@@ -28,11 +28,6 @@ import com.example.eventtrackerapp.model.EventWithTags
 import com.example.eventtrackerapp.common.BottomNavBar
 import com.example.eventtrackerapp.common.CommentBottomSheet
 import com.example.eventtrackerapp.common.EventTrackerTopAppBar
-import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
-import com.example.eventtrackerapp.model.roommodels.Event
-import com.example.eventtrackerapp.model.roommodels.EventWithTags
-import com.example.eventtrackerapp.utils.BottomNavBar
-import com.example.eventtrackerapp.utils.CommentBottomSheet
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import kotlinx.coroutines.flow.Flow

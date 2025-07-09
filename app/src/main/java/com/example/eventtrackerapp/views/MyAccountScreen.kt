@@ -45,9 +45,6 @@ import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
-import com.example.eventtrackerapp.model.roommodels.Profile
-import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
-import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 
 
@@ -55,7 +52,7 @@ import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 @Composable
 fun MyAccountScreen(
     navController:NavController,
-    profile: Profile,
+    profile:Profile,
     profileViewModel: ProfileViewModel
 ) {
     Scaffold(modifier = Modifier

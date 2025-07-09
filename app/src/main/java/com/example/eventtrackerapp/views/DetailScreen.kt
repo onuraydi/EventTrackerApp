@@ -58,10 +58,6 @@ import com.example.eventtrackerapp.model.Category
 import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.common.CommentBottomSheet
-import com.example.eventtrackerapp.model.roommodels.Category
-import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
-import com.example.eventtrackerapp.model.roommodels.Event
-import com.example.eventtrackerapp.utils.CommentBottomSheet
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel

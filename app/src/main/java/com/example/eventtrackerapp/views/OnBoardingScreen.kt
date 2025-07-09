@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.data.source.local.UserPreferences
-import com.example.eventtrackerapp.model.roommodels.OnBoardingModel
+import com.example.eventtrackerapp.model.OnBoardingModel
 import kotlinx.coroutines.launch
 
 @Composable
