@@ -11,7 +11,11 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,6 +62,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -69,13 +74,14 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.data.source.local.UserPreferences
 import com.example.eventtrackerapp.model.Category
 import com.example.eventtrackerapp.model.CategoryWithTag
 import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.model.Tag
+import com.example.eventtrackerapp.common.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
@@ -204,7 +210,7 @@ fun CreateProfileScreen(
 
                     Spacer(Modifier.padding(vertical = 7.dp))
 
-                    EventTrackerAppOutlinedTextField(
+                    EventTrackerAppAuthTextField(
                         txt = "Fullname",
                         state = fullNameState,
                         onValueChange = {
@@ -216,7 +222,7 @@ fun CreateProfileScreen(
 
                     Spacer(Modifier.padding(vertical = 12.dp))
 
-                    EventTrackerAppOutlinedTextField(
+                    EventTrackerAppAuthTextField(
                         txt = "Username",
                         state = userNameState,
                         onValueChange = {

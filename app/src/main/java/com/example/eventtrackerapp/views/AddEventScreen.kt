@@ -82,7 +82,7 @@ import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
+import com.example.eventtrackerapp.common.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
@@ -239,7 +239,7 @@ fun AddEventScreen(
 
                     //Event Name
                     Spacer(Modifier.padding(vertical = 12.dp))
-                    EventTrackerAppOutlinedTextField(
+                    EventTrackerAppAuthTextField(
                         txt = "Event Name",
                         state = eventName,
                         onValueChange = {
@@ -247,11 +247,16 @@ fun AddEventScreen(
                             nameError.value = eventName.value.isBlank()
                         },
                         isError = nameError.value,
+                        supportingText = {
+                            if(nameError.value){
+                                Text("Bu alanı boş bırakamazsınız")
+                            }
+                        }
                     )
 
                     //Event Detail
                     Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppOutlinedTextField(
+                    EventTrackerAppAuthTextField(
                         modifier = Modifier.heightIn(min = 120.dp, max = 200.dp),
                         txt = "Event Detail",
                         state = eventDetail,
@@ -260,6 +265,11 @@ fun AddEventScreen(
                             detailError.value = eventDetail.value.isBlank()
                         },
                         isError = detailError.value,
+                        supportingText = {
+                            if(detailError.value){
+                                Text("Bu alanı boş bırakamazsınız")
+                            }
+                        },
                         isSingleLine = false
                     )
 
@@ -269,7 +279,7 @@ fun AddEventScreen(
 
                     //Event Duration
                     Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppOutlinedTextField(
+                    EventTrackerAppAuthTextField(
                         txt = "Event Duration",
                         state = eventDuration,
                         onValueChange = {
@@ -277,11 +287,16 @@ fun AddEventScreen(
                             durationError.value = eventDuration.value.isBlank()
                         },
                         isError = durationError.value,
+                        supportingText = {
+                            if(durationError.value){
+                                Text("Bu alanı boş bırakamazsınız")
+                            }
+                        }
                     )
 
                     //Event Location
                     Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppOutlinedTextField(
+                    EventTrackerAppAuthTextField(
                         txt = "Event Location",
                         state = eventLocation,
                         onValueChange = {
@@ -289,6 +304,11 @@ fun AddEventScreen(
                             locationError.value = eventLocation.value.isBlank()
                         },
                         isError = locationError.value,
+                        supportingText = {
+                            if(locationError.value){
+                                Text("Bu alanı boş bırakamazsınız")
+                            }
+                        }
                     )
 
                     //Select Category

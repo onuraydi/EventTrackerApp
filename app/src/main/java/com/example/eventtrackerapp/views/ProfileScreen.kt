@@ -1,7 +1,12 @@
 package com.example.eventtrackerapp.views
 
+import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -60,20 +65,16 @@ fun ProfileScreen(
             verticalArrangement = Arrangement.Center
             ) {
 
-            if(profilePhoto.value!="")
-            {
+            if(profilePhoto.value!=""){
                 val imageFile = profilePhoto.value?.let { File(it) }
-
-                if(imageFile!=null && imageFile.exists())
-                {
+                if(imageFile!=null && imageFile.exists()){
                     AsyncImage(
                         model = imageFile,
-                        contentDescription = "Profile Photo",
+                        null,
                         error = painterResource(R.drawable.clock_icon),
                         modifier = Modifier
                             .clip(CircleShape)
-                            .clickable
-                            {
+                            .clickable {
                                 println(profilePhoto.value)
                             }
                     )
@@ -83,13 +84,13 @@ fun ProfileScreen(
                         contentDescription = null,
                         modifier = Modifier
                             .clip(CircleShape)
-                            .clickable
-                            {
+                            .clickable {
                                 println(profilePhoto.value)
                             }
                     )
                 }
             }
+
 
                 Spacer(Modifier.padding(10.dp))
 
@@ -108,8 +109,7 @@ fun ProfileScreen(
 
             EventTrackerExtendedFloatingActionButton(
                 text = "My Account",
-                onClick =
-                {
+                onClick = {
                     navController.navigate("my_account")
                     {
                         launchSingleTop = true
@@ -123,8 +123,7 @@ fun ProfileScreen(
 
             EventTrackerExtendedFloatingActionButton(
                 text = "My Preferences",
-                onClick =
-                {
+                onClick = {
                     navController.navigate("preferences")
                     {
                         launchSingleTop = true
@@ -138,8 +137,7 @@ fun ProfileScreen(
 
             EventTrackerExtendedFloatingActionButton(
                 text = "My Events",
-                onClick =
-                {
+                onClick = {
                     navController.navigate("my_events")
                     {
                         launchSingleTop = true
@@ -154,8 +152,7 @@ fun ProfileScreen(
             EventTrackerExtendedFloatingActionButton(
                 text = "Log Out",
                 textColor = Color.Red,
-                onClick =
-                {
+                onClick = {
                     authViewModel.logOut()
                     navController.navigate("login_screen")
                     {

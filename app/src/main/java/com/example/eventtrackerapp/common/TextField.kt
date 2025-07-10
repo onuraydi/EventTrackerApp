@@ -1,7 +1,6 @@
 package com.example.eventtrackerapp.common
 
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,7 +11,35 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun EventTrackerAppOutlinedTextField(
+fun EventTrackerAppOutlinedTextField(txt:String,
+     state: MutableState<String>,
+     leadingIcon: @Composable (() -> Unit)? = null,
+     trailingIcon: @Composable (() -> Unit)? = null,
+     isSingleLine: Boolean = true,
+     isReadOnly:Boolean=false,
+     isPassword:Boolean = false)
+{
+    OutlinedTextField(
+        modifier = Modifier.widthIn(max = 280.dp),
+        value = state.value,
+        onValueChange = {
+            state.value = it;
+        },
+        singleLine = isSingleLine,
+        readOnly = isReadOnly,
+        label = { Text(text = txt) },
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+        visualTransformation = if(isPassword)
+            PasswordVisualTransformation()
+        else VisualTransformation.None
+    )
+
+}
+
+
+@Composable
+fun EventTrackerAppAuthTextField(
     modifier: Modifier = Modifier,
     txt: String,
     state: MutableState<String>,
@@ -22,7 +49,8 @@ fun EventTrackerAppOutlinedTextField(
     isReadOnly: Boolean = false,
     isPassword: Boolean = false,
     isError: Boolean = false,
-    onValueChange: (String)->Unit = {}
+    supportingText: @Composable (()->Unit)? = null,
+    onValueChange: (String)->Unit
 )
 {
     OutlinedTextField(
@@ -35,16 +63,7 @@ fun EventTrackerAppOutlinedTextField(
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         isError = isError,
-        supportingText =
-        {
-            if(isError) {
-                Text(
-                    text = "Bu alan boş bırakılamaz!",
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
-        },
+        supportingText = supportingText,
         visualTransformation = if(isPassword)
             PasswordVisualTransformation()
         else VisualTransformation.None

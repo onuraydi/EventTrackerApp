@@ -205,7 +205,7 @@ fun AppNavGraph(
             }
 
             composable("sign_up") {
-                SignUpScreen(navController,authViewModel)
+                SignUpScreen(navController,authViewModel,userPreferences)
             }
 
             composable("login_screen") {
