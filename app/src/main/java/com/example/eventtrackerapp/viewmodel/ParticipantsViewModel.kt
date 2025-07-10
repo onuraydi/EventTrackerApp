@@ -44,6 +44,6 @@ class ParticipantsViewModel(application: Application):AndroidViewModel(applicati
 
     fun getParticipants(eventId: Int):Flow<List<Profile>>
     {
-        return participationDao.getEventWithParticipants(eventId).map { it.pariticipants }
+        return participationDao.getEventWithParticipants(eventId).map { it?.pariticipants ?: listOf() }
     }
 }

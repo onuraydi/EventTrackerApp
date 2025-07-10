@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -124,7 +126,7 @@ fun DetailScreen(
                     val imageFile = event.image?.let { File(it) }
                     if (imageFile != null && imageFile.exists()) {
                         AsyncImage(
-                            model = R.drawable.ic_launcher_foreground,
+                            model = imageFile,
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -173,33 +175,35 @@ fun DetailScreen(
                         navController.navigate("participants_screen/${event.id}")
                 })
                 Spacer(Modifier.padding(top = 5.dp))
-                Row(modifier = Modifier
+                LazyRow(modifier = Modifier
                     .clickable { navController.navigate("participants_screen/${event.id}") }) {
-                    if(participantsCount < 4)
-                    {
-                        repeat(participantsCount)
+                    items(participants){participant->
+                        if(participantsCount < 4)
                         {
-                            AsyncImage(
-                                // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
-                                painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                                Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer), shape = CircleShape)
-                                    .size(60.dp))
-                            Spacer(Modifier.padding(start = 10.dp))
+                            repeat(participantsCount)
+                            {
+                                AsyncImage(
+                                    // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
+                                    model = participant.photo, contentDescription = null,
+                                    Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer), shape = CircleShape)
+                                        .size(60.dp))
+                                Spacer(Modifier.padding(start = 10.dp))
+                            }
                         }
-                    }
-                    else
-                    {
-                        repeat(3)
+                        else
                         {
-                            AsyncImage(
-                                // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
-                                painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                                Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer), shape = CircleShape)
-                                    .size(60.dp))
-                            Spacer(Modifier.padding(start = 10.dp))
+                            repeat(3)
+                            {
+                                AsyncImage(
+                                    // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
+                                    model = participant.photo, contentDescription = null,
+                                    Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer), shape = CircleShape)
+                                        .size(60.dp))
+                                Spacer(Modifier.padding(start = 10.dp))
+                            }
+                            Text("+${participantsCount - 3} Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier)
+
                         }
-                        Text("+${participantsCount - 3} Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier
-                            .align(Alignment.CenterVertically))
                     }
                 }
                 Spacer(Modifier.padding(top = 20.dp))

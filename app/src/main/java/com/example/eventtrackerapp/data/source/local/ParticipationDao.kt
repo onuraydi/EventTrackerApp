@@ -28,9 +28,9 @@ interface ParticipationDao {
 
     @Transaction
     @Query("SELECT * FROM events WHERE id = :eventId")
-    fun getEventWithParticipants(eventId:Int):Flow<EventWithParticipants>
+    fun getEventWithParticipants(eventId:Int):Flow<EventWithParticipants?>
 
     @Transaction
     @Query("SELECT * FROM profiles WHERE id = :profileId")
-    fun getProfileWithEvent(profileId:String):Flow<ProfileWithEvents>
+    fun getProfileWithEvent(profileId:String):Flow<ProfileWithEvents?>
 }

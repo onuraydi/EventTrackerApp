@@ -49,7 +49,6 @@ fun ProfileScreen(
     profile:Profile
     )
 {
-
     val profilePhoto = rememberSaveable { mutableStateOf(profile.photo) }
 
     Scaffold(Modifier
