@@ -20,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,8 +48,6 @@ fun ProfileScreen(
     profile:Profile
     )
 {
-    val profilePhoto = rememberSaveable { mutableStateOf(profile.photo) }
-
     Scaffold(Modifier
         .fillMaxSize(),
         bottomBar = { BottomNavBar(navController = navController)}
@@ -66,7 +65,7 @@ fun ProfileScreen(
             SelectableImageBox(
                 boxWidth = 140.dp,
                 boxHeight = 140.dp,
-                imagePath = profilePhoto.value,
+                imagePath = profile.photo,
                 modifier = Modifier,
                 placeHolder = painterResource(R.drawable.ic_launcher_foreground),
                 shape = CircleShape,

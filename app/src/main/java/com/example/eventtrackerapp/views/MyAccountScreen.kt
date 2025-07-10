@@ -1,5 +1,9 @@
 package com.example.eventtrackerapp.views
 
+import android.app.Activity
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -31,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -42,7 +47,9 @@ import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.common.EventTrackerTopAppBar
+import com.example.eventtrackerapp.common.PermissionHelper
 import com.example.eventtrackerapp.common.SelectableImageBox
+import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import java.io.File
 
@@ -51,8 +58,40 @@ import java.io.File
 fun MyAccountScreen(
     navController:NavController,
     profile:Profile,
-    profileViewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
+    permissionViewModel: PermissionViewModel
 ) {
+    //Media Permission
+    val context = LocalContext.current
+    val permission = permissionViewModel.getPermissionName()
+    val profilePhotoState = rememberSaveable { mutableStateOf(profile.photo) }
+
+
+    //galeriye gidip fotoğraf seçmemizi sağlayacak
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result->
+        if(result.resultCode == Activity.RESULT_OK && result.data != null){
+            val data = result.data?.data
+            if(data!=null){
+                val savedUri = saveProfileImageToInternalStorage(context,data)
+                profilePhotoState.value = savedUri.toString()
+            }
+        }
+    }
+
+    //izin olaylarını ele alan launcher
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ){granted->
+        if(granted){
+            //kullanıcı izin verdi
+            PermissionHelper.goToGallery(imagePickerLauncher)
+        }else{
+            Toast.makeText(context,"İzin kalıcı olarak reddedildi.Lütfen ayarlardan izin verin.",Toast.LENGTH_LONG).show()
+        }
+    }
+
     Scaffold(modifier = Modifier
         .fillMaxSize(),
         topBar = {
@@ -80,7 +119,6 @@ fun MyAccountScreen(
             val passwordState = rememberSaveable { mutableStateOf("") }  // burası düzeltilececk
             val gender = rememberSaveable { mutableStateOf(profile.gender!!) }
             val isExpanded = rememberSaveable { mutableStateOf(false) }
-            val profilePhotoState = rememberSaveable { mutableStateOf(profile.photo) }
 
             val fullNameError = rememberSaveable { mutableStateOf(false)}
             var userNameError = rememberSaveable { mutableStateOf(false)}
@@ -106,7 +144,16 @@ fun MyAccountScreen(
                     imagePath = profilePhotoState.value,
                     modifier = Modifier,
                     placeHolder = painterResource(R.drawable.ic_launcher_background),
-                    shape = CircleShape
+                    shape = CircleShape,
+                    onClick = {
+                        PermissionHelper.requestPermission(
+                            context,
+                            permission= permission,
+                            viewModel = permissionViewModel,
+                            permissionLauncher = permissionLauncher,
+                            imagePickerLauncher = imagePickerLauncher
+                        )
+                    }
                 )
 
                 Spacer(modifier = Modifier

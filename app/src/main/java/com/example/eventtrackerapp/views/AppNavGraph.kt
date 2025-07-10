@@ -172,7 +172,7 @@ fun AppNavGraph(
                     profileViewModel.getById(uid!!)
                 }
                 val profile by profileViewModel.profile.collectAsStateWithLifecycle()
-                MyAccountScreen(navController,profile,profileViewModel)
+                MyAccountScreen(navController,profile,profileViewModel,permissionViewModel)
             }
 
             composable("preferences"){
