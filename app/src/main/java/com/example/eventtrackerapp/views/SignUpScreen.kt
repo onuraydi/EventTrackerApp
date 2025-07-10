@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -31,8 +30,8 @@ import androidx.navigation.NavController
 import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.Authentication.SignUpRequest
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.common.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.common.EventTrackerAppOutlinedButton
+import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
 
 @Composable
@@ -85,7 +84,7 @@ fun SignUpScreen(
                     .padding(15.dp)
             )
 
-            EventTrackerAppAuthTextField(
+            EventTrackerAppOutlinedTextField(
                 txt = "Kullanıcı Adı",
                 state = fullName,
                 onValueChange =
@@ -101,22 +100,11 @@ fun SignUpScreen(
                         contentDescription = "full name"
                     )
                 },
-                supportingText =
-                {
-                    if(fullNameError.value)
-                    {
-                        Text(
-                            text = "Bu alan boş bırakılamaz!",
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
             )
 
             Spacer(modifier = Modifier.padding(15.dp))
 
-            EventTrackerAppAuthTextField(
+            EventTrackerAppOutlinedTextField(
                 txt = "Email",
                 state = email,
                 onValueChange =
@@ -132,22 +120,11 @@ fun SignUpScreen(
                         contentDescription = "email"
                     )
                 },
-                supportingText =
-                {
-                    if(emailError.value)
-                    {
-                        Text(
-                            text = "Bu alan boş bırakılamaz!",
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
             )
 
             Spacer(modifier = Modifier.padding(15.dp))
 
-            EventTrackerAppAuthTextField(
+            EventTrackerAppOutlinedTextField(
                 txt = "Şifre",
                 state = password,
                 onValueChange =
@@ -184,22 +161,11 @@ fun SignUpScreen(
                     )
                 },
                 isPassword = !isObscure.value,
-                supportingText =
-                {
-                    if(passwordError.value)
-                    {
-                        Text(
-                            text = "Bu alan boş bırakılamaz!",
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
             )
 
             Spacer(modifier = Modifier.padding(15.dp))
 
-            EventTrackerAppAuthTextField(
+            EventTrackerAppOutlinedTextField(
                 txt = "Şifre tekrarı",
                 state = passwordConfirm,
                 onValueChange =
@@ -228,17 +194,6 @@ fun SignUpScreen(
                     )
                 },
                 isPassword = !isObscureConfirm.value,
-                supportingText =
-                {
-                    if(passwordConfirmError.value)
-                    {
-                        Text(
-                            text = "Bu alan boş bırakılamaz!",
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
             )
 
 
