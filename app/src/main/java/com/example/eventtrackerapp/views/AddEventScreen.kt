@@ -7,17 +7,13 @@ import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -86,14 +82,13 @@ import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.eventtrackerapp.common.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
-import kotlinx.coroutines.flow.first
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -219,51 +214,25 @@ fun AddEventScreen(
                 ) {
                     Spacer(Modifier.padding(vertical = 12.dp))
 
-                    //Profil Fotoğrafı
-                    Box(
-                        Modifier
-                            .size(180.dp,160.dp)
-                            .border(border = BorderStroke(2.dp, Color.Black), shape = RoundedCornerShape(12.dp))
-                            .clickable {
-                                doRequestPermission(
-                                    context = context,
-                                    permission = permission,
-                                    viewModel = permissionViewModel,
-                                    permissionLauncher = permissionLauncher,
-                                    imagePickerLauncher = imagePickerLauncher
-                                )
-                            }
-                    ){
-                        if(imagePath.value != ""){
-                            val imageFile = File(imagePath.value)
-                            if(imageFile.exists()){
-                                AsyncImage(
-                                    model = imageFile,
-                                    contentDescription = "Selected Photo",
-                                    Modifier
-                                        .fillMaxSize(1f)
-                                        .align(Alignment.Center)
-                                )
-                            }else{
-                                Image(
-                                    painter = painterResource(R.drawable.ic_launcher_background),
-                                    contentDescription = "Selected Photo",
-                                    Modifier
-                                        .fillMaxSize(1f)
-                                        .align(Alignment.Center)
-                                )
-                            }
-                        }else{
-                            Icon(
-                                painter = painterResource(R.drawable.image_icon),
-                                contentDescription = "Add Image",
-                                modifier = Modifier
-                                    .fillMaxSize(1f)
-                                    .align(Alignment.Center)
-                                    .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
+
+                    //Event Fotoğrafı
+                    SelectableImageBox(
+                        boxWidth= 180.dp,
+                        boxHeight = 160.dp,
+                        imagePath.value,
+                        modifier = Modifier,
+                        placeHolder = painterResource(R.drawable.image_icon),
+                        shape = RoundedCornerShape(12.dp),
+                        onClick = {
+                            doRequestPermission(
+                                context,
+                                permission = permission,
+                                viewModel = permissionViewModel,
+                                imagePickerLauncher = imagePickerLauncher,
+                                permissionLauncher = permissionLauncher
                             )
                         }
-                    }
+                    )
 
                     Spacer(Modifier.padding(vertical = 5.dp))
                     Text("Please add event photo")

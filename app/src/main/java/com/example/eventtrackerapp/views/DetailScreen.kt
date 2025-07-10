@@ -48,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +65,7 @@ import com.example.eventtrackerapp.model.Category
 import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.common.CommentBottomSheet
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
@@ -123,26 +125,14 @@ fun DetailScreen(
             Column() {
 
                 if (event != null && event.image != null && event.image != "") {
-                    val imageFile = event.image?.let { File(it) }
-                    if (imageFile != null && imageFile.exists()) {
-                        AsyncImage(
-                            model = imageFile,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp),
-                            contentScale = ContentScale.Crop
-                        )
-                    }else{
-                        Image(
-                            painter = painterResource(R.drawable.ic_launcher_background),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
+                    SelectableImageBox(
+                        boxWidth = 200.dp,
+                        boxHeight = 200.dp,
+                        imagePath = event.image,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RectangleShape,
+                        placeHolder = painterResource(R.drawable.ic_launcher_background)
+                    )
                 }
 
                 Spacer(Modifier.padding(top = 18.dp))
@@ -182,11 +172,15 @@ fun DetailScreen(
                         {
                             repeat(participantsCount)
                             {
-                                AsyncImage(
-                                    // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
-                                    model = participant.photo, contentDescription = null,
-                                    Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer), shape = CircleShape)
-                                        .size(60.dp))
+                                SelectableImageBox(
+                                    boxWidth = 60.dp,
+                                    boxHeight = 60.dp,
+                                    imagePath = participant.photo,
+                                    modifier = Modifier,
+                                    placeHolder = painterResource(R.drawable.ic_launcher_foreground),
+                                    shape = CircleShape,
+                                    borderStroke = BorderStroke(2.dp,MaterialTheme.colorScheme.primaryContainer)
+                                )
                                 Spacer(Modifier.padding(start = 10.dp))
                             }
                         }
@@ -194,11 +188,15 @@ fun DetailScreen(
                         {
                             repeat(3)
                             {
-                                AsyncImage(
-                                    // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
-                                    model = participant.photo, contentDescription = null,
-                                    Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer), shape = CircleShape)
-                                        .size(60.dp))
+                                SelectableImageBox(
+                                    boxWidth = 60.dp,
+                                    boxHeight = 60.dp,
+                                    imagePath = participant.photo,
+                                    modifier = Modifier,
+                                    placeHolder = painterResource(R.drawable.ic_launcher_foreground),
+                                    shape = CircleShape,
+                                    borderStroke = BorderStroke(2.dp,MaterialTheme.colorScheme.primaryContainer)
+                                )
                                 Spacer(Modifier.padding(start = 10.dp))
                             }
                             Text("+${participantsCount - 3} Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier)

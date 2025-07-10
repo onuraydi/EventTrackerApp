@@ -83,6 +83,7 @@ import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.common.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
@@ -182,54 +183,25 @@ fun CreateProfileScreen(
                 ) {
                     Spacer(Modifier.padding(vertical = 15.dp))
 
-                    Box(
-                        Modifier
-                            .size(80.dp, 80.dp)
-                            .border(border = BorderStroke(2.dp, Color.Black), shape = CircleShape)
-                            .clickable {
-                                requestPermission(
-                                    context = context,
-                                    permission = permission,
-                                    viewModel = permissionViewModel,
-                                    imagePickerLauncher = imagePickerLauncher,
-                                    permissionLauncher = permissionLauncher
-                                )
-                            },
-                    ) {
-                        if(imagePath.value != ""){
-                            val imageFile = File(imagePath.value)
-                            if(imageFile.exists()){
-                                AsyncImage(
-                                    model = imageFile,
-                                    contentDescription = "Selected Photo",
-                                    Modifier
-                                        .fillMaxSize(1f)
-                                        .align(Alignment.Center)
-                                        .clip(CircleShape),
-                                    contentScale = ContentScale.FillBounds,
-                                )
-                            }else{
-                                Image(
-                                    painter = painterResource(R.drawable.ic_launcher_background),
-                                    contentDescription = "Selected Photo",
-                                    Modifier
-                                        .fillMaxSize(1f)
-                                        .align(Alignment.Center)
-                                        .clip(CircleShape),
-                                    contentScale = ContentScale.FillBounds,
-                                )
-                            }
-                        }else{
-                            Image(
-                                painterResource(R.drawable.profile_photo_add_icon),
-                                modifier = Modifier
-                                    .fillMaxSize(1f)
-                                    .align(Alignment.Center)
-                                    .padding(start = 5.dp),
-                                contentDescription = "PhotoAdd",
+                    //Profil Fotoğrafı
+                    SelectableImageBox(
+                        boxWidth = 80.dp,
+                        boxHeight = 80.dp,
+                        imagePath = imagePath.value,
+                        modifier = Modifier,
+                        placeHolder = painterResource(R.drawable.profile_photo_add_icon),
+                        shape = CircleShape,
+                        contentScale = ContentScale.Crop,
+                        onClick = {
+                            doRequestPermission(
+                                context= context,
+                                permission = permission,
+                                viewModel = permissionViewModel,
+                                imagePickerLauncher = imagePickerLauncher,
+                                permissionLauncher = permissionLauncher,
                             )
                         }
-                    }
+                    )
 
                     Spacer(Modifier.padding(vertical = 5.dp))
 

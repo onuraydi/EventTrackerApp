@@ -92,15 +92,11 @@ fun ParticipantsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
 
             items(participants){
-                Image(
-                    painter = painterResource(R.drawable.ic_launcher_foreground),
-                    contentDescription = null
-                )
-//                it.photo?.let { it1 -> it.fullName?.let { it2 -> it.email?.let { it3 ->
-//                    user(it1, it2,
-//                        it3
-//                    )
-//                } } }
+                it.photo?.let { it1 -> it.fullName?.let { it2 -> it.email?.let { it3 ->
+                    user(it1, it2,
+                        it3
+                    )
+                } } }
             }
         }
         }
