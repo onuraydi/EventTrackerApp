@@ -48,7 +48,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -61,7 +60,6 @@ import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.model.EventWithTags
 import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
-import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.common.EventTrackerTopAppBar
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
@@ -194,147 +192,19 @@ fun EditEventScreen(
                         .padding(vertical = 12.dp)
                 )
 
-                val eventDetail = rememberSaveable { mutableStateOf(eventWithTag.event.detail ?: "") }
-                val detailError = rememberSaveable { mutableStateOf(false) }
-
-                val selectedDate = rememberSaveable { mutableStateOf<Long?>(eventWithTag.event.date) }
-                val dateError = rememberSaveable { mutableStateOf(false) }
-
-                val showModal = rememberSaveable { mutableStateOf(false) }
-
-                val eventDuration = rememberSaveable { mutableStateOf(eventWithTag.event.duration ?: "") }
-                val durationError = rememberSaveable { mutableStateOf(false) }
-
-                val eventLocation = rememberSaveable { mutableStateOf(eventWithTag.event.location ?: "") }
-                val locationError = rememberSaveable { mutableStateOf(false) }
-
-                val categoryError = rememberSaveable { mutableStateOf(false) }
-
-                val eventImage = rememberSaveable{mutableStateOf(eventWithTag.event.image)}
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 90.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(Modifier.padding(vertical = 12.dp))
-
-                    //Event Fotoğrafı
-                    SelectableImageBox(
-                        boxWidth = 180.dp,
-                        boxHeight = 160.dp,
-                        imagePath = eventImage.value,
-                        modifier = Modifier,
-                        placeHolder = painterResource(R.drawable.image_icon),
-                        shape = RoundedCornerShape(12.dp),
-                        onClick = {
-                            //TODO resim yükleme gelecek
-                        }
-                    )
-                    Spacer(Modifier.padding(vertical = 5.dp))
-                    Text("you are updated event photo")
-
-                    //Event Name
-                    Spacer(Modifier.padding(vertical = 12.dp))
-                    EventTrackerAppAuthTextField(
-                        txt = "Event Name",
-                        state = eventName,
-                        onValueChange = {
-                            eventName.value = it
-                            nameError.value = eventName.value.isBlank()
-                        },
-                        isError = nameError.value,
-                        supportingText = {
-                            if (nameError.value) {
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        }
-                    )
-
-                    //Event Detail
-                    Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppAuthTextField(
-                        modifier = Modifier.heightIn(min = 120.dp, max = 200.dp),
-                        txt = "Event Detail",
-                        state = eventDetail,
-                        onValueChange = {
-                            eventDetail.value = it
-                            detailError.value = eventDetail.value.isBlank()
-                        },
-                        isError = detailError.value,
-                        supportingText = {
-                            if (detailError.value) {
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        },
-                        isSingleLine = false
-                    )
-
-                    //Event Date
-                    Spacer(Modifier.padding(vertical = 8.dp))
-                    ShowDateModal(Modifier, selectedDate, showModal, dateError, context)
-
-                    //Event Duration
-                    Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppAuthTextField(
-                        txt = "Event Duration",
-                        state = eventDuration,
-                        onValueChange = {
-                            eventDuration.value = it
-                            durationError.value = eventDuration.value.isBlank()
-                        },
-                        isError = durationError.value,
-                        supportingText = {
-                            if (durationError.value) {
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        }
-                    )
-
-                    //Event Location
-                    Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppAuthTextField(
-                        txt = "Event Location",
-                        state = eventLocation,
-                        onValueChange = {
-                            eventLocation.value = it
-                            locationError.value = eventLocation.value.isBlank()
-                        },
-                        isError = locationError.value,
-                        supportingText = {
-                            if (locationError.value) {
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        }
-                    )
-
-                    //Select Category
-                    Spacer(Modifier.padding(vertical = 8.dp))
-                    ExposedDropdownMenuBox(
-                        expanded = isExpanded.value,
-                        onExpandedChange = {
-                            isExpanded.value = it
-                        }
-                    ) {
-
-                        OutlinedTextField(
-                            modifier = Modifier.menuAnchor(),
-                            value = selectedCategoryName.value,
-                            onValueChange = {},
-                            readOnly = true,
-                            placeholder = {
-                                Text("Event Category")
-                            },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(isExpanded.value)
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(R.drawable.category_icon),
-                                    contentDescription = "Category"
+                if(eventImage.value !=null)
+                {
+                    val imageFile = eventImage.value?.let { File(it) }
+                    if(imageFile!=null && imageFile.exists())
+                    {
+                        AsyncImage(
+                            model = imageFile,
+                            contentDescription = "Add Image",
+                            modifier = Modifier
+                                .size(180.dp, 160.dp)
+                                .background(
+                                    color = Color.LightGray,
+                                    shape = RoundedCornerShape(12.dp)
                                 )
                                 .clickable {
                                     /*TODO(Buraya fotoğraf yükleme gelecek)*/
