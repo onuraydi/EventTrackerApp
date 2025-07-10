@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastCbrt
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
@@ -81,6 +82,11 @@ fun MyAccountScreen(
             val isExpanded = rememberSaveable { mutableStateOf(false) }
             val profilePhotoState = rememberSaveable { mutableStateOf(profile.photo) }
 
+            val fullNameError = rememberSaveable { mutableStateOf(false)}
+            var userNameError = rememberSaveable { mutableStateOf(false)}
+            val emailError = rememberSaveable { mutableStateOf(false)}
+            val genderError = rememberSaveable { mutableStateOf(false)}
+
             Column(
                 modifier = Modifier
                     .padding(bottom = 80.dp)
@@ -123,7 +129,13 @@ fun MyAccountScreen(
 
                 EventTrackerAppOutlinedTextField(
                     txt = "Full Name",
-                    state = fullNameState
+                    state = fullNameState,
+                    onValueChange =
+                    {
+                        fullNameState.value = it
+                        fullNameError.value = it.isBlank()
+                    },
+                    isError = fullNameError.value
                 )
 
                 Spacer(
@@ -133,7 +145,13 @@ fun MyAccountScreen(
 
                 EventTrackerAppOutlinedTextField(
                     txt = "Username",
-                    state = userNameState
+                    state = userNameState,
+                    onValueChange =
+                    {
+                        userNameState.value = it
+                        userNameError.value = it.isBlank()
+                    },
+                    isError = userNameError.value
                 )
 
                 Spacer(
@@ -150,7 +168,11 @@ fun MyAccountScreen(
                         modifier = Modifier
                             .menuAnchor(),
                         value = gender.value,
-                        onValueChange = {},
+                        onValueChange =
+                        {
+                            gender.value = it
+                            genderError.value = it.isBlank()
+                        },
                         placeholder =
                         {
                             Text(
@@ -162,6 +184,7 @@ fun MyAccountScreen(
                         {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded.value)
                         },
+                        isError = genderError.value
                     )
 
                     ExposedDropdownMenu(
@@ -214,7 +237,13 @@ fun MyAccountScreen(
                         Modifier.clickable {
                             // TODO
                         }
-                    }
+                    },
+                    onValueChange =
+                    {
+                        emailState.value = it
+                        emailError.value = it.isBlank()
+                    },
+                    isError = emailError.value
                 )
 
                 Spacer(
@@ -236,7 +265,12 @@ fun MyAccountScreen(
                             Modifier.clickable {
                                 // TODO
                             }
-                    }
+                    },
+                    onValueChange =
+                    {
+                        passwordState.value = it
+                    },
+                    isError = false
                 )
             }
 
@@ -252,16 +286,27 @@ fun MyAccountScreen(
             ) {
                 EventTrackerAppPrimaryButton("Complete")
                 {
-                    val updatedProfile = Profile(
-                        id = profile.id,
-                        email = profile.email,
-                        fullName = fullNameState.value,
-                        userName = userNameState.value,
-                        gender = gender.value,
-                        photo = profilePhotoState.value
-                    )
-                    profileViewModel.updateProfile(updatedProfile)
-                    navController.popBackStack()
+                    if(fullNameState.value.isBlank() || userNameState.value.isBlank() || gender.value.isBlank())
+                    {
+                        fullNameError.value = fullNameState.value.isBlank()
+                        userNameError.value = userNameState.value.isBlank()
+                        genderError.value = gender.value.isBlank()
+                        return@EventTrackerAppPrimaryButton
+                    }else {
+                        val updatedProfile = Profile(
+                            id = profile.id,
+                            email = profile.email,
+                            fullName = fullNameState.value,
+                            userName = userNameState.value,
+                            gender = gender.value,
+                            photo = profilePhotoState.value,
+                            selectedCategoryList = profile.selectedCategoryList,
+                            addedEvents = profile.addedEvents,
+                            selectedTagList = profile.selectedTagList
+                        )
+                        profileViewModel.updateProfile(updatedProfile)
+                        navController.popBackStack()
+                    }
                 }
             }
         }
