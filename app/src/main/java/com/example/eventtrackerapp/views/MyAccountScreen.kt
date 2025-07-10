@@ -40,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastCbrt
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
@@ -97,6 +98,11 @@ fun MyAccountScreen(
                 rememberSaveable { mutableStateOf(profile.photo) }
             // Buraya kullanıcının yüklediği profil gelecek
 
+            val fullNameError = rememberSaveable { mutableStateOf(false)}
+            var userNameError = rememberSaveable { mutableStateOf(false)}
+            val emailError = rememberSaveable { mutableStateOf(false)}
+            val genderError = rememberSaveable { mutableStateOf(false)}
+
             Column(
                 modifier = Modifier
                     .padding(bottom = 80.dp)
@@ -151,11 +157,29 @@ fun MyAccountScreen(
                 Spacer(Modifier.padding(vertical = 7.dp))
 
 
-                EventTrackerAppOutlinedTextField(txt = "Full Name", fullNameState)
+                EventTrackerAppOutlinedTextField(
+                    txt = "Full Name",
+                    state = fullNameState,
+                    onValueChange =
+                    {
+                        fullNameState.value = it
+                        fullNameError.value = it.isBlank()
+                    },
+                    isError = fullNameError.value
+                )
 
                 Spacer(modifier = Modifier.padding(vertical = 12.dp))
 
-                EventTrackerAppOutlinedTextField(txt = "Username", userNameState)
+                EventTrackerAppOutlinedTextField(
+                    txt = "Username",
+                    state = userNameState,
+                    onValueChange =
+                    {
+                        userNameState.value = it
+                        userNameError.value = it.isBlank()
+                    },
+                    isError = userNameError.value
+                )
 
                 Spacer(Modifier.padding(vertical = 12.dp))
 
@@ -164,19 +188,28 @@ fun MyAccountScreen(
                     expanded = isExpanded.value,
                     onExpandedChange = { isExpanded.value = it }
                 ) {
-                    gender.value?.let {
-                        OutlinedTextField(
-                            modifier = Modifier
-                                .menuAnchor(),
-                            value = it,
-                            onValueChange = {},
-                            placeholder = { Text("Gender") },
-                            readOnly = true,
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded.value)
-                            },
-                        )
-                    }
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .menuAnchor(),
+                        value = gender.value,
+                        onValueChange =
+                        {
+                            gender.value = it
+                            genderError.value = it.isBlank()
+                        },
+                        placeholder =
+                        {
+                            Text(
+                                text = "Gender"
+                            )
+                        },
+                        readOnly = true,
+                        trailingIcon =
+                        {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded.value)
+                        },
+                        isError = genderError.value
+                    )
 
                     ExposedDropdownMenu(
                         expanded = isExpanded.value,
@@ -199,38 +232,93 @@ fun MyAccountScreen(
                     }
                 }
 
-                Spacer(Modifier.padding(vertical = 12.dp))
+                Spacer(
+                    modifier = Modifier
+                        .padding(vertical = 12.dp)
+                )
+
+                EventTrackerAppOutlinedTextField(
+                    txt = "email",
+                    state = emailState,
+                    isReadOnly = true,
+                    trailingIcon =
+                    {
+                        Icon(
+                            imageVector = Icons.Default.Build,
+                            contentDescription = "Edit Email")
+                        Modifier.clickable {
+                            // TODO
+                        }
+                    },
+                    onValueChange =
+                    {
+                        emailState.value = it
+                        emailError.value = it.isBlank()
+                    },
+                    isError = emailError.value
+                )
+
+                Spacer(
+                    modifier = Modifier
+                        .padding(vertical = 12.dp)
+                )
 
 
-                EventTrackerAppOutlinedTextField(txt = "email", emailState, isReadOnly = true,
-                    trailingIcon = {
-                        Icon(Icons.Default.Build,null)
-                        Modifier.clickable {  }
-                    })
-
-                Spacer(Modifier.padding(vertical = 12.dp))
-
-
-                EventTrackerAppOutlinedTextField(txt = "Şifre", passwordState, isPassword = true, isReadOnly = true,
-                    trailingIcon = {
-                        Icon(Icons.Default.Build,null)
-                        Modifier.clickable {  }
-                    })
-
+                EventTrackerAppOutlinedTextField(
+                    txt = "Şifre",
+                    state = passwordState,
+                    isPassword = true,
+                    isReadOnly = true,
+                    trailingIcon =
+                    {
+                        Icon(
+                            imageVector = Icons.Default.Build,
+                            contentDescription = "Edit Password")
+                            Modifier.clickable {
+                                // TODO
+                            }
+                    },
+                    onValueChange =
+                    {
+                        passwordState.value = it
+                    },
+                    isError = false
+                )
             }
-            Spacer(Modifier.padding(vertical = 20.dp))
-            Box(Modifier.align(Alignment.BottomCenter).padding(bottom = 20.dp)){
-                EventTrackerAppPrimaryButton("Complete") {
-                    val updatedProfile = Profile(
-                        id = profile.id,
-                        email = profile.email,
-                        fullName = fullNameState.value,
-                        userName = userNameState.value,
-                        gender = gender.value,
-                        photo = profilePhotoState.value
-                    )
-                    profileViewModel.updateProfile(updatedProfile)
-                    navController.popBackStack()
+
+            Spacer(
+                modifier = Modifier
+                    .padding(vertical = 20.dp)
+            )
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 20.dp)
+            ) {
+                EventTrackerAppPrimaryButton("Complete")
+                {
+                    if(fullNameState.value.isBlank() || userNameState.value.isBlank() || gender.value.isBlank())
+                    {
+                        fullNameError.value = fullNameState.value.isBlank()
+                        userNameError.value = userNameState.value.isBlank()
+                        genderError.value = gender.value.isBlank()
+                        return@EventTrackerAppPrimaryButton
+                    }else {
+                        val updatedProfile = Profile(
+                            id = profile.id,
+                            email = profile.email,
+                            fullName = fullNameState.value,
+                            userName = userNameState.value,
+                            gender = gender.value,
+                            photo = profilePhotoState.value,
+                            selectedCategoryList = profile.selectedCategoryList,
+                            addedEvents = profile.addedEvents,
+                            selectedTagList = profile.selectedTagList
+                        )
+                        profileViewModel.updateProfile(updatedProfile)
+                        navController.popBackStack()
+                    }
                 }
             }
         }
