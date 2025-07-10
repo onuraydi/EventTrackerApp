@@ -29,6 +29,7 @@ import com.example.eventtrackerapp.model.EventWithTags
 import com.example.eventtrackerapp.common.BottomNavBar
 import com.example.eventtrackerapp.common.CommentBottomSheet
 import com.example.eventtrackerapp.common.EventTrackerTopAppBar
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import kotlinx.coroutines.flow.Flow
@@ -134,16 +135,16 @@ private fun EventRow(event:Event,navController: NavController, commentList:Flow<
     )
     {
 
-        AsyncImage(
-            model = event.image,
-            contentDescription = "Event Image",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(220.dp)
-                .align(Alignment.CenterHorizontally)
-                .clickable { navController.navigate("detail/${event.id}") }
-                .clip(RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)),
-            contentScale = ContentScale.Crop
+        SelectableImageBox(
+            boxWidth = 220.dp,
+            boxHeight = 220.dp,
+            imagePath = event.image,
+            modifier = Modifier.fillMaxWidth(),
+            placeHolder = painterResource(R.drawable.ic_launcher_background),
+            shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
+            onClick = {
+                navController.navigate("detail/${event.id}")
+            }
         )
 
         Row {

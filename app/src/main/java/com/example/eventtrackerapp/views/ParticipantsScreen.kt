@@ -1,6 +1,7 @@
 package com.example.eventtrackerapp.views
 
 import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W500
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 import java.io.File
@@ -124,26 +127,16 @@ fun user(image:String,nameSurname:String, email:String)
             .padding(horizontal = 8.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            // TODO resim veri tabanından daha sonra gelecek
-            if(userImage.value!=""){
-                val imageFile = userImage.value.let { File(it) }
-                if(imageFile!=null && imageFile.exists()){
-                    AsyncImage(
-                        model = imageFile,
-                        null, modifier = Modifier
-                            .clip(CircleShape)
-                            .size(70.dp)
-                    )
-                }else{
-                    Image(
-                        painter = painterResource(R.drawable.ic_launcher_background),
-                        null, modifier = Modifier
-                            .clip(CircleShape)
-                            .size(70.dp)
-                    )
-                }
-            }
 
+            SelectableImageBox(
+                boxWidth = 70.dp,
+                boxHeight = 70.dp,
+                imagePath = userImage.value,
+                modifier = Modifier,
+                placeHolder = painterResource(R.drawable.ic_launcher_foreground),
+                shape = CircleShape,
+                borderStroke = BorderStroke(1.dp,MaterialTheme.colorScheme.primaryContainer)
+            )
 
             Column(modifier = Modifier
                 .fillMaxHeight()

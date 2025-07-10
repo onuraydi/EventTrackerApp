@@ -1,5 +1,6 @@
 package com.example.eventtrackerapp.views
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +37,7 @@ import com.example.eventtrackerapp.model.Profile
 import java.io.File
 import com.example.eventtrackerapp.common.BottomNavBar
 import com.example.eventtrackerapp.common.EventTrackerExtendedFloatingActionButton
+import com.example.eventtrackerapp.common.SelectableImageBox
 
 
 @Composable
@@ -59,37 +62,16 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
             ) {
-
-            if(profilePhoto.value!="")
-            {
-                val imageFile = profilePhoto.value?.let { File(it) }
-
-                if(imageFile!=null && imageFile.exists())
-                {
-                    AsyncImage(
-                        model = imageFile,
-                        contentDescription = "Profile Photo",
-                        error = painterResource(R.drawable.clock_icon),
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .clickable
-                            {
-                                println(profilePhoto.value)
-                            }
-                    )
-                }else{
-                    Image(
-                        painter = painterResource(R.drawable.ic_launcher_background),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .clickable
-                            {
-                                println(profilePhoto.value)
-                            }
-                    )
-                }
-            }
+            //Profil Fotoğrafı
+            SelectableImageBox(
+                boxWidth = 140.dp,
+                boxHeight = 140.dp,
+                imagePath = profilePhoto.value,
+                modifier = Modifier,
+                placeHolder = painterResource(R.drawable.ic_launcher_foreground),
+                shape = CircleShape,
+                borderStroke = BorderStroke(1.dp,MaterialTheme.colorScheme.primaryContainer)
+            )
 
                 Spacer(Modifier.padding(10.dp))
 

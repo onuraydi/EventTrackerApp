@@ -3,6 +3,7 @@
 package com.example.eventtrackerapp.views
 
 import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,6 +62,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import java.io.File
@@ -121,28 +124,15 @@ fun MyEventsScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                if(it.image!=""){
-                                    val imageFile = it.image?.let{File(it)}
-                                    if(imageFile!=null && imageFile.exists()){
-                                        AsyncImage(
-                                            model = imageFile,
-                                            modifier = Modifier
-                                                .clip(CircleShape)
-                                                .background(Color.Red)
-                                                .size(60.dp),
-                                            contentDescription = "Profile",
-                                        )
-                                    }else{
-                                        Image(
-                                            painter = painterResource(R.drawable.ic_launcher_background),
-                                            modifier = Modifier
-                                                .clip(CircleShape)
-                                                .background(Color.Red)
-                                                .size(60.dp),
-                                            contentDescription = "Profile",
-                                        )
-                                    }
-                                }
+                                SelectableImageBox(
+                                    boxWidth = 60.dp,
+                                    boxHeight = 60.dp,
+                                    imagePath = it.image,
+                                    modifier = Modifier,
+                                    placeHolder = painterResource(R.drawable.ic_launcher_background),
+                                    shape = CircleShape,
+                                    borderStroke = BorderStroke(1.dp,MaterialTheme.colorScheme.primaryContainer)
+                                )
 
                                 Column(
                                     Modifier

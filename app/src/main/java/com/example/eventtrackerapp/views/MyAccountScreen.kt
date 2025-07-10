@@ -30,6 +30,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -40,6 +41,7 @@ import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.common.EventTrackerTopAppBar
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import java.io.File
 
@@ -92,44 +94,14 @@ fun MyAccountScreen(
                         .padding(vertical = 15.dp)
                 )
 
-                Box(
-                    modifier = Modifier
-                        .size(80.dp, 80.dp)
-                        .border(
-                            border = BorderStroke(2.dp, Color.Black),
-                            shape = CircleShape
-                        )
-                        .clickable
-                        {
-                            // TODO
-                        }
-                ) {
-                    if(profilePhotoState.value != "")
-                    {
-                        val imageFile = profilePhotoState.value?.let { File(it) }
-                        if(imageFile!=null && imageFile.exists())
-                        {
-                            AsyncImage(
-                                model = imageFile,
-                                modifier = Modifier
-                                    .fillMaxSize(0.8f)
-                                    .align(Alignment.Center)
-                                    .padding(start = 5.dp),
-                                contentDescription = "PhotoAdd",
-                            )
-                        }else
-                        {
-                            Image(
-                                painter = painterResource(R.drawable.ic_launcher_background),
-                                modifier = Modifier
-                                    .fillMaxSize(0.8f)
-                                    .align(Alignment.Center)
-                                    .padding(start = 5.dp),
-                                contentDescription = "PhotoAdd",
-                            )
-                        }
-                    }
-                }
+                SelectableImageBox(
+                    boxWidth = 80.dp,
+                    boxHeight = 80.dp,
+                    imagePath = profilePhotoState.value,
+                    modifier = Modifier,
+                    placeHolder = painterResource(R.drawable.ic_launcher_background),
+                    shape = CircleShape
+                )
 
                 Spacer(modifier = Modifier
                     .padding(vertical = 5.dp)
@@ -138,7 +110,9 @@ fun MyAccountScreen(
                 Text(
                     text = "Update Profile Photo",
                     textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.clickable { }
+                    modifier = Modifier.clickable {
+                        //TODO resim yükleme
+                    }
                 )
 
                 Spacer(

@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -44,6 +45,7 @@ import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.common.BottomNavBar
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.ExploreViewModel
 import java.io.File
 
@@ -163,46 +165,17 @@ fun ExploreScreen(
 
 @Composable
 fun MyImage(event:Event,navController: NavController){
-    val randomHeights = remember { (150..300).random().dp }
-
-    val imageFile = event.image?.let { File(it) }
-    if(imageFile!=null && imageFile.exists()){
-        AsyncImage(
-            model = imageFile,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(randomHeights)
-                .border(
-                    border = BorderStroke(
-                        1.dp,
-                        Color.Black
-                    )
-                )
-                .clickable {
-                    navController.navigate("detail/${event.id}")
-                },
-            contentDescription = "",
-            contentScale = ContentScale.Crop,
-        )
-    }else{
-        Image(
-            painter = painterResource(R.drawable.ic_launcher_background),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(randomHeights)
-                .border(
-                    border = BorderStroke(
-                        1.dp,
-                        Color.Black
-                    )
-                )
-                .clickable {
-                    navController.navigate("detail/${event.id}")
-                },
-            contentScale = ContentScale.Crop,
-        )
-    }
+    SelectableImageBox(
+        boxWidth = 160.dp,
+        boxHeight = 200.dp,
+        imagePath = event.image,
+        modifier = Modifier,
+        placeHolder = painterResource(R.drawable.ic_launcher_background),
+        shape = RectangleShape,
+        onClick = {
+            navController.navigate("detail/${event.id}")
+        }
+    )
 
 }
 
