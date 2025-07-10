@@ -1,7 +1,6 @@
 package com.example.eventtrackerapp.views
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,7 +32,6 @@ import com.example.eventtrackerapp.common.EventTrackerTopAppBar
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import kotlinx.coroutines.flow.Flow
-import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

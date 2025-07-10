@@ -60,6 +60,7 @@ import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.model.EventWithTags
 import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.common.EventTrackerTopAppBar
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
