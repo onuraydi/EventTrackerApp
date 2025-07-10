@@ -191,7 +191,6 @@ fun CreateProfileScreen(
                         modifier = Modifier,
                         placeHolder = painterResource(R.drawable.profile_photo_add_icon),
                         shape = CircleShape,
-                        contentScale = ContentScale.Crop,
                         onClick = {
                             doRequestPermission(
                                 context= context,

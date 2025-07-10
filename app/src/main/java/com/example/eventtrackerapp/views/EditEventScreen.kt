@@ -52,6 +52,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -65,6 +66,7 @@ import com.example.eventtrackerapp.model.EventWithTags
 import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.common.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.TagViewModel
@@ -198,32 +200,17 @@ fun EditEventScreen(
                     Spacer(Modifier.padding(vertical = 12.dp))
 
                     //Event Fotoğrafı
-                    if(eventImage.value !=null){
-                        val imageFile = eventImage.value?.let { File(it) }
-                        if(imageFile!=null && imageFile.exists()){
-                            AsyncImage(
-                                model = imageFile,
-                                contentDescription = "Add Image",
-                                modifier = Modifier
-                                    .size(180.dp, 160.dp)
-                                    .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
-                                    .clickable {
-                                        /*TODO(Buraya fotoğraf yükleme gelecek)*/
-                                    }
-                            )
-                        }else{
-                            Image(
-                                painter = painterResource(R.drawable.ic_launcher_background),
-                                contentDescription = "Add Image",
-                                modifier = Modifier
-                                    .size(180.dp, 160.dp)
-                                    .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
-                                    .clickable {
-                                        /*TODO(Buraya fotoğraf yükleme gelecek)*/
-                                    }
-                            )
+                    SelectableImageBox(
+                        boxWidth = 180.dp,
+                        boxHeight = 160.dp,
+                        imagePath = eventImage.value,
+                        modifier = Modifier,
+                        placeHolder = painterResource(R.drawable.image_icon),
+                        shape = RoundedCornerShape(12.dp),
+                        onClick = {
+                            //TODO resim yükleme gelecek
                         }
-                    }
+                    )
                     Spacer(Modifier.padding(vertical = 5.dp))
                     Text("you are updated event photo")
 

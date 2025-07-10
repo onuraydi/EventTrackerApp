@@ -31,7 +31,6 @@ fun SelectableImageBox(
     imagePath:String?,
     modifier: Modifier = Modifier,
     placeHolder: Painter = painterResource(R.drawable.ic_launcher_background),
-    contentScale: ContentScale = ContentScale.Crop,
     shape: Shape,
     borderStroke: BorderStroke = BorderStroke(2.dp,Color.Black),
     onClick:()->Unit = {}
@@ -54,7 +53,7 @@ fun SelectableImageBox(
                         .fillMaxSize(1f)
                         .align(Alignment.Center)
                         .clip(shape),
-                    contentScale = contentScale
+                    contentScale = ContentScale.Crop
                 )
             } else {
                 //eğer dosya boş geldiyse
@@ -65,7 +64,7 @@ fun SelectableImageBox(
                         .fillMaxSize(1f)
                         .align(Alignment.Center)
                         .clip(shape),
-                    contentScale = contentScale
+                    contentScale = ContentScale.Crop
                 )
             }
         }else{
@@ -77,7 +76,7 @@ fun SelectableImageBox(
                     .fillMaxSize(1f)
                     .align(Alignment.Center)
                     .clip(shape),
-                contentScale = contentScale
+                contentScale = ContentScale.Crop
             )
         }
 

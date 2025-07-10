@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -165,42 +166,28 @@ fun DetailScreen(
                         navController.navigate("participants_screen/${event.id}")
                 })
                 Spacer(Modifier.padding(top = 5.dp))
-                LazyRow(modifier = Modifier
+                LazyRow(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
                     .clickable { navController.navigate("participants_screen/${event.id}") }) {
-                    items(participants){participant->
-                        if(participantsCount < 4)
-                        {
-                            repeat(participantsCount)
-                            {
-                                SelectableImageBox(
-                                    boxWidth = 60.dp,
-                                    boxHeight = 60.dp,
-                                    imagePath = participant.photo,
-                                    modifier = Modifier,
-                                    placeHolder = painterResource(R.drawable.ic_launcher_foreground),
-                                    shape = CircleShape,
-                                    borderStroke = BorderStroke(2.dp,MaterialTheme.colorScheme.primaryContainer)
-                                )
-                                Spacer(Modifier.padding(start = 10.dp))
-                            }
-                        }
-                        else
-                        {
-                            repeat(3)
-                            {
-                                SelectableImageBox(
-                                    boxWidth = 60.dp,
-                                    boxHeight = 60.dp,
-                                    imagePath = participant.photo,
-                                    modifier = Modifier,
-                                    placeHolder = painterResource(R.drawable.ic_launcher_foreground),
-                                    shape = CircleShape,
-                                    borderStroke = BorderStroke(2.dp,MaterialTheme.colorScheme.primaryContainer)
-                                )
-                                Spacer(Modifier.padding(start = 10.dp))
-                            }
+                    items(participants.take(3)){participant->
+                        //.take(3) ilk 3 elemanı alır. Eğer 3'ten fazla olursa aşağısı çalışır
+                        //itemsIndexed de olabilir.
+                        SelectableImageBox(
+                            boxWidth = 60.dp,
+                            boxHeight = 60.dp,
+                            imagePath = participant.photo,
+                            modifier = Modifier,
+                            placeHolder = painterResource(R.drawable.ic_launcher_foreground),
+                            shape = CircleShape,
+                            borderStroke = BorderStroke(2.dp,MaterialTheme.colorScheme.primaryContainer)
+                        )
+                        Spacer(Modifier.padding(start = 10.dp))
+                    }
+                    if(participantsCount > 3){
+                        item {
                             Text("+${participantsCount - 3} Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier)
-
                         }
                     }
                 }
