@@ -139,16 +139,16 @@ class ProfileRepository(
             .addOnFailureListener { e-> Log.w(TAG,"Error deleting profile from Firestore") }
     }
 
-    suspend fun updateAddedEventIds(profileId:String,newAddedEventıds:List<String>){
+    suspend fun updateAddedEventIds(profileId:String,newAddedEventIds:List<String>){
         //Room'u güncelle
         val profile = profileDao.getById(profileId).first()
         profile?.let {
-            val updatedProfile = it.copy(addedEventIds = newAddedEventıds)
+            val updatedProfile = it.copy(addedEventIds = newAddedEventIds)
             profileDao.add(updatedProfile)
         }
 
         //Sonra Firestore'u güncelle
-        profilesCollection.document(profileId).update("addedEventIds",newAddedEventıds)
+        profilesCollection.document(profileId).update("addedEventIds",newAddedEventIds)
             .addOnSuccessListener{Log.d(TAG,"Added event IDs updated in Firestore")}
             .addOnFailureListener { e-> Log.w(TAG,"Error updating added event IDs in Firestore",e) }
     }
