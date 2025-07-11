@@ -3,10 +3,6 @@ package com.example.eventtrackerapp.model.firebasemodels
 import com.google.firebase.database.PropertyName
 
 data class FirebaseLike(
-    @get:PropertyName("id")
-    @set:PropertyName("id")
-    var id:String = "",
-
     @get:PropertyName("eventId")
     @set:PropertyName("eventId")
     var eventId:String = "",
