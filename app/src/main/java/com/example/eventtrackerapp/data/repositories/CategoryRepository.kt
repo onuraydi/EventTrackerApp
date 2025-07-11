@@ -1,84 +1,51 @@
 package com.example.eventtrackerapp.data.repositories
 
 import com.example.eventtrackerapp.data.mappers.CategoryMapper
+import com.example.eventtrackerapp.data.mappers.TagMapper
 import com.example.eventtrackerapp.data.source.local.CategoryDao
+import com.example.eventtrackerapp.data.source.local.TagDao
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseCategory
-import com.example.eventtrackerapp.model.roommodels.Category
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.example.eventtrackerapp.model.firebasemodels.FirebaseTag
+import com.example.eventtrackerapp.model.roommodels.CategoryWithTag
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
 
 
-@Singleton
-class CategoryRepository @Inject constructor(
-    private val categoryDao:CategoryDao,
-    private val firebaseDatabase: FirebaseDatabase
+class CategoryRepository(
+    private val categoryDao: CategoryDao,
+    private val tagDao: TagDao,
+    private val firestore: FirebaseFirestore
 ) {
-    private val categoriesRef = firebaseDatabase.getReference("categories")
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+    private val categoryCollection = firestore.collection("categories")
+    private val tagCollection = firestore.collection("tags")
 
-    init {
-        // senkronizasyonu başlatıyoruz.
-        syncCategoriesFromFirebase()
-    }
-
-
-    fun getAllCategoriesFromLocal(): Flow<List<Category>>{
-        return categoryDao.getAll()
-    }
-
-    fun getCategoryByIdFromLocal(categoryId: String):Flow<Category> {
-        return categoryDao.getById(categoryId)
-    }
-
-    // Tek seferlik room'dan alma metodu
-    suspend fun getAllCategoriesOnce(): List<Category> {
-        return categoryDao.getAllCategoriesOnce()
-    }
-
-    suspend fun saveCategory(category: Category)
+    suspend fun initializeCategoriesAndTags()
     {
-        val finalCategory = if(category.id.isEmpty()){
-            val newRef = categoriesRef.push()
-            category.copy(id = newRef.key ?: throw IllegalStateException("Firebase Category ID could not be generated"))
-        }else{
-            category
+        val categorySnapshot = categoryCollection.get().await()
+        val firebaseCategories = categorySnapshot.documents.mapNotNull { it.toObject(FirebaseCategory::class.java) }
+        firebaseCategories.forEach { firebaseCategory ->
+            // TODO BURADAN KAYNAKLI YANLIŞ VERİLER GELEBİLİR
+            val roomCategory = CategoryMapper.toEntity(firebaseCategory)
+            categoryDao.insert(roomCategory)
         }
 
-        categoryDao.insert(finalCategory) // rooma kaydeder
-        val firebaseCategory = CategoryMapper.toFirebaseModel(finalCategory)
-        categoriesRef.child(firebaseCategory.id).setValue(firebaseCategory).await() // firebase' e kaydet
+        val tagSnapshot = tagCollection.get().await()
+        val firebaseTags = tagSnapshot.documents.mapNotNull { it.toObject(FirebaseTag::class.java) }
+        firebaseTags.forEach { firebaseTag ->
+            val roomTags = TagMapper.toEntity(firebaseTag)
+            tagDao.insert(roomTags)
+        }
     }
 
-    private fun syncCategoriesFromFirebase(){
-
-        categoriesRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                coroutineScope.launch {
-                    val firebaseCategories = mutableListOf<FirebaseCategory>()
-                    for(childSnapShot in snapshot.children) {
-                        val firebaseCategory = childSnapShot.getValue(FirebaseCategory::class.java)?.apply {
-                            id = childSnapShot.key ?: ""
-                        }
-                        firebaseCategory?.let { firebaseCategories.add(it) }
-                    }
-                    categoryDao.insertAllCategories(CategoryMapper.toEntityList(firebaseCategories))
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // TODO HATA yönetimi
-            }
-        })
+    fun getCategoriesWithTags(): Flow<List<CategoryWithTag>>
+    {
+        return categoryDao.getCategoryWithTags()
     }
 
+    fun getCategoryWithTagsByCategoryId(categoryId:String):Flow<CategoryWithTag?>
+    {
+        return categoryDao.getCategoryWithTagsById(categoryId)
+    }
 }
 
