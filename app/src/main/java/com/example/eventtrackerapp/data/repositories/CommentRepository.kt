@@ -1,105 +1,87 @@
 package com.example.eventtrackerapp.data.repositories
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import android.util.Log
 import com.example.eventtrackerapp.data.mappers.CommentMapper
 import com.example.eventtrackerapp.data.source.local.CommentDao
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseComment
 import com.example.eventtrackerapp.model.roommodels.Comment
-import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.CoroutineScope
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class CommentRepository @Inject constructor(
+class CommentRepository(
     private val commentDao: CommentDao,
-    private val firebaseDatabase: FirebaseDatabase
+    private val firestore: FirebaseFirestore
 ){
+    private val commentsCollection = firestore.collection("comments")
 
-    private val commentRef = firebaseDatabase.getReference("comments")
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
-
-    init {
-        syncCommentFromFirebase()
-    }
-
-    fun getAllCommentFromLocal(): Flow<List<Comment>> {
-        return commentDao.getAllComment()
-    }
-
-
-    fun getCommentByIdFromLocal(commentId:String):Flow<Comment>
-    {
-        return commentDao.getCommentById(commentId)
-    }
-
-    fun getCommentForEventFromLocal(eventId:String):Flow<List<Comment>>
-    {
+    //Etkinliğe özel yorumları Room'dan al ve Firestore'dan dinle
+    fun getCommentsForEvent(eventId:String):Flow<List<Comment>>{
         return commentDao.getCommentsForEvent(eventId)
+            .onEach {
+                listenForFirestoreCommentsForEvent(eventId)
+            }
     }
 
-    fun getCommentForEventWithDetailFromLocal(eventId: String):Flow<List<CommentWithProfileAndEvent>>{
-        return commentDao.getCommentForEventWithDetail(eventId)
-    }
+    //Firestore'dan belirli bir etkinliğe ait yorumları dinleme
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun listenForFirestoreCommentsForEvent(eventId:String){
+        commentsCollection.whereEqualTo("eventId",eventId)
+            .addSnapshotListener{snapshot,e->
+                if(e!=null){
+                    Log.w(TAG,"Listen failed for comments of event $eventId")
+                }
 
-    suspend fun getCommentByIdOnce(commentId: String):Comment {
-        return commentDao.getCommentByIdOnce(commentId)
-    }
+                if(snapshot!=null){
+                    val firebaseComments = snapshot.documents.mapNotNull { it.toObject(FirebaseComment::class.java) }
+                    GlobalScope.launch(Dispatchers.IO){
+                        val currentRoomComments = commentDao.getCommentsForEvent(eventId).first()
+                        val currentRoomCommentIds = currentRoomComments.map { it.id }.toSet()
+                        val firebaseCommentIds = firebaseComments.map { it.id }.toSet()
 
-    suspend fun getCommentsForEventOnce(eventId:String):List<Comment>
-    {
-        return commentDao.getCommentsForEventOnce(eventId)
-    }
-
-    suspend fun getCommentsForProfileOnce(profileId:String):List<Comment>
-    {
-        return commentDao.getCommentsForProfileOnce(profileId)
-    }
-
-
-    suspend fun saveComment(comment: Comment){
-        val finalComment = if(comment.id.isEmpty()){
-            val newRef = commentRef.push()
-            comment.copy(id = newRef.key ?: throw IllegalStateException("Firebase Comment ID could not be generated"))
-        }else{
-            comment
-        }
-        commentDao.insertComment(finalComment)
-
-        var firebaseComment = CommentMapper.toFirebaseModel(finalComment)
-        commentRef.child(firebaseComment.id).setValue(firebaseComment).await()
-    }
-
-
-
-    private fun syncCommentFromFirebase(){
-        commentRef.addValueEventListener(object : ValueEventListener{
-            override fun onDataChange(snapshot: DataSnapshot) {
-                coroutineScope.launch {
-                    val firebaseComments = mutableListOf<FirebaseComment>()
-                    for (childSnapShot in snapshot.children){
-                        val firebaseComment = childSnapShot.getValue(FirebaseComment::class.java)?.apply {
-                            id = childSnapShot.key ?: ""
+                        //Firestore'dan gelenleri Room'a ekle/güncelle
+                        firebaseComments.forEach { fbComment->
+                            val roomComment = CommentMapper.toEntity(fbComment)
+                            commentDao.insertComment(roomComment)
                         }
-                        firebaseComment?.let {
-                            firebaseComments.add(it)
-                        }
+
                     }
-                    commentDao.insertAllComments(CommentMapper.toEntityList(firebaseComments))
                 }
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                // TODO HATA YÖNETİMİ
-            }
-        })
     }
+
+    //Yorum Ekle
+    suspend fun upsertComment(comment:Comment){
+        //Room'a kaydet
+        commentDao.insertComment(comment)
+
+        //Sonra Firestore'a kaydet
+        val firebaseComment = CommentMapper.toFirebaseModel(comment)
+        commentsCollection.document(firebaseComment.id).set(firebaseComment)
+            .addOnSuccessListener { Log.d(TAG,"Comment successfully upserted to Firestore") }
+            .addOnFailureListener { e-> Log.w(TAG,"Error upserting comment to Firestore",e) }
+    }
+
+    //Bir etkinliğe ait tüm yorumları silme(Event silinirken çağrılabilir)
+    suspend fun deleteCommentsForEvent(eventId:String){
+        //Room'dan sil
+        commentDao.deleteCommentsForEvent(eventId)
+
+        //Firestore'dan sil (Firestore'da genelde Cloud Functions tercih ediliyormuş)
+        commentsCollection.whereEqualTo("eventId",eventId).get().await().documents.forEach { doc->
+            doc.reference.delete()
+        }
+        Log.d(TAG,"All comments for event $eventId deleted from Firestore.")
+    }
+
+    companion object{
+        private const val TAG = "CommentsRepository"
+    }
+
 }
