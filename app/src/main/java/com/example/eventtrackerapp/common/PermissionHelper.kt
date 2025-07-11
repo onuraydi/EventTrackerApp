@@ -24,7 +24,7 @@ object PermissionHelper {
         launcher.launch(intent)
     }
 
-    fun saveEventImageToInternalStorage(context:Context, uri:Uri):String?{
+    fun saveImageToInternalStorage(context:Context, uri:Uri):String?{
         val contentResolver = context.contentResolver
         try{
             val inputStream = contentResolver.openInputStream(uri)

@@ -84,6 +84,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.PermissionHelper
 import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
@@ -136,7 +137,7 @@ fun AddEventScreen(
             //kullanıcı resim seçti ve gelen intent boş değilse
             val data = result.data?.data
             if(data!=null){
-                val savedUri = saveEventImageToInternalStorage(context,data)
+                val savedUri = PermissionHelper.saveImageToInternalStorage(context,data)
                 imagePath.value = savedUri.toString()
             }
         }
@@ -148,7 +149,7 @@ fun AddEventScreen(
     ) {granted->
         if(granted){
             //kullanıcı izin verdi
-            goToGallery(imagePickerLauncher)
+            PermissionHelper.goToGallery(imagePickerLauncher)
         }else{
             Toast.makeText(context,"İzin kalıcı olarak reddedildi. Lütfen ayarlardan izni verin",Toast.LENGTH_LONG).show()
         }
@@ -219,12 +220,12 @@ fun AddEventScreen(
                     SelectableImageBox(
                         boxWidth= 180.dp,
                         boxHeight = 160.dp,
-                        imagePath.value,
+                        imagePath = imagePath.value,
                         modifier = Modifier,
                         placeHolder = painterResource(R.drawable.image_icon),
                         shape = RoundedCornerShape(12.dp),
                         onClick = {
-                            doRequestPermission(
+                            PermissionHelper.requestPermission(
                                 context,
                                 permission = permission,
                                 viewModel = permissionViewModel,
@@ -467,53 +468,6 @@ fun AddEventScreen(
         }
     }
 
-fun doRequestPermission(
-    context: Context,
-    permission:String,
-    viewModel: PermissionViewModel,
-    permissionLauncher:ManagedActivityResultLauncher<String,Boolean>,
-    imagePickerLauncher:ManagedActivityResultLauncher<Intent,ActivityResult>
-){
-    if(ContextCompat.checkSelfPermission(context,permission)!=PackageManager.PERMISSION_GRANTED){
-        //izin reddedildi
-        if(viewModel.shouldShowRationale(context)){
-            Toast.makeText(context,"Fotoğraf yüklemek için galeri izni lazım",Toast.LENGTH_LONG).show()
-            permissionLauncher.launch(permission)
-        }else{
-            permissionLauncher.launch(permission)
-        }
-    }else{
-        //izin verildi
-        goToGallery(imagePickerLauncher)
-    }
-}
-
-fun goToGallery(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>){
-    val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-        type = "image/*"
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) //urileri kalıcı olarak tutmak için gerekli
-    }
-    launcher.launch(intent)
-}
-
-
-fun saveEventImageToInternalStorage(context: Context, uri:Uri):String?{
-    val contentResolver = context.contentResolver
-    try {
-        val inputStream = contentResolver.openInputStream(uri)
-        val fileName = "my_image${System.currentTimeMillis()}.jpg" //benzersiz dosya adı
-        val outputFile = File(context.filesDir,fileName) // uygulamanın dahili depolama dizini
-
-        FileOutputStream(outputFile).use{ outputStream->
-            inputStream?.copyTo(outputStream)
-        }
-        return outputFile.absolutePath //kaydedilen dosyanın mutlak yolunu döndürür
-    }catch (e: IOException){
-        e.printStackTrace()
-        return null
-    }
-}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)

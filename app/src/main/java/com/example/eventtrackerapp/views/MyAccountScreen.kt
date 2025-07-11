@@ -74,7 +74,7 @@ fun MyAccountScreen(
         if(result.resultCode == Activity.RESULT_OK && result.data != null){
             val data = result.data?.data
             if(data!=null){
-                val savedUri = saveProfileImageToInternalStorage(context,data)
+                val savedUri = PermissionHelper.saveImageToInternalStorage(context,data)
                 profilePhotoState.value = savedUri.toString()
             }
         }

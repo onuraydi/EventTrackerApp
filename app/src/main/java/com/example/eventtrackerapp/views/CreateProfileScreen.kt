@@ -77,6 +77,7 @@ import com.example.eventtrackerapp.model.CategoryWithTag
 import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.model.Tag
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.PermissionHelper
 import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
@@ -124,7 +125,7 @@ fun CreateProfileScreen(
             //kullanıcının seçtiği resmi viewModel
             // tarafında doldurup burada imageUri ile aldık
             if(data!=null){
-                val savedUri = saveProfileImageToInternalStorage(context,data)
+                val savedUri = PermissionHelper.saveImageToInternalStorage(context,data)
                 imagePath.value = savedUri.toString()
             }
         }
@@ -136,7 +137,7 @@ fun CreateProfileScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted->
         if(granted){
-            openGallery(imagePickerLauncher)
+            PermissionHelper.goToGallery(imagePickerLauncher)
         }else{
             Toast.makeText(context,"İzin kalıcı olarak reddedildi. Lütfen ayarlardan izin verin",Toast.LENGTH_LONG).show()
         }
@@ -186,7 +187,7 @@ fun CreateProfileScreen(
                         placeHolder = painterResource(R.drawable.profile_photo_add_icon),
                         shape = CircleShape,
                         onClick = {
-                            doRequestPermission(
+                            PermissionHelper.requestPermission(
                                 context= context,
                                 permission = permission,
                                 viewModel = permissionViewModel,
@@ -434,52 +435,6 @@ fun CreateProfileScreen(
 
         }
     }
-
-
-fun requestPermission(
-    context: Context,
-    permission:String,
-    viewModel: PermissionViewModel,
-    permissionLauncher:ManagedActivityResultLauncher<String,Boolean>,
-    imagePickerLauncher:ManagedActivityResultLauncher<Intent,ActivityResult>
-){
-    if(ContextCompat.checkSelfPermission(context,permission)!= PackageManager.PERMISSION_GRANTED){
-        //izin reddedildi, sebebini göster ve izin iste
-        if(viewModel.shouldShowRationale(context)){
-            Toast.makeText(context,"Fotoğraf yüklemek için galeri izni lazım",Toast.LENGTH_LONG).show()
-            permissionLauncher.launch(permission)
-        }else{
-            //sebebi gösterilmedi, izin iste
-            permissionLauncher.launch(permission)
-        }
-    }else{
-        //izin verildi
-        openGallery(imagePickerLauncher)
-    }
-}
-
-
-fun saveProfileImageToInternalStorage(context: Context, uri:Uri):String?{
-    val contentResolver = context.contentResolver
-    try {
-        val inputStream = contentResolver.openInputStream(uri)
-        val fileName = "my_image${System.currentTimeMillis()}.jpg" //benzersiz dosya adı
-        val outputFile = File(context.filesDir,fileName) // uygulamanın dahili depolama dizini
-
-        FileOutputStream(outputFile).use{ outputStream->
-            inputStream?.copyTo(outputStream)
-        }
-        return outputFile.absolutePath //kaydedilen dosyanın mutlak yolunu döndürür
-    }catch (e: IOException){
-        e.printStackTrace()
-        return null
-    }
-}
-
-fun openGallery(launcher:ManagedActivityResultLauncher<Intent,ActivityResult>){
-    val intent = Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-    launcher.launch(intent)
-}
 
 //@Preview(showBackground = true)
 //@Composable
