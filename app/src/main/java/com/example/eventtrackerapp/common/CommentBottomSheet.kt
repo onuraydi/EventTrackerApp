@@ -74,13 +74,15 @@ fun CommentBottomSheet(
         sheetState = sheetState,
         modifier = Modifier
             .navigationBarsPadding()
-            .imePadding()
+            .imePadding(),
+        containerColor = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxWidth()
                 .heightIn(min = 300.dp, max = 600.dp)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             // Başlık
             Text(
@@ -107,7 +109,7 @@ fun CommentBottomSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -151,7 +153,8 @@ fun CommentBottomSheet(
 @Composable
 fun CommentItem(comment: CommentWithProfileAndEvent) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
         Image(

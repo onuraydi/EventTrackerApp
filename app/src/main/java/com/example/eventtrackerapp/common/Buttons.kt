@@ -3,6 +3,8 @@ package com.example.eventtrackerapp.common
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +41,12 @@ fun EventTrackerAppOutlinedButton(
         onClick = onClick,
         Modifier.fillMaxWidth(0.7f),
         shape = RoundedCornerShape(12.dp),
+//        colors = ButtonColors(
+//            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+//            contentColor = MaterialTheme.colorScheme.onBackground,
+//            disabledContainerColor = MaterialTheme.colorScheme.primary,
+//            disabledContentColor = MaterialTheme.colorScheme.primaryContainer
+//        )
     ){
         Text(text= text, fontSize = fontSize, textDecoration = textDecoration)
     }
