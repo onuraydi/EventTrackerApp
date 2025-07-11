@@ -25,6 +25,6 @@ import androidx.room.Index
 )
 data class Like(
     val profileId:String = "",
-    val eventId: Int = 0,
+    val eventId: String = "",
 ) {
 }
