@@ -174,12 +174,12 @@ fun CommentItem(comment: CommentWithProfileAndEvent) {
                 text = "${comment.profile.userName}",
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.surfaceTint
             )
             Text(
                 text = "${comment.comment.comment}",
                 fontSize = 14.sp,
-                color = Color.DarkGray,
+                color = MaterialTheme.colorScheme.surfaceTint,
                 modifier = Modifier.padding(top = 2.dp)
             )
         }

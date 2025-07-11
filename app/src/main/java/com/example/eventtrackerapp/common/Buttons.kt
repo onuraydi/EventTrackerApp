@@ -24,7 +24,13 @@ fun EventTrackerAppPrimaryButton(
     Button(
         onClick = onClick,
         Modifier.fillMaxWidth(0.7f),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.surfaceTint,
+            disabledContentColor = MaterialTheme.colorScheme.secondaryContainer,
+            disabledContainerColor = MaterialTheme.colorScheme.secondary
+        )
     ) {
         Text(text, fontSize = fontSize)
     }
@@ -41,12 +47,12 @@ fun EventTrackerAppOutlinedButton(
         onClick = onClick,
         Modifier.fillMaxWidth(0.7f),
         shape = RoundedCornerShape(12.dp),
-//        colors = ButtonColors(
-//            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-//            contentColor = MaterialTheme.colorScheme.onBackground,
-//            disabledContainerColor = MaterialTheme.colorScheme.primary,
-//            disabledContentColor = MaterialTheme.colorScheme.primaryContainer
-//        )
+        colors = ButtonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.surfaceTint,
+            disabledContentColor = MaterialTheme.colorScheme.secondaryContainer,
+            disabledContainerColor = MaterialTheme.colorScheme.secondary
+        )
     ){
         Text(text= text, fontSize = fontSize, textDecoration = textDecoration)
     }
