@@ -1,6 +1,7 @@
 package com.example.eventtrackerapp.data.source.local
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -14,11 +15,37 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface EventDao {
 
+    @Insert
+    suspend fun insert(event: Event)
+
+    @Update
+    suspend fun update(event: Event)
+
     @Query("SELECT * FROM events")
     fun getAll():Flow<List<Event>>
 
+    @Transaction
+    @Query("SELECT * FROM events")
+    fun getAllEventsWithRelations():Flow<List<EventWithTags>>
+
+    @Transaction
+    @Query("SELECT * FROM events WHERE id = :eventId")
+    fun getEventWithRelationsById(eventId: String): Flow<EventWithTags?>
+
     @Query("Select * FROM events WHERE id = :id")
     fun getById(id:String): Flow<Event>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertEventTagCrossRef(crossRef: EventTagCrossRef)
+
+    @Delete
+    suspend fun deleteEventTagCrossRef(crossRef: EventTagCrossRef)
+
+    @Delete
+    suspend fun deleteEvent(event: Event)
+
+    @Query("DELETE FROM EventTagCrossRef WHERE eventId = :eventId")
+    suspend fun deleteEventTagCrossRefsForEvent(eventId: String)
 
     @Query("SELECT * FROM events")
     suspend fun getAllEventOnce():List<Event>
@@ -26,20 +53,10 @@ interface EventDao {
     @Query("SELECT * FROM events WHERE categoryId = :categoryId")
     fun getEventsByCategoryId(categoryId:String):Flow<List<Event>>
 
-    @Query("SELECT * FROM events WHERE tagIds= :tagId")
-    fun getEventsByTagId(tagId:String):Flow<List<Event>>
-
     @Query("SELECT * FROM events WHERE ownerId = :ownerId")
     suspend fun getEventsByOwnerIdOnce(ownerId: String):List<Event>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllEvents(event: List<Event>)
 
-    @Insert
-    suspend fun add(event: Event):Long
-
-    @Update
-    suspend fun update(event: Event):Int
 
     @Query("delete from events where id = :eventId")
     suspend fun delete(eventId: Int)
