@@ -40,6 +40,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -80,8 +81,8 @@ fun DetailScreen(
 {
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    val likeCount by likeViewModel.getLikeCount(event.id).collectAsState(initial = 0)
-    val isLiked by likeViewModel.isLikedByUser(event.id, profileId).collectAsState(initial = false)
+    val likeCount = likeViewModel.getLikeCountForEvent(event.id)
+    val isLiked = likeViewModel.isEventLikedByUser(event.id,profileId)
 
     val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(initial = 0)
 
@@ -221,11 +222,11 @@ fun DetailScreen(
 
                     ) {
                     Row(Modifier.weight(1f),horizontalArrangement = Arrangement.Center){
-                        if (isLiked == false) {
+                        if (isLiked.value == false) {
                             Icon(Icons.Filled.FavoriteBorder, null, modifier = Modifier
                                 .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
                                 .clickable {
-                                    likeViewModel.likeEvent(event.id,profileId)
+                                    likeViewModel.toggleLike(event.id,profileId)
                                 })
                             Text(
                                 text = "${likeCount}",
@@ -235,7 +236,7 @@ fun DetailScreen(
                             Icon(Icons.Filled.Favorite, null, modifier = Modifier
                                 .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
                                 .clickable {
-                                    likeViewModel.unlikeEvent(event.id,profileId)
+                                    likeViewModel.toggleLike(event.id,profileId)
                                 })
                             Text(
                                 text = "${likeCount}",

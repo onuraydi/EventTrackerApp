@@ -96,8 +96,8 @@ private fun EventRow(event: Event, navController: NavController, commentList:Flo
 
     var showBottomSheet by remember { mutableStateOf(false ) }
 
-    val likeCount by likeViewModel.getLikeCount(event.id).collectAsState(initial = 0)
-    val isLiked by likeViewModel.isLikedByUser(event.id, profileId).collectAsState(initial = false)
+    val likeCount = likeViewModel.getLikeCountForEvent(event.id)
+    val isLiked = likeViewModel.isEventLikedByUser(event.id,profileId)
 
     val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(initial = 0)
 
@@ -119,12 +119,12 @@ private fun EventRow(event: Event, navController: NavController, commentList:Flo
 
 
         Row() {
-            if(isLiked == false)
+            if(isLiked.value == false)
             {
                 Icon(Icons.Filled.FavoriteBorder,null, modifier = Modifier
                     .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
                     .clickable {
-                        likeViewModel.likeEvent(eventId = event.id,profileId);
+                        likeViewModel.toggleLike(eventId = event.id,profileId);
                     })
                 Text(text = "${likeCount}",Modifier.align(Alignment.CenterVertically))
             }else
@@ -132,7 +132,7 @@ private fun EventRow(event: Event, navController: NavController, commentList:Flo
                 Icon(Icons.Filled.Favorite,null, modifier = Modifier
                     .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
                     .clickable {
-                        likeViewModel.unlikeEvent(event.id,profileId)
+                        likeViewModel.toggleLike(event.id,profileId)
                     })
                 Text(text = "${likeCount}",Modifier.align(Alignment.CenterVertically))
             }
