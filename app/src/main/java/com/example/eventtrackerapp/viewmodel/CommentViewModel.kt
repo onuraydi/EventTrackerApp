@@ -37,7 +37,7 @@ class CommentViewModel(application: Application):AndroidViewModel(application) {
     }
 
     // TODO buraya güncelleme gerekebilir dao kısmında da suspend yapmak gerekebilir.
-    fun getComments(eventId: Int):Flow<List<CommentWithProfileAndEvent>>{
+    fun getComments(eventId: String):Flow<List<CommentWithProfileAndEvent>>{
             return commentDao.getCommentsForEvent(eventId)
     }
 

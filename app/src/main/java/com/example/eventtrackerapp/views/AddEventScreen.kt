@@ -66,6 +66,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -102,7 +103,7 @@ import java.util.Locale
 fun AddEventScreen(
     navController: NavController,
     tagViewModel: TagViewModel = viewModel(),
-    categoryViewModel: CategoryViewModel = viewModel(),
+    categoryViewModel: CategoryViewModel,
     eventViewModel: EventViewModel = viewModel(),
     permissionViewModel: PermissionViewModel = viewModel(),
     ownerId:String
@@ -111,7 +112,7 @@ fun AddEventScreen(
         tagViewModel.resetTag()
     }
     
-    val categoryWithTags by categoryViewModel.categoryWithTags.collectAsState()
+    val categoryWithTags by categoryViewModel.categoryWithTags.observeAsState(emptyList())
     val selectedTag by tagViewModel.selectedTag.collectAsStateWithLifecycle()
     val chosenTags by tagViewModel.chosenTags.collectAsStateWithLifecycle()
 
@@ -183,7 +184,7 @@ fun AddEventScreen(
                 val eventDetail = rememberSaveable { mutableStateOf("") }
                 val detailError = rememberSaveable{mutableStateOf(false)}
 
-                val selectedDate = rememberSaveable { mutableStateOf<Long?>(null) }
+                val selectedDate = rememberSaveable { mutableStateOf<Long?>(0) }
                 val dateError = rememberSaveable{mutableStateOf(false)}
 
                 val showModal = rememberSaveable { mutableStateOf(false) }
@@ -196,7 +197,7 @@ fun AddEventScreen(
 
                 val categoryError = rememberSaveable{mutableStateOf(false)}
 
-                val categoryId = rememberSaveable{ mutableStateOf(0) }
+                val categoryId = rememberSaveable{ mutableStateOf("") }
                 val isExpanded = rememberSaveable{ mutableStateOf(false)}
 
                 Column(
@@ -473,8 +474,7 @@ fun AddEventScreen(
                                     ownerId = ownerId,
                                     name = eventName.value,
                                     detail = eventDetail.value,
-                                    image = R.drawable.ic_launcher_background,
-                                    date = selectedDate.value,
+                                    date = selectedDate.value!!,
                                     duration = eventDuration.value,
                                     location = eventLocation.value,
                                     likeCount = 0,

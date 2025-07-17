@@ -6,9 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -34,7 +36,7 @@ import com.google.firebase.auth.FirebaseAuth
 fun AppNavGraph(
     navController: NavHostController,
     eventViewModel: EventViewModel = viewModel(),
-    categoryViewModel: CategoryViewModel = viewModel(),
+    categoryViewModel: CategoryViewModel = hiltViewModel(),
     tagViewModel: TagViewModel = viewModel(),
     authViewModel: AuthViewModel = viewModel(),
     profileViewModel: ProfileViewModel = viewModel(),
@@ -71,11 +73,7 @@ fun AppNavGraph(
             }
 
             composable("create_profile_screen") {
-                LaunchedEffect(Unit) {
-                    categoryViewModel.getAllCategoryWithTags()
-                }
-                val categoryWithTags by categoryViewModel
-                    .categoryWithTags.collectAsStateWithLifecycle(initialValue = emptyList())
+                val categoryWithTags by categoryViewModel.categoryWithTags.observeAsState(emptyList())
                 val uid = auth.currentUser?.uid
                 val email = auth.currentUser?.email
                 CreateProfileScreen(navController,tagViewModel,profileViewModel,permissionViewModel,userPreferences,categoryWithTags,uid,email)
@@ -102,9 +100,7 @@ fun AppNavGraph(
 
             composable("addEvent") {
                 val uid = auth.currentUser?.uid
-                LaunchedEffect(Unit) {
-                    categoryViewModel.getAllCategoryWithTags()
-                }
+
                 AddEventScreen(
                     navController = navController,
                     tagViewModel,
@@ -126,18 +122,18 @@ fun AppNavGraph(
 
                 val event by eventViewModel.event.collectAsState()
 
-                val category by categoryViewModel.category.collectAsState()
+                val category by categoryViewModel.categoryWithTags.observeAsState(emptyList())
 
-                LaunchedEffect(event?.categoryId) {
-                    val categoryID = event?.categoryId ?: 0
-                    if (categoryID != 0) {
-                        categoryViewModel.getCategoryById(categoryID)
-                    }
-                }
                 var uid = auth.currentUser?.uid!!
 
+                // TODO bu metot belki değişebilir
+
+                val detailCategory = category.filter { cat ->
+                    cat.category.id == event.categoryId
+                }.map { it.category }.first()
+
                 var commentList = commentViewModel.getComments(eventId = event.id)
-                DetailScreen(event = event, navController = navController, category = category, commentList,commentViewModel,likeViewModel,uid,participantsViewModel)
+                DetailScreen(event = event, navController = navController, category = detailCategory, commentList,commentViewModel,likeViewModel,uid,participantsViewModel)
             }
 
 

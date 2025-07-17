@@ -15,7 +15,7 @@ interface LikeDao {
     suspend fun insertLike(like: Like)
 
     @Query("SELECT * FROM likes")
-    suspend fun getAllLikes():Flow<List<Like>>
+    fun getAllLikes():Flow<List<Like>>
 
     @Delete
     suspend fun deleteLike(like:Like)

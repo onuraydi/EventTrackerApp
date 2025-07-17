@@ -1,38 +1,24 @@
 package com.example.eventtrackerapp.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
-import com.example.eventtrackerapp.model.roommodels.Category
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import com.example.eventtrackerapp.data.repositories.CategoryRepository
 import com.example.eventtrackerapp.model.roommodels.CategoryWithTag
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class CategoryViewModel(application: Application): AndroidViewModel(application){
 
-    private val categoryDao = EventTrackerDatabase.getDatabase(application,viewModelScope).categoryDao()
+@HiltViewModel
+class CategoryViewModel @Inject constructor(
+    private val categoryRepository: CategoryRepository
+) : ViewModel()
+{
+    // TODO ileride farklı işlemler de gelebilir
 
-    private val _categoryWithTags = MutableStateFlow<List<CategoryWithTag>>(arrayListOf())
-    val categoryWithTags:StateFlow<List<CategoryWithTag>> = _categoryWithTags
+    val categoryWithTags: LiveData<List<CategoryWithTag>> = categoryRepository.getCategoriesWithTags().asLiveData()
 
-    private val _category = MutableStateFlow<Category>(Category());
-    val category: MutableStateFlow<Category> = _category
-
-    fun getAllCategoryWithTags(){
-        viewModelScope.launch{
-            categoryDao.getCategoryWithTags()
-                .collect{data->
-                    _categoryWithTags.value = data
-                }
-        }
-    }
-
-    fun getCategoryById(categoryId:Int){
-        viewModelScope.launch(Dispatchers.IO) {
-            _category.value = categoryDao.getById(categoryId)
-        };
+    fun getCategoryWithTagsById(categoryId: String): LiveData<CategoryWithTag?> {
+        return categoryRepository.getCategoryWithTagsByCategoryId(categoryId).asLiveData()
     }
 }
