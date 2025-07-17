@@ -1,122 +1,71 @@
 package com.example.eventtrackerapp.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
+import com.example.eventtrackerapp.data.repositories.CategoryRepository
+import com.example.eventtrackerapp.data.repositories.EventRepository
+import com.example.eventtrackerapp.model.roommodels.CategoryWithTag
 import com.example.eventtrackerapp.model.roommodels.Event
-import com.example.eventtrackerapp.model.roommodels.EventTagCrossRef
 import com.example.eventtrackerapp.model.roommodels.EventWithTags
 import com.example.eventtrackerapp.model.roommodels.Tag
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class EventViewModel(application:Application): AndroidViewModel(application) {
+@HiltViewModel
+class EventViewModel @Inject constructor(
+    private val eventRepository: EventRepository,
+    private val categoryRepository: CategoryRepository
+):ViewModel()
+{
+    val allEventsWithRelations: LiveData<List<EventWithTags>> = eventRepository.getAllEventsWithRelations().asLiveData()
 
-    private val eventDao = EventTrackerDatabase.getDatabase(application, viewModelScope).eventDao()
-
-    private val _eventList = MutableStateFlow<List<Event>>(arrayListOf())
-    private val _event = MutableStateFlow<Event>(Event())
-
-    private val _eventWithTag = MutableStateFlow<List<EventWithTags>>(arrayListOf())
-    private val _eventWithTagItem = MutableStateFlow<EventWithTags>(EventWithTags(Event(), emptyList()))
-
-    val eventList:StateFlow<List<Event>> = _eventList
-    val event:StateFlow<Event> = _event
-
-    val eventWithTag:StateFlow<List<EventWithTags>> = _eventWithTag
-    val eventWithTagItem:StateFlow<EventWithTags> = _eventWithTagItem
-
-    private val _eventsByOwner = MutableStateFlow<List<Event>>(arrayListOf())
-    val eventsByOwner:StateFlow<List<Event>> = _eventsByOwner
-
-    fun getAllEvents(){
-        viewModelScope.launch(Dispatchers.IO) {
-            _eventList.value = eventDao.getAll()
-        }
-    }
-
-    fun getEventById(id:Int){
-        viewModelScope.launch(Dispatchers.IO) {
-            _event.value = eventDao.getById(id)
-        }
-    }
-
-    fun addEvent(event: Event) {
-        viewModelScope.launch(Dispatchers.IO) {
-            eventDao.add(event)
-        }
-    }
-
-    fun updateEvent(event: Event) {
-        viewModelScope.launch(Dispatchers.IO) {
-            eventDao.update(event)
-        }
-    }
-
-    fun deleteEvent(eventId: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            eventDao.delete(eventId)
-        }
-    }
-
-    fun getEventWithTagByEventId(eventId: Int)
+    fun getEventWithRelationsById(eventId:String):LiveData<EventWithTags?>
     {
-        viewModelScope.launch(Dispatchers.IO) {
-            _eventWithTagItem.value = eventDao.getEventWithTagsByEventId(eventId)
-        }
+        return eventRepository.getEventWithRelationsById(eventId).asLiveData()
     }
 
+    val allcategoriesWithTags: LiveData<List<CategoryWithTag>> = categoryRepository.getCategoriesWithTags().asLiveData()
 
-
-
-    fun getEventBySelectedTag(tagIds :List<Int>){
-        viewModelScope.launch(Dispatchers.IO) {
-            _eventWithTag.value = eventDao.getEventBySelectedTag(tagIds)
-        }
-    }
-
-
-    fun getFilteredEvents(selectedTagIds: List<Tag>): Flow<List<EventWithTags>> {
-        return eventDao.getAllEventsWithTags().map { allEvents ->
-            allEvents.filter { event ->
-                event.tags.any { tag -> tag in selectedTagIds }
-            }
-        }
-    }
-
-    fun insertEventWithTags(event: Event, tags: List<Tag>){
-        viewModelScope.launch(Dispatchers.IO) {
-            val eventId = eventDao.add(event).toInt()
-            val refs = tags.map { tag ->
-                EventTagCrossRef(eventId = eventId,tagId = tag.id)
-            }
-            eventDao.insertEventTags(refs)
-        }
-    }
-
-    fun updateEventWithTags(event: Event, tags: List<Tag>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            eventDao.update(event)
-            eventDao.deleteTagsForEvent(event.id)
-            val refs = tags.map { tag ->
-                EventTagCrossRef(eventId = event.id, tagId = tag.id)
-            }
-            eventDao.insertEventTags(refs)
-        }
-    }
-
-    val allEventsWithTags: Flow<List<EventWithTags>> = eventDao.getAllEventsWithTags()
-
-    fun getEventByOwner(ownerId:String){
+    fun addEvent(event:Event,selectedTags: List<Tag>)
+    {
         viewModelScope.launch {
-            eventDao.getEventsByOwner(ownerId).collect{data->
-                _eventsByOwner.value = data
-            }
+            eventRepository.insertEvent(event,selectedTags)
         }
+    }
+
+    fun updateEvent(event: Event,selectedTags: List<Tag>)
+    {
+        viewModelScope.launch {
+            eventRepository.updateEvent(event,selectedTags)
+        }
+    }
+
+    fun deleteEvent(event: Event)
+    {
+        viewModelScope.launch {
+            eventRepository.deleteEvent(event)
+        }
+    }
+
+    // TODO etkinliğe ait kategorinin adını getirecek metot. Gerekirse tamamlanabilir
+
+//    fun getCategoryNameForEvent(eventId: String):LiveData<String>
+//    {
+//        return eventRepository.getEventWithRelationsById(eventId).filter {eventWithTags ->
+//            eventWithTags.event.categoryId ==
+//        }
+//    }
+
+    // TODO bu metoda daha sonra bakılabilir liste döndürmesi sağlanabilir şuan tüm tagları tek bir string olarak dönüyor
+
+    fun getTagNamesForEvent(eventId:String): LiveData<String?>
+    {
+        return eventRepository.getEventWithRelationsById(eventId).map { eventWithTags ->
+            eventWithTags?.tags?.joinToString { it.name }
+        }.asLiveData()
     }
 }
