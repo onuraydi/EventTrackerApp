@@ -29,6 +29,11 @@ class CommentRepository(
             }
     }
 
+    //Etkinliğe ait yorum sayısını getirme (Room'dan alınıyor)
+    fun getCommentCountForEvent(eventId:String):Flow<Int>{
+        return commentDao.getCommentCount(eventId)
+    }
+
     //Firestore'dan belirli bir etkinliğe ait yorumları dinleme
     @OptIn(DelicateCoroutinesApi::class)
     private fun listenForFirestoreCommentsForEvent(eventId:String){

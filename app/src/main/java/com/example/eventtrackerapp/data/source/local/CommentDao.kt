@@ -21,7 +21,7 @@ interface CommentDao {
     fun getCommentsForEvent(eventId:String):Flow<List<Comment>>
 
     @Query("SELECT COUNT(*) FROM comments WHERE eventId = :eventId")
-    fun getCommentCount(eventId: Int):Flow<Int>
+    fun getCommentCount(eventId: String):Flow<Int>
 
     @Query("DELETE FROM comments WHERE eventId = :eventId")
     suspend fun deleteCommentsForEvent(eventId: String)
