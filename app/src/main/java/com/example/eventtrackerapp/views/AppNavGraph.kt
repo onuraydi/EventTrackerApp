@@ -26,7 +26,6 @@ import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
-import com.example.eventtrackerapp.viewmodel.TagViewModel
 import com.example.eventtrackerapp.viewmodel.ThemeViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -37,7 +36,6 @@ fun AppNavGraph(
     navController: NavHostController,
     eventViewModel: EventViewModel = hiltViewModel(),
     categoryViewModel: CategoryViewModel = hiltViewModel(),
-    tagViewModel: TagViewModel = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel(),
     profileViewModel: ProfileViewModel = hiltViewModel(),
     commentViewModel: CommentViewModel = hiltViewModel(),

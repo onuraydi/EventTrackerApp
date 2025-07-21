@@ -65,7 +65,6 @@ import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
-import com.example.eventtrackerapp.viewmodel.TagViewModel
 
 
 @SuppressLint("NewApi")
@@ -77,7 +76,7 @@ fun EditEventScreen(
     eventWithTag: EventWithTags,
     eventViewModel: EventViewModel,
     categoryViewModel: CategoryViewModel,
-    tagViewModel: TagViewModel,
+//    tagViewModel: TagViewModel,
     ownerId: String
 ) {
     val context = LocalContext.current
