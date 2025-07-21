@@ -39,7 +39,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -52,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
+import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Event
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,10 +59,10 @@ import com.example.eventtrackerapp.model.roommodels.Event
 fun MyEventsScreen(
     navController: NavController,
     myEvents:List<Event>,
-    deleteEvent:(id:Int)->Unit
+    deleteEvent:(event:Event)->Unit
 ){
     val showDialog = remember { mutableStateOf(false) }
-    val selectedEventId = remember { mutableIntStateOf(0) }
+    val selectedEvent = remember { mutableStateOf(Event()) }
 
         Scaffold(
             Modifier.fillMaxSize(),
@@ -116,7 +116,7 @@ fun MyEventsScreen(
                                         .clip(CircleShape)
                                         .background(Color.Red)
                                         .size(60.dp),
-                                    painter = painterResource(it.image),
+                                    painter = painterResource(R.drawable.ic_launcher_foreground),
                                     contentDescription = "Profile",
                                 )
 
@@ -167,7 +167,7 @@ fun MyEventsScreen(
                                             Icon(Icons.Default.Delete, "Delete")
                                         },
                                         onClick = {
-                                            selectedEventId.intValue = it.id
+                                            selectedEvent.value = it
                                             showDialog.value = true
                                         }
                                     )
@@ -181,7 +181,7 @@ fun MyEventsScreen(
                         dialogTitle = "Etkinlik Silinecek",
                         dialogText = "Eğer onaylarsan eklediğin etkinliği silmiş olacaksın." +
                                 " Sildiğin etkinliği bir daha geri alamazsın",
-                        onConfirmation = {deleteEvent(selectedEventId.value)},
+                        onConfirmation = {deleteEvent(selectedEvent.value)},
                         onDismissRequest = {showDialog.value = false}
                     )
                 }

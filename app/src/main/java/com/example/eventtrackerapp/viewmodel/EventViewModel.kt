@@ -56,6 +56,10 @@ class EventViewModel @Inject constructor(
         }
     }
 
+    fun getEventsByOwnerId(profileId:String):LiveData<List<Event>>{
+        return eventRepository.getEventsForOwner(profileId).asLiveData()
+    }
+
     // TODO etkinliğe ait kategorinin adını getirecek metot. Gerekirse tamamlanabilir
 
 //    fun getCategoryNameForEvent(eventId: String):LiveData<String>

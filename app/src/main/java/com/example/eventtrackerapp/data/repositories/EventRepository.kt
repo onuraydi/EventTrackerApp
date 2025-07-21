@@ -60,6 +60,11 @@ class EventRepository (
         return eventDao.getEventBySelectedTag(tagIds)
     }
 
+    //kullanıcının eklediği etkinlikleri getirecek
+    fun getEventsForOwner(profileId:String):Flow<List<Event>>{
+        return eventDao.getEventsByOwner(profileId)
+    }
+
     suspend fun insertEvent(event: Event, tags:List<Tag>)
     {
         eventDao.insert(event)

@@ -221,15 +221,17 @@ fun AppNavGraph(
             }
 
             composable("my_events"){
-                val uid = auth.currentUser?.uid
-                LaunchedEffect(Unit) {
-                    /*TODO kullanıcının eklediği eventleri getiren metod
-                    eventViewModel.getEventByOwner(uid ?: "")*/
+                val uid = auth.currentUser?.uid!!
+                val myEventsLiveData = remember(uid) {
+                    eventViewModel.getEventsByOwnerId(uid)
                 }
-                /*val myEvents by eventViewModel.eventsByOwner.collectAsStateWithLifecycle()
-                MyEventsScreen(navController,myEvents){
-                    eventViewModel.deleteEvent(it)
-                }*/
+                val myEvents by myEventsLiveData.observeAsState()
+
+                if(myEvents!=null){
+                    MyEventsScreen(navController,myEvents!!){
+                        eventViewModel.deleteEvent(it)
+                    }
+                }
             }
 
             composable("notification") {
