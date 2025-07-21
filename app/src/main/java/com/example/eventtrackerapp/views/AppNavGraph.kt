@@ -79,21 +79,27 @@ fun AppNavGraph(
 
             composable("home") {backStackEntry ->
                 val uid = auth.currentUser?.uid!!
-                LaunchedEffect(uid) {
+
+                //Yapay Zeka tarafından live data için önerilen kullanım şekli
+                val profileLiveData = remember(uid) {
                     profileViewModel.getById(uid)
                 }
 
-                val profile by profileViewModel.profile.collectAsStateWithLifecycle()
+                val profile by profileLiveData.observeAsState()
 
-                LaunchedEffect(profile.selectedTagList) {
-                    val tagIds = profile.selectedTagList?.map { it.id } ?: emptyList()
-                    eventViewModel.getEventBySelectedTag(tagIds)
+                if(profile!=null){
+                    LaunchedEffect(profile!!.selectedTagList) {
+                        val tagIds = profile!!.selectedTagList.map { it.id } ?: emptyList()
+                        eventViewModel.getEventBySelectedTag(tagIds)
+                    }
+                    println("selectedTagList"+profile!!.selectedTagList)
+                    val eventList by eventViewModel.eventWithTag.collectAsState()
 
+                    HomeScreen(eventList = eventList, navController = navController,commentViewModel,likeViewModel,uid)
                 }
-                println("selectedTagList"+profile.selectedTagList)
-                val eventList by eventViewModel.eventWithTag.collectAsState()
 
-                HomeScreen(eventList = eventList, navController = navController,commentViewModel,likeViewModel,uid) }
+            }
+
 
 
             composable("addEvent") {
@@ -114,9 +120,18 @@ fun AppNavGraph(
                 val eventId = backStackEntry.arguments?.getString("id") ?: ""
 
                 // Event'i çağır
-                val eventWithTags by eventViewModel.getEventWithRelationsById(eventId).observeAsState()
+                val eventLiveData = remember(eventId) {
+                    eventViewModel.getEventWithRelationsById(eventId)
+                }
 
-                val category by categoryViewModel.categoryWithTags.observeAsState(emptyList())
+                //Category'i al
+                val categoryLiveData = remember {
+                    categoryViewModel.categoryWithTags
+                }
+
+                val eventWithTags by eventLiveData.observeAsState()
+
+                val category by categoryLiveData.observeAsState(emptyList())
 
                 val uid = auth.currentUser?.uid!!
 
@@ -144,17 +159,28 @@ fun AppNavGraph(
 
 
             composable("explorer"){
-                LaunchedEffect(Unit) {
-                    eventViewModel.getAllEvents()
+
+                val eventListLiveData = remember {
+                    eventViewModel.allEventsWithRelations
                 }
-                val eventList by eventViewModel.eventList.collectAsStateWithLifecycle()
-                ExploreScreen(eventList,navController,exploreViewModel)
+
+                val eventList by eventListLiveData.observeAsState()
+
+                if(eventList!=null){
+                    ExploreScreen(eventList!!,navController,exploreViewModel)
+                }
+
             }
 
             composable("profile") {
                 val uid = auth.currentUser?.uid
+
                 if(uid!=null){
-                    val profile by profileViewModel.getById(uid).observeAsState()
+
+                    val profileLiveData = remember(uid) {
+                        profileViewModel.getById(uid)
+                    }
+                    val profile by profileLiveData.observeAsState()
 
                     profile?.let {
                         ProfileScreen(navController = navController,authViewModel, it)
@@ -166,7 +192,11 @@ fun AppNavGraph(
                 val uid = auth.currentUser?.uid
 
                 if(uid!=null){
-                    val profile by profileViewModel.getById(uid).observeAsState()
+
+                    val profileLiveData = remember(uid) {
+                        profileViewModel.getById(uid)
+                    }
+                    val profile by profileLiveData.observeAsState()
 
                     profile?.let {profile->
                         MyAccountScreen(navController,profile,profileViewModel)
@@ -178,7 +208,11 @@ fun AppNavGraph(
                 val uid = auth.currentUser?.uid
 
                 if(uid!=null){
-                    val profile by profileViewModel.getById(uid).observeAsState()
+
+                    val profileLiveData = remember(uid) {
+                        profileViewModel.getById(uid)
+                    }
+                    val profile by profileLiveData.observeAsState()
 
                     val isDark = themeViewModel.isDarkTheme.collectAsState().value
 

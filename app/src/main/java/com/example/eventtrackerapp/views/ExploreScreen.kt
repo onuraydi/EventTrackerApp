@@ -40,14 +40,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.roommodels.Event
+import com.example.eventtrackerapp.model.roommodels.EventWithTags
 import com.example.eventtrackerapp.utils.BottomNavBar
 import com.example.eventtrackerapp.viewmodel.ExploreViewModel
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun ExploreScreen(
-    eventList:List<Event>,
+    eventList:List<EventWithTags>,
     navController:NavController,
     exploreViewModel: ExploreViewModel = viewModel()
 ){
@@ -138,7 +138,7 @@ fun ExploreScreen(
     }
 
 @Composable
-fun MyImage(event: Event, navController: NavController){
+fun MyImage(eventWithTag: EventWithTags, navController: NavController){
     val randomHeights = remember { (150..300).random().dp }
     Image(
         modifier = Modifier
@@ -151,9 +151,9 @@ fun MyImage(event: Event, navController: NavController){
                 )
             )
             .clickable {
-                navController.navigate("detail/${event.id}")
+                navController.navigate("detail/${eventWithTag.event.id}")
             },
-        painter = painterResource(event.image),
+        painter = painterResource(R.drawable.ic_launcher_foreground),
         contentDescription = "",
         contentScale = ContentScale.Crop,
     )
@@ -171,7 +171,7 @@ fun SimpleSearchBar(
     placeHolder: @Composable (()->Unit)? = null,
     leadingIcon: @Composable (()->Unit)? = null,
     trailingIcon: @Composable (()->Unit)? = null,
-    searchResult: List<Event>,
+    searchResult: List<EventWithTags>,
     navController: NavController,
     searchHistoryList: List<String>,
     onHistoryClick: (String)->Unit,
@@ -221,18 +221,18 @@ fun SimpleSearchBar(
                 }
             }
             else{
-                items(searchResult){event->
+                items(searchResult){eventWithTag->
                     Row(
                         Modifier
                             .padding(8.dp)
                             .fillMaxWidth()
                             .clickable {
-                                onSearch(event.name ?: "")
-                                navController.navigate("detail/${event.id}")
+                                onSearch(eventWithTag.event.name ?: "")
+                                navController.navigate("detail/${eventWithTag.event.id}")
                             }
                     ){
                         Icon(painterResource(R.drawable.baseline_event_24),"HistoryItem")
-                        Text(event.name ?: "", modifier = Modifier.padding(start = 4.dp))
+                        Text(eventWithTag.event.name ?: "", modifier = Modifier.padding(start = 4.dp))
                     }
                 }
             }
