@@ -54,6 +54,12 @@ class EventRepository (
         return eventDao.getEventWithRelationsById(eventId)
     }
 
+    // seçtiği taglara göre getirecek
+    fun getEventsForUser(tagIds:List<String>):Flow<List<EventWithTags>>
+    {
+        return eventDao.getEventBySelectedTag(tagIds)
+    }
+
     suspend fun insertEvent(event: Event, tags:List<Tag>)
     {
         eventDao.insert(event)

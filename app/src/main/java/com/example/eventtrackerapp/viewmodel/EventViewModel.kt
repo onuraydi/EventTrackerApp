@@ -37,6 +37,11 @@ class EventViewModel @Inject constructor(
         }
     }
 
+    fun getEventsForUser(tagIds:List<String>):LiveData<List<EventWithTags>>
+    {
+        return eventRepository.getEventsForUser(tagIds).asLiveData()
+    }
+
     fun updateEvent(event: Event,selectedTags: List<Tag>)
     {
         viewModelScope.launch {

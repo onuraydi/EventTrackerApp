@@ -35,6 +35,16 @@ interface EventDao {
     @Query("Select * FROM events WHERE id = :id")
     fun getById(id:String): Flow<Event>
 
+    @Transaction
+    @Query("""
+    SELECT DISTINCT E.*
+    FROM events E
+    INNER JOIN EventTagCrossRef ETC ON E.id = ETC.eventId
+    WHERE ETC.tagId IN (:tagIds)
+""")
+    fun getEventBySelectedTag(tagIds:List<String>):Flow<List<EventWithTags>>
+
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEventTagCrossRef(crossRef: EventTagCrossRef)
 
@@ -78,15 +88,6 @@ interface EventDao {
     @Query("SELECT * FROM events WHERE id = :eventId")
     suspend fun getEventWithTagsByEventId(eventId:Int): EventWithTags
 
-    // TODO ??
-    @Transaction
-    @Query("""
-    SELECT DISTINCT E.*
-    FROM events E
-    INNER JOIN EventTagCrossRef ETC ON E.id = ETC.eventId
-    WHERE ETC.tagId IN (:tagIds)
-""")
-    suspend fun getEventBySelectedTag(tagIds:List<Int>):List<EventWithTags>
 
     @Query("DELETE FROM EventTagCrossRef WHERE eventId = :eventId")
     suspend fun deleteTagsForEvent(eventId: Int)
