@@ -7,7 +7,7 @@ import androidx.room.Entity
 )
 data class ProfileEventCrossRef(
     val profileId:String,
-    val eventId:Int,
+    val eventId:String,
 //    val isLiked:Boolean,
 //    val isAttending:Boolean
 )

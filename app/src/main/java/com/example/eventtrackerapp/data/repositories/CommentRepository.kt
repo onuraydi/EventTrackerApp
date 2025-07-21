@@ -41,6 +41,7 @@ class CommentRepository(
             .addSnapshotListener{snapshot,e->
                 if(e!=null){
                     Log.w(TAG,"Listen failed for comments of event $eventId")
+                    return@addSnapshotListener
                 }
 
                 if(snapshot!=null){

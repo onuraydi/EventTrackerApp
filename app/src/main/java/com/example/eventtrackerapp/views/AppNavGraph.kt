@@ -113,27 +113,35 @@ fun AppNavGraph(
 
             composable("detail/{id}") { backStackEntry ->
 
-                val eventId = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: 0
+                val eventId = backStackEntry.arguments?.getString("id") ?: ""
 
                 // Event'i çağır
-                LaunchedEffect(eventId) {
-                    eventViewModel.getEventById(eventId)
-                }
-
-                val event by eventViewModel.event.collectAsState()
+                val eventWithTags by eventViewModel.getEventWithRelationsById(eventId).observeAsState()
 
                 val category by categoryViewModel.categoryWithTags.observeAsState(emptyList())
 
-                var uid = auth.currentUser?.uid!!
+                val uid = auth.currentUser?.uid!!
 
                 // TODO bu metot belki değişebilir
 
                 val detailCategory = category.filter { cat ->
-                    cat.category.id == event.categoryId
+                    cat.category.id == eventWithTags?.event?.categoryId
                 }.map { it.category }.first()
 
-                var commentList = commentViewModel.getComments(eventId = event.id)
-                DetailScreen(event = event, navController = navController, category = detailCategory, commentList,commentViewModel,likeViewModel,uid,participantsViewModel)
+                if(eventWithTags!=null){
+                    val commentList = commentViewModel.getComments(eventId = eventWithTags!!.event.id)
+
+                    DetailScreen(event = eventWithTags!!.event,
+                        navController = navController,
+                        category = detailCategory,
+                        commentList = commentList.value!!,
+                        commentViewModel = commentViewModel,
+                        likeViewModel = likeViewModel,
+                        profileId = uid,
+                        participantsViewModel= participantsViewModel,
+                        profileViewModel = profileViewModel
+                    )
+                }
             }
 
 
@@ -146,49 +154,52 @@ fun AppNavGraph(
             }
 
             composable("profile") {
-                var uid = auth.currentUser?.uid
-                LaunchedEffect(Unit) {
-                    profileViewModel.getById(uid!!)
+                val uid = auth.currentUser?.uid
+                if(uid!=null){
+                    val profile by profileViewModel.getById(uid).observeAsState()
+
+                    profile?.let {
+                        ProfileScreen(navController = navController,authViewModel, it)
+                    }
                 }
-
-                val profile by profileViewModel.profile.collectAsStateWithLifecycle()
-
-
-                ProfileScreen(navController = navController,authViewModel,profile)
             }
 
             composable("my_account") {
-                var uid = auth.currentUser?.uid
-                LaunchedEffect(Unit) {
-                    profileViewModel.getById(uid!!)
+                val uid = auth.currentUser?.uid
+
+                if(uid!=null){
+                    val profile by profileViewModel.getById(uid).observeAsState()
+
+                    profile?.let {profile->
+                        MyAccountScreen(navController,profile,profileViewModel)
+                    }
                 }
-                val profile by profileViewModel.profile.collectAsStateWithLifecycle()
-                MyAccountScreen(navController,profile,profileViewModel)
             }
 
             composable("preferences"){
                 val uid = auth.currentUser?.uid
-                LaunchedEffect(Unit){
-                    profileViewModel.getById(uid ?: "")
+
+                if(uid!=null){
+                    val profile by profileViewModel.getById(uid).observeAsState()
+
+                    val isDark = themeViewModel.isDarkTheme.collectAsState().value
+
+                    profile?.let{profile->
+                        PreferencesScreen(navController,profile,profileViewModel,isDark,themeViewModel)
+                    }
                 }
-
-                val profile by profileViewModel.profile.collectAsStateWithLifecycle()
-
-                val isDark = themeViewModel.isDarkTheme.collectAsState().value
-
-
-                PreferencesScreen(navController,profile,profileViewModel,isDark,themeViewModel)
             }
 
             composable("my_events"){
                 val uid = auth.currentUser?.uid
                 LaunchedEffect(Unit) {
-                    eventViewModel.getEventByOwner(uid ?: "")
+                    /*TODO kullanıcının eklediği eventleri getiren metod
+                    eventViewModel.getEventByOwner(uid ?: "")*/
                 }
-                val myEvents by eventViewModel.eventsByOwner.collectAsStateWithLifecycle()
+                /*val myEvents by eventViewModel.eventsByOwner.collectAsStateWithLifecycle()
                 MyEventsScreen(navController,myEvents){
                     eventViewModel.deleteEvent(it)
-                }
+                }*/
             }
 
             composable("notification") {

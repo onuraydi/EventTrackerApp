@@ -211,7 +211,6 @@ fun MyAccountScreen(
                         fullName = fullNameState.value,
                         userName = userNameState.value,
                         gender = gender.value,
-                        photo = profilePhotoState.value
                     )
                     profileViewModel.updateProfile(updatedProfile)
                     navController.popBackStack()

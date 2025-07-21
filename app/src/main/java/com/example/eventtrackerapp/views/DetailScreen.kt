@@ -56,13 +56,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Category
-import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
+import com.example.eventtrackerapp.model.roommodels.Comment
 import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.utils.CommentBottomSheet
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
-import kotlinx.coroutines.flow.Flow
+import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -72,11 +72,12 @@ fun DetailScreen(
     event: Event,
     navController: NavController,
     category: Category,
-    commentList: Flow<List<CommentWithProfileAndEvent>>,
+    commentList: List<Comment>,
     commentViewModel: CommentViewModel,
     likeViewModel:LikeViewModel,
     profileId:String,
-    participantsViewModel: ParticipantsViewModel
+    participantsViewModel: ParticipantsViewModel,
+    profileViewModel:ProfileViewModel
 )
 {
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -84,7 +85,9 @@ fun DetailScreen(
     val likeCount = likeViewModel.getLikeCountForEvent(event.id)
     val isLiked = likeViewModel.isEventLikedByUser(event.id,profileId)
 
-    val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(initial = 0)
+    val commentOwner by profileViewModel.getById(profileId).observeAsState()
+
+    val commentCount by commentViewModel.getCommentCount(event.id).observeAsState()
 
     val state by participantsViewModel.getParticipationState(event.id,profileId).collectAsState(initial = false)
 
@@ -114,9 +117,9 @@ fun DetailScreen(
             .verticalScroll(rememberScrollState())) {
             Column() {
 
-                if (event != null && event.image != null && event.image != 0) {
+                if (event != null && event.imageUrl != null && event.imageUrl != "") {
                     Image(
-                        painter = painterResource(id = event.image),
+                        painter = painterResource(R.drawable.ic_launcher_foreground),
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -265,7 +268,7 @@ fun DetailScreen(
                     comments = commentList,
                     currentUserImage = painterResource(R.drawable.ic_launcher_foreground),
                     commentViewModel = commentViewModel,
-                    profileId = profileId,
+                    profile = commentOwner!!,
                     eventId = event.id
                 )
             }

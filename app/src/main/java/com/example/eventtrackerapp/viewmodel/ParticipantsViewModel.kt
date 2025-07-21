@@ -16,30 +16,30 @@ class ParticipantsViewModel(application: Application):AndroidViewModel(applicati
     private var participationDao = EventTrackerDatabase.getDatabase(application,viewModelScope).participationDao()
 
 
-    fun deleteParticipation(eventId: Int, profileId: String)
+    fun deleteParticipation(eventId: String, profileId: String)
     {
         viewModelScope.launch(Dispatchers.IO) {
             participationDao.deleteParticipation(ProfileEventCrossRef(profileId,eventId))
         }
     }
 
-    fun getParticipationState(eventId: Int,profileId: String):Flow<Boolean>
+    fun getParticipationState(eventId: String,profileId: String):Flow<Boolean>
     {
         return participationDao.getParticipationState(profileId,eventId)
     }
 
-    fun getParticipantsCount(eventId: Int):Flow<Int>{
+    fun getParticipantsCount(eventId: String):Flow<Int>{
         return participationDao.getParticipantsCount(eventId)
     }
 
-    fun joinEvent(eventId:Int,profileId:String)
+    fun joinEvent(eventId:String,profileId:String)
     {
         viewModelScope.launch(Dispatchers.IO) {
             participationDao.insertParticipation(ProfileEventCrossRef(profileId,eventId))
         }
     }
 
-    fun getParticipants(eventId: Int):Flow<List<Profile>>
+    fun getParticipants(eventId: String):Flow<List<Profile>>
     {
         return participationDao.getEventWithParticipants(eventId).map { it.pariticipants }
     }

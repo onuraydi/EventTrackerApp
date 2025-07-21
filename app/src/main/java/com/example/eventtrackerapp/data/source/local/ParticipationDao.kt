@@ -21,14 +21,14 @@ interface ParticipationDao {
 
     @Transaction
     @Query("SELECT EXISTS(SELECT 1 FROM ProfileEventCrossRef WHERE profileId = :profileId AND eventId = :eventId)")
-    fun getParticipationState(profileId: String, eventId: Int): Flow<Boolean>
+    fun getParticipationState(profileId: String, eventId: String): Flow<Boolean>
 
     @Query("SELECT COUNT(*) FROM profileeventcrossref WHERE eventId = :eventId")
-    fun getParticipantsCount(eventId: Int):Flow<Int>
+    fun getParticipantsCount(eventId: String):Flow<Int>
 
     @Transaction
     @Query("SELECT * FROM events WHERE id = :eventId")
-    fun getEventWithParticipants(eventId:Int):Flow<EventWithParticipants>
+    fun getEventWithParticipants(eventId:String):Flow<EventWithParticipants>
 
     @Transaction
     @Query("SELECT * FROM profiles WHERE id = :profileId")

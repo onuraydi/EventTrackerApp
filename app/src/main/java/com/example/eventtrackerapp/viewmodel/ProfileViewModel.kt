@@ -6,6 +6,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.eventtrackerapp.data.repositories.ProfileRepository
 import com.example.eventtrackerapp.model.roommodels.Profile
+import com.example.eventtrackerapp.model.roommodels.Tag
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,28 +41,32 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    /*fun addTag(tag: Tag){
-        if (!_profile.value.selectedTagList.orEmpty().contains(tag)) {
-            val updatedList = _profile.value.selectedTagList.orEmpty() + tag
-            val updatedProfile = _profile.value.copy(selectedTagList = updatedList)
-            _profile.value = updatedProfile
+    fun addTag(tag: Tag,id:String){
+        val profile = getById(id)
+        if (!profile.value?.selectedTagList.orEmpty().contains(tag)) {
+            val updatedList = profile.value?.selectedTagList.orEmpty() + tag
+            val updatedProfile = profile.value?.copy(selectedTagList = updatedList)
+            if (updatedProfile != null) {
+                updateProfile(updatedProfile)
+            }
+        }
+    }
+
+    fun removeTag(tagId:String, id:String){
+        val profile = getById(id)
+        //id'ye göre silme
+        val updatedList = profile.value?.selectedTagList.orEmpty()
+            .filterNot { it.id == tagId }
+
+        val updatedProfile = profile.value?.copy(selectedTagList = updatedList)
+        if (updatedProfile != null) {
             updateProfile(updatedProfile)
         }
     }
 
-    fun removeTag(tagId:Int){
-        //id'ye göre silme
-        val updatedList = _profile.value.selectedTagList.orEmpty()
-            .filterNot { it.id == tagId }
-
-        val updatedProfile = _profile.value.copy(selectedTagList = updatedList)
-        _profile.value = updatedProfile
-        updateProfile(updatedProfile)
-    }*/
-
-    /*fun updateProfile(profile: Profile){
-        viewModelScope.launch(Dispatchers.IO) {
-            profileRepository.update(profile)
+    fun updateProfile(profile: Profile){
+        viewModelScope.launch{
+            profileRepository.upsertProfile(profile)
         }
-    }*/
+    }
 }

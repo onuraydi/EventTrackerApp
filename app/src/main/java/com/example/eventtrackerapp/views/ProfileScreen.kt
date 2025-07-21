@@ -67,8 +67,8 @@ fun ProfileScreen(
 
                 Spacer(Modifier.padding(10.dp))
 
-                Text("${profile.fullName}", fontSize = 20.sp)
-                Text("${profile.email}", fontSize = 14.sp, fontWeight = FontWeight.Light)
+                Text(profile.fullName, fontSize = 20.sp)
+                Text(profile.email, fontSize = 14.sp, fontWeight = FontWeight.Light)
 
             // Hesabım
 
