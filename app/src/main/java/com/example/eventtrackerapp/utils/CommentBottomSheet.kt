@@ -30,7 +30,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -47,10 +46,7 @@ import androidx.compose.ui.unit.sp
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Comment
 import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
-import com.example.eventtrackerapp.model.roommodels.Profile
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
-import com.example.eventtrackerapp.views.user
-import kotlinx.coroutines.flow.Flow
 
 
 // TODO yorum kısmı dinamikleştirildikten sonra buradaki parametreler vb düzeltilecek
@@ -59,10 +55,10 @@ import kotlinx.coroutines.flow.Flow
 fun CommentBottomSheet(
     showSheet: Boolean,
     onDismiss: () -> Unit,
-    comments: List<Comment>,
+    comments: List<CommentWithProfileAndEvent>,
     currentUserImage: Painter,
     commentViewModel: CommentViewModel,
-    profile:Profile,
+    profileId:String,
     eventId:String
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -99,7 +95,7 @@ fun CommentBottomSheet(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(comments){
-                    CommentItem(it,profile.userName)
+                    CommentItem(it)
                 }
             }
 
@@ -135,7 +131,7 @@ fun CommentBottomSheet(
                                 if (commentText.isNotBlank()) {
                                     val comment = Comment(
                                         eventId = eventId,
-                                        profileId = profile.id,
+                                        profileId = profileId,
                                         comment = commentText
                                     )
                                     commentViewModel.addComment(comment)
@@ -155,7 +151,7 @@ fun CommentBottomSheet(
 
 // TODO Buradaki comment model oluşturduktan sonra düzeltilecek
 @Composable
-fun CommentItem(comment: Comment,userName:String) {
+fun CommentItem(commentWithProfile: CommentWithProfileAndEvent) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top
@@ -174,13 +170,13 @@ fun CommentItem(comment: Comment,userName:String) {
 
         Column {
             Text(
-                text = userName,
+                text = commentWithProfile.profile.userName,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
                 color = Color.Black
             )
             Text(
-                text = comment.comment,
+                text = commentWithProfile.comment.comment,
                 fontSize = 14.sp,
                 color = Color.DarkGray,
                 modifier = Modifier.padding(top = 2.dp)

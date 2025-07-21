@@ -57,6 +57,7 @@ import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Category
 import com.example.eventtrackerapp.model.roommodels.Comment
+import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.utils.CommentBottomSheet
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
@@ -72,20 +73,17 @@ fun DetailScreen(
     event: Event,
     navController: NavController,
     category: Category,
-    commentList: List<Comment>,
+    commentList: List<CommentWithProfileAndEvent>,
     commentViewModel: CommentViewModel,
     likeViewModel:LikeViewModel,
     profileId:String,
     participantsViewModel: ParticipantsViewModel,
-    profileViewModel:ProfileViewModel
 )
 {
     var showBottomSheet by remember { mutableStateOf(false) }
 
     val likeCount = likeViewModel.getLikeCountForEvent(event.id)
     val isLiked = likeViewModel.isEventLikedByUser(event.id,profileId)
-
-    val commentOwner by profileViewModel.getById(profileId).observeAsState()
 
     val commentCount by commentViewModel.getCommentCount(event.id).observeAsState()
 
@@ -130,9 +128,9 @@ fun DetailScreen(
 
                 Spacer(Modifier.padding(top = 18.dp))
 
-                event.name?.let { Text(text= it, fontSize = 30.sp, fontWeight = FontWeight.W500) }
+                event.name.let { Text(text= it, fontSize = 30.sp, fontWeight = FontWeight.W500) }
                 Spacer(Modifier.padding(top = 3.dp))
-                category?.let {
+                category.let {
                     Text("Kategori:" + it.name)
                 }
                 Spacer(Modifier.padding(top = 10.dp))
@@ -268,7 +266,7 @@ fun DetailScreen(
                     comments = commentList,
                     currentUserImage = painterResource(R.drawable.ic_launcher_foreground),
                     commentViewModel = commentViewModel,
-                    profile = commentOwner!!,
+                    profileId = profileId,
                     eventId = event.id
                 )
             }

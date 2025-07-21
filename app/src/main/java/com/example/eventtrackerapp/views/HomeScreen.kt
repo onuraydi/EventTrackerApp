@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -80,8 +81,8 @@ fun HomeScreen(
 
             items(eventList)
             {
-                var commentList = commentViewModel.getComments(eventId = it.event.id)
-                EventRow(it.event, navController,commentList,commentViewModel,profileId,likeViewModel)
+                val commentList = commentViewModel.getComments(eventId = it.event.id)
+                EventRow(it.event, navController,commentList.value,commentViewModel,profileId,likeViewModel)
             }
         }
     }
@@ -89,7 +90,7 @@ fun HomeScreen(
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-private fun EventRow(event: Event, navController: NavController, commentList:Flow<List<CommentWithProfileAndEvent>>, commentViewModel:CommentViewModel, profileId:String, likeViewModel: LikeViewModel)
+private fun EventRow(event: Event, navController: NavController, commentList:List<CommentWithProfileAndEvent>, commentViewModel:CommentViewModel, profileId:String, likeViewModel: LikeViewModel)
 {
     var eventViewModel: EventViewModel = viewModel()
 
@@ -99,7 +100,7 @@ private fun EventRow(event: Event, navController: NavController, commentList:Flo
     val likeCount = likeViewModel.getLikeCountForEvent(event.id)
     val isLiked = likeViewModel.isEventLikedByUser(event.id,profileId)
 
-    val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(initial = 0)
+    val commentCount by commentViewModel.getCommentCount(event.id).observeAsState(initial = 0)
 
 
     Column (modifier = Modifier
@@ -108,7 +109,7 @@ private fun EventRow(event: Event, navController: NavController, commentList:Flo
         .border(BorderStroke(2.dp, Color.Black), shape = RoundedCornerShape(20.dp))
         )
     {
-        Image(painterResource(event.image), null, modifier = Modifier
+        Image(painterResource(R.drawable.ic_launcher_foreground), null, modifier = Modifier
             .fillMaxWidth()
             .height(220.dp)
             .align(Alignment.CenterHorizontally)
@@ -147,7 +148,7 @@ private fun EventRow(event: Event, navController: NavController, commentList:Flo
         }
 
 
-        event.name?.let {
+        event.name.let {
             Text(text= it, modifier = Modifier
                 .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
                 .clickable {  navController.navigate("detail/${event.id}") },

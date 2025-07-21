@@ -84,20 +84,21 @@ fun AppNavGraph(
                 val profileLiveData = remember(uid) {
                     profileViewModel.getById(uid)
                 }
-
                 val profile by profileLiveData.observeAsState()
 
                 if(profile!=null){
-                    LaunchedEffect(profile!!.selectedTagList) {
+
+                    val eventForUser = remember(profile!!.selectedTagList) {
                         val tagIds = profile!!.selectedTagList.map { it.id } ?: emptyList()
-                        eventViewModel.getEventBySelectedTag(tagIds)
+                        eventViewModel.getEventsForUser(tagIds)
                     }
                     println("selectedTagList"+profile!!.selectedTagList)
-                    val eventList by eventViewModel.eventWithTag.collectAsState()
+                    val eventList by eventForUser.observeAsState()
 
-                    HomeScreen(eventList = eventList, navController = navController,commentViewModel,likeViewModel,uid)
+                    if(eventList!=null){
+                        HomeScreen(eventList = eventList!!, navController = navController,commentViewModel,likeViewModel,uid)
+                    }
                 }
-
             }
 
 
@@ -123,14 +124,12 @@ fun AppNavGraph(
                 val eventLiveData = remember(eventId) {
                     eventViewModel.getEventWithRelationsById(eventId)
                 }
+                val eventWithTags by eventLiveData.observeAsState()
 
                 //Category'i al
                 val categoryLiveData = remember {
                     categoryViewModel.categoryWithTags
                 }
-
-                val eventWithTags by eventLiveData.observeAsState()
-
                 val category by categoryLiveData.observeAsState(emptyList())
 
                 val uid = auth.currentUser?.uid!!
@@ -152,7 +151,6 @@ fun AppNavGraph(
                         likeViewModel = likeViewModel,
                         profileId = uid,
                         participantsViewModel= participantsViewModel,
-                        profileViewModel = profileViewModel
                     )
                 }
             }

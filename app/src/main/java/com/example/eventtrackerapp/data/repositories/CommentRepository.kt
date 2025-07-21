@@ -5,6 +5,7 @@ import com.example.eventtrackerapp.data.mappers.CommentMapper
 import com.example.eventtrackerapp.data.source.local.CommentDao
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseComment
 import com.example.eventtrackerapp.model.roommodels.Comment
+import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +23,7 @@ class CommentRepository(
     private val commentsCollection = firestore.collection("comments")
 
     //Etkinliğe özel yorumları Room'dan al ve Firestore'dan dinle
-    fun getCommentsForEvent(eventId:String):Flow<List<Comment>>{
+    fun getCommentsForEvent(eventId:String):Flow<List<CommentWithProfileAndEvent>>{
         return commentDao.getCommentsForEvent(eventId)
             .onEach {
                 listenForFirestoreCommentsForEvent(eventId)
@@ -48,7 +49,7 @@ class CommentRepository(
                     val firebaseComments = snapshot.documents.mapNotNull { it.toObject(FirebaseComment::class.java) }
                     GlobalScope.launch(Dispatchers.IO){
                         val currentRoomComments = commentDao.getCommentsForEvent(eventId).first()
-                        val currentRoomCommentIds = currentRoomComments.map { it.id }.toSet()
+                        val currentRoomCommentIds = currentRoomComments.map { it.comment.id }.toSet()
                         val firebaseCommentIds = firebaseComments.map { it.id }.toSet()
 
                         //Firestore'dan gelenleri Room'a ekle/güncelle
