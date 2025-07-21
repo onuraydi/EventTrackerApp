@@ -54,4 +54,9 @@ class CategoryViewModel @Inject constructor(
     fun removeChosenTag(tag: Tag){
         _chosenTags.value = _chosenTags.value.filter{it.id!=tag.id}
     }
+
+    fun resetChosenTagForCategory(categoryId: String)
+    {
+        _chosenTags.value = _chosenTags.value.filterNot { it.categoryId == categoryId }
+    }
 }

@@ -71,7 +71,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
@@ -82,6 +81,7 @@ import com.example.eventtrackerapp.model.roommodels.Profile
 import com.example.eventtrackerapp.model.roommodels.Tag
 import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import kotlinx.coroutines.launch
@@ -90,16 +90,16 @@ import kotlinx.coroutines.launch
 @Composable
 fun CreateProfileScreen(
     navController: NavController,
-//    tagViewModel: TagViewModel = viewModel(),
-    profileViewModel: ProfileViewModel = viewModel(),
-    permissionViewModel: PermissionViewModel = viewModel(),
+    categoryViewModel: CategoryViewModel,
+    profileViewModel: ProfileViewModel,
+    permissionViewModel: PermissionViewModel,
     userPreferences: UserPreferences,
     categoryWithTags:List<CategoryWithTag>,
-    uid:String?="",
-    email:String?=""
+    uid:String,
+    email:String
 ) {
-    val selectedTag by tagViewModel.selectedTag.collectAsStateWithLifecycle()
-    val chosenTags by tagViewModel.chosenTags.collectAsStateWithLifecycle()
+    val selectedTag by categoryViewModel.selectedTag.collectAsStateWithLifecycle()
+    val chosenTags by categoryViewModel.chosenTags.collectAsStateWithLifecycle()
 
     val selectedCompleteTagList = remember{ mutableStateListOf<Tag?>(null) }
     val selectedCompleteCategoryList = remember{ mutableStateListOf<Category?>(null) }
@@ -303,17 +303,17 @@ fun CreateProfileScreen(
                                 FilterChip(
                                     modifier = Modifier.padding(end = 8.dp),
                                     selected = selected.value,
-                                    label = { Text(it.category.name?:"") },
+                                    label = { Text(it.category.name) },
                                     onClick = {
                                         selected.value = !selected.value
                                         isShow.value = selected.value
 
                                         if(selected.value){
-                                            tagViewModel.updateSelectedCategoryTags(it) //selectedTags ı doldurur
+                                            categoryViewModel.updateSelectedCategoryTags(it) //selectedTags ı doldurur
                                             selectedCompleteCategoryList.add(it.category) //categoryWithTag eklendi
                                         }else{
                                             // Kategori kaldırıldı → hem chosenTags hem selectedCompleteTagList içinden temizle
-                                            tagViewModel.resetChosenTagForCategory(it.category.id)
+                                            categoryViewModel.resetChosenTagForCategory(it.category.id)
 
                                             selectedCompleteCategoryList.removeAll{category-> category == it.category}
 
@@ -349,9 +349,9 @@ fun CreateProfileScreen(
                                 FilterChip(
                                     modifier = Modifier.padding(end = 8.dp),
                                     selected = isSelected,
-                                    label = { Text(tag.name ?: "") },
+                                    label = { Text(tag.name) },
                                     onClick = {
-                                        tagViewModel.toggleTag(tag)
+                                        categoryViewModel.toggleTag(tag)
                                         if(!selectedCompleteTagList.any{it?.id == tag.id}){
                                             selectedCompleteTagList.add(tag)
                                         }else if(isSelected){
@@ -393,10 +393,10 @@ fun CreateProfileScreen(
                             selectedCompleteTagList.filterNotNull().forEach {tag->
                                 FilterChip(
                                     modifier = Modifier.padding(end = 3.dp),
-                                    label = { Text(tag.name?:"", fontSize = 12.sp, maxLines = 1) },
+                                    label = { Text(tag.name, fontSize = 12.sp, maxLines = 1) },
                                     selected = true,
                                     onClick = {
-                                        tagViewModel.removeChosenTag(tag)
+                                        categoryViewModel.removeChosenTag(tag)
                                         selectedCompleteTagList.remove(tag)
                                     },
                                     trailingIcon = {
@@ -425,16 +425,16 @@ fun CreateProfileScreen(
                                 userPreferences.setIsProfileCompleted(value = true)
                             }
                             val profile = Profile(
-                                id = uid ?: "",
+                                id = uid,
                                 email = email,
                                 fullName = fullNameState.value,
                                 userName = userNameState.value,
                                 gender = gender.value,
                                 selectedCategoryList = selectedCompleteCategoryList.filterNotNull(),
                                 selectedTagList = selectedCompleteTagList.filterNotNull(),
-                                photo = R.drawable.ic_launcher_background
+                                photo = R.drawable.ic_launcher_background.toString() // TODO Geçici olarak böyle değişecek
                             )
-                            profileViewModel.insertProfile(profile)
+                            profileViewModel.upsertProfile(profile)
                             navController.navigate("home"){
                                 popUpTo("create_profile_screen"){
                                     inclusive = true
@@ -444,7 +444,6 @@ fun CreateProfileScreen(
                     }
                 }
             }
-
         }
     }
 
@@ -476,13 +475,6 @@ fun openGallery(launcher:ManagedActivityResultLauncher<Intent,ActivityResult>){
     launcher.launch(intent)
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun Preview(){
-//    EventTrackerAppTheme {
-////        CreateProfileScreen()
-//    }
-//}
 
 
 
