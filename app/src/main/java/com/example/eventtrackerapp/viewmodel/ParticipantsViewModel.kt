@@ -1,46 +1,39 @@
 package com.example.eventtrackerapp.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
+import com.example.eventtrackerapp.data.repositories.EventRepository
 import com.example.eventtrackerapp.model.roommodels.Profile
-import com.example.eventtrackerapp.model.roommodels.ProfileEventCrossRef
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ParticipantsViewModel(application: Application):AndroidViewModel(application) {
-
-    private var participationDao = EventTrackerDatabase.getDatabase(application,viewModelScope).participationDao()
-
-
-    fun deleteParticipation(eventId: String, profileId: String)
+@HiltViewModel
+class ParticipantsViewModel @Inject constructor(
+    private val eventRepository: EventRepository
+) : ViewModel() {
+    fun getParticipationCount(eventId: String):LiveData<Int>
     {
-        viewModelScope.launch(Dispatchers.IO) {
-            participationDao.deleteParticipation(ProfileEventCrossRef(profileId,eventId))
+        return eventRepository.getParticipationCountForEvent(eventId).asLiveData()
+    }
+
+    fun hasUserParticipated(eventId: String, profileId:String):LiveData<Boolean>
+    {
+        return eventRepository.hasUserParticipated(eventId,profileId).asLiveData()
+    }
+
+    fun toggleAttendance(eventId: String,profileId: String)
+    {
+        viewModelScope.launch {
+            eventRepository.toggleAttendance(eventId,profileId)
         }
     }
 
-    fun getParticipationState(eventId: String,profileId: String):Flow<Boolean>
+    fun getParticipantsForEvent(eventId: String):LiveData<List<Profile>>
     {
-        return participationDao.getParticipationState(profileId,eventId)
-    }
-
-    fun getParticipantsCount(eventId: String):Flow<Int>{
-        return participationDao.getParticipantsCount(eventId)
-    }
-
-    fun joinEvent(eventId:String,profileId:String)
-    {
-        viewModelScope.launch(Dispatchers.IO) {
-            participationDao.insertParticipation(ProfileEventCrossRef(profileId,eventId))
-        }
-    }
-
-    fun getParticipants(eventId: String):Flow<List<Profile>>
-    {
-        return participationDao.getEventWithParticipants(eventId).map { it.pariticipants }
+        return eventRepository.getEventWithParticipants(eventId).map { it?.pariticipants ?: emptyList() }.asLiveData()
     }
 }

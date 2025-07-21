@@ -9,7 +9,11 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.model.roommodels.EventTagCrossRef
+import com.example.eventtrackerapp.model.roommodels.EventWithParticipants
 import com.example.eventtrackerapp.model.roommodels.EventWithTags
+import com.example.eventtrackerapp.model.roommodels.ProfileEventCrossRef
+import com.example.eventtrackerapp.model.roommodels.ProfileWithEvents
+import com.google.firebase.database.core.utilities.ImmutableTree
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -44,6 +48,23 @@ interface EventDao {
 """)
     fun getEventBySelectedTag(tagIds:List<String>):Flow<List<EventWithTags>>
 
+
+    // etkinliğe katılım işlemleri
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrUpdateProfileEventCrossRef(crossRef: ProfileEventCrossRef)
+
+    @Query("SELECT * FROM profile_event_cross_ref WHERE eventId = :eventId AND profileId = :profileId LIMIT 1")
+    fun getProfileEventCrossRef(eventId: String, profileId:String):Flow<ProfileEventCrossRef?>
+
+    @Query("SELECT COUNT(*) FROM profile_event_cross_ref WHERE eventId = :eventId AND isAttending = 1")
+    fun getParticipationCountForEvent(eventId: String):Flow<Int>
+
+    @Query("Select Count(*) FROM profile_event_cross_ref WHERE eventId = :eventId AND profileId = :profileId AND isAttending = 1")
+    fun hasUserParticipated(eventId : String,profileId: String):Flow<Int>
+
+    @Transaction
+    @Query("SELECT * FROM events WHERE id = :eventId LIMIT 1")
+    fun getEventWithParticipantsById(eventId:String):Flow<EventWithParticipants?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEventTagCrossRef(crossRef: EventTagCrossRef)

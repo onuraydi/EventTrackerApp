@@ -40,10 +40,10 @@ object AppModule{
     //TODO DATABASE DÜZELTİLECEK. SCOPE SORUNLU
     @Provides
     @Singleton
-    fun provideEventDatabase(@ApplicationContext context: Context, scope: CoroutineScope): EventTrackerDatabase {
+    fun provideEventDatabase(@ApplicationContext context: Context): EventTrackerDatabase {
         //EventTrackerDatabase.getDatabase() metodu, Context bağımlılığına sahiptir.
         // Hilt, @ApplicationContext annotation'ı sayesinde doğru Context'i otomatik olarak sağlar.
-        return EventTrackerDatabase.getDatabase(context,scope)
+        return EventTrackerDatabase.getDatabase(context)
     }
 
     @Provides
@@ -119,8 +119,8 @@ object AppModule{
 
     @Provides
     @Singleton
-    fun provideEventRepository(eventDao: EventDao, firestore: FirebaseFirestore): EventRepository {
-        return EventRepository(eventDao,firestore)
+    fun provideEventRepository(eventDao: EventDao, profileDao: ProfileDao, firestore: FirebaseFirestore): EventRepository {
+        return EventRepository(eventDao,profileDao,firestore)
     }
 
     @Provides

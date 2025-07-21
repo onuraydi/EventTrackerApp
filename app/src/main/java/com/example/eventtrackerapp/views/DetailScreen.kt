@@ -20,8 +20,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
@@ -38,7 +38,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -56,14 +55,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Category
-import com.example.eventtrackerapp.model.roommodels.Comment
 import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.utils.CommentBottomSheet
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
-import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -87,9 +84,9 @@ fun DetailScreen(
 
     val commentCount by commentViewModel.getCommentCount(event.id).observeAsState()
 
-    val state by participantsViewModel.getParticipationState(event.id,profileId).collectAsState(initial = false)
+    val state by participantsViewModel.hasUserParticipated(event.id,profileId).observeAsState(false)
 
-    val participantsCount by participantsViewModel.getParticipantsCount(event.id).collectAsState(initial = 0)
+    val participantsCount by participantsViewModel.getParticipationCount(event.id).observeAsState(initial = 0)
 
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -101,7 +98,8 @@ fun DetailScreen(
                     Text("Etkinlik Detay Sayfası", fontSize = 25.sp)
                 },
                 navigationIcon = {
-                    Icon(Icons.Default.ArrowBack,null, modifier = Modifier
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,null, modifier = Modifier
                         .padding(start = 8.dp)
                         .clickable { navController.popBackStack() })
                 }
@@ -193,14 +191,14 @@ fun DetailScreen(
                     // TODO etkinliğe katılıp katılmadığının kontorlü yapılarak butonun görünümü vb. değişecek
                     if (!state)
                     {
-                        ExtendedFloatingActionButton(onClick = {participantsViewModel.joinEvent(profileId = profileId, eventId = event.id) },
+                        ExtendedFloatingActionButton(onClick = {participantsViewModel.toggleAttendance(profileId = profileId, eventId = event.id) },
                             icon = { Icon(Icons.Default.Add,null)},
                             text = { Text("Katıl")},
                             modifier = Modifier.weight(1f)
                         )
                     }
                     else{
-                        ExtendedFloatingActionButton(onClick = {participantsViewModel.deleteParticipation(event.id,profileId)},
+                        ExtendedFloatingActionButton(onClick = {participantsViewModel.toggleAttendance(event.id,profileId)},
                             icon = {Icon(Icons.Default.Clear,null)},
                             text = { Text("Vazgeç")},
                             modifier = Modifier.weight(1f)

@@ -6,21 +6,27 @@ import com.example.eventtrackerapp.data.source.local.CategoryDao
 import com.example.eventtrackerapp.data.source.local.EventDao
 import com.example.eventtrackerapp.data.source.local.ProfileDao
 import com.example.eventtrackerapp.data.source.local.TagDao
+import com.example.eventtrackerapp.model.firebasemodels.FirebaseAttendance
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseEvent
 import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.model.roommodels.EventTagCrossRef
+import com.example.eventtrackerapp.model.roommodels.EventWithParticipants
 import com.example.eventtrackerapp.model.roommodels.EventWithTags
+import com.example.eventtrackerapp.model.roommodels.ProfileEventCrossRef
 import com.example.eventtrackerapp.model.roommodels.Tag
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -30,9 +36,11 @@ import kotlin.concurrent.timerTask
 
 class EventRepository (
     private val eventDao:EventDao,
+    private val profileDao: ProfileDao,
     private val firestore: FirebaseFirestore
 ) {
     private val eventCollection = firestore.collection("events")
+    private val attendancesCollection = "attendances"
 
     init
     {
@@ -105,6 +113,87 @@ class EventRepository (
             .addOnFailureListener { e -> Log.e(TAG, "Error deleting event from Firestore", e) }
 
         // TODO burada event silindiğinde like ve comment ile ilgii kısımları da silmek gerekebilir.
+    }
+
+    suspend fun toggleAttendance(eventId:String, profileId:String)
+    {
+        val firestoreDocId = "${eventId}-${profileId}"
+        val currentCrossRef = eventDao.getProfileEventCrossRef(eventId,profileId).firstOrNull()
+
+        val newAttendingStatus = !(currentCrossRef?.isAttending ?: false)
+
+        val updatedCrossRef = currentCrossRef?.copy(isAttending = newAttendingStatus) ?: ProfileEventCrossRef(profileId = profileId, eventId = eventId, isAttending = newAttendingStatus)
+        eventDao.insertOrUpdateProfileEventCrossRef(updatedCrossRef)
+
+        if (newAttendingStatus)
+        {
+            val firebaseAttendance = FirebaseAttendance(eventId = eventId, profileId = profileId)
+            firestore.collection(attendancesCollection).document(firestoreDocId).set(firebaseAttendance).await()
+        }
+        else
+        {
+            firestore.collection(attendancesCollection).document(firestoreDocId).delete().await()
+        }
+    }
+
+    fun getParticipationCountForEvent(eventId:String):Flow<Int>
+    {
+        return eventDao.getParticipationCountForEvent(eventId)
+    }
+
+    fun hasUserParticipated(eventId:String,profileId: String):Flow<Boolean>
+    {
+        return eventDao.hasUserParticipated(eventId,profileId).map { count -> count > 0 }
+    }
+
+    fun getEventWithParticipants(eventId:String):Flow<EventWithParticipants?>
+    {
+        return  eventDao.getEventWithParticipantsById(eventId)
+    }
+
+    private fun listenForFirestoreAttendances()
+    {
+        firestore.collection(attendancesCollection).addSnapshotListener{snapshots, e ->
+            if (e != null) {
+                Log.e(TAG, "Attendance listen failed", e)
+                return@addSnapshotListener
+            }
+
+            if (snapshots != null) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    snapshots.documentChanges.forEach{ dc ->
+                        val firebaseAttendance = dc.document.toObject(FirebaseAttendance::class.java)
+                        val eventId = firebaseAttendance.eventId
+                        val profileId = firebaseAttendance.profileId
+
+                        val existingCrossRef = eventDao.getProfileEventCrossRef(eventId, profileId).firstOrNull()
+
+                        when (dc.type)
+                        {
+                            com.google.firebase.firestore.DocumentChange.Type.ADDED,
+                            com.google.firebase.firestore.DocumentChange.Type.MODIFIED -> {
+                                val updatedCrossRef = existingCrossRef?.copy(
+                                    isAttending = true) ?: ProfileEventCrossRef(
+                                        profileId = profileId,
+                                        eventId = eventId,
+                                        isAttending = true
+                                    )
+                                eventDao.insertOrUpdateProfileEventCrossRef(updatedCrossRef)
+                            }
+                            com.google.firebase.firestore.DocumentChange.Type.REMOVED -> {
+                                if (existingCrossRef != null)
+                                {
+                                    val updatedCrossRef = existingCrossRef.copy(
+                                        isAttending = false
+                                    )
+                                    eventDao.insertOrUpdateProfileEventCrossRef(updatedCrossRef)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun listenForFireStoreEvents()
