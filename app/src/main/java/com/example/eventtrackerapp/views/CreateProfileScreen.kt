@@ -84,14 +84,13 @@ import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
-import com.example.eventtrackerapp.viewmodel.TagViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CreateProfileScreen(
     navController: NavController,
-    tagViewModel: TagViewModel = viewModel(),
+//    tagViewModel: TagViewModel = viewModel(),
     profileViewModel: ProfileViewModel = viewModel(),
     permissionViewModel: PermissionViewModel = viewModel(),
     userPreferences: UserPreferences,

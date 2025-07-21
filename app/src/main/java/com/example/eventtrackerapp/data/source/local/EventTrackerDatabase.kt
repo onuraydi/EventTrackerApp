@@ -71,20 +71,20 @@ abstract class EventTrackerDatabase : RoomDatabase(){
             val techId = categoryDao.insert(Category(name = "Teknoloji")).toInt()
             val artId = categoryDao.insert(Category(name = "Sanat")).toInt()
 
-            tagDao.insert(Tag(name = "Futbol", categoryId = sportsId))
-            tagDao.insert(Tag(name = "Basketbol", categoryId = sportsId))
-            tagDao.insert(Tag(name = "Tenis", categoryId = sportsId))
-            tagDao.insert(Tag(name = "Voleybol", categoryId = sportsId))
-
-            tagDao.insert(Tag(name = "Yazılım", categoryId = techId))
-            tagDao.insert(Tag(name = "Donanım", categoryId = techId))
-            tagDao.insert(Tag(name = "Yapay Zeka", categoryId = techId))
-
-            tagDao.insert(Tag(name = "Resim", categoryId = artId))
-            tagDao.insert(Tag(name = "Müzik", categoryId = artId))
-            tagDao.insert(Tag(name = "Sinema", categoryId = artId))
-            tagDao.insert(Tag(name = "Tiyatro", categoryId = artId))
-            tagDao.insert(Tag(name = "Edebiyat", categoryId = artId))
+//            tagDao.insert(Tag(name = "Futbol", categoryId = sportsId))
+//            tagDao.insert(Tag(name = "Basketbol", categoryId = sportsId))
+//            tagDao.insert(Tag(name = "Tenis", categoryId = sportsId))
+//            tagDao.insert(Tag(name = "Voleybol", categoryId = sportsId))
+//
+//            tagDao.insert(Tag(name = "Yazılım", categoryId = techId))
+//            tagDao.insert(Tag(name = "Donanım", categoryId = techId))
+//            tagDao.insert(Tag(name = "Yapay Zeka", categoryId = techId))
+//
+//            tagDao.insert(Tag(name = "Resim", categoryId = artId))
+//            tagDao.insert(Tag(name = "Müzik", categoryId = artId))
+//            tagDao.insert(Tag(name = "Sinema", categoryId = artId))
+//            tagDao.insert(Tag(name = "Tiyatro", categoryId = artId))
+//            tagDao.insert(Tag(name = "Edebiyat", categoryId = artId))
         }
     }
 }

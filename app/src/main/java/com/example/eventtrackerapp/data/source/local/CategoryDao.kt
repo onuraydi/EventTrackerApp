@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CategoryDao {
 
+    // TODO Kategori ve tag işlemleri ortak olarak kategori başlığı altında toplandığı için bu ve bazı dosyaların adı değişecek
     @Query("SELECT * FROM categories")
     fun getAll():Flow<List<Category>>
 
