@@ -251,7 +251,7 @@ fun AppNavGraph(
 
             composable("participants_screen/{id}") {backStackEntry ->
 
-                val eventId = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: 0
+                val eventId = backStackEntry.arguments?.getString("id")?.toString() ?: ""
                 // TODO Event Id değeri gelmiyor o yüzden crash yiyoruz
                 println("eventId:" + eventId)
                 ParticipantsScreen(navController,participantsViewModel, eventId)

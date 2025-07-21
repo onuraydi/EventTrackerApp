@@ -30,8 +30,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,12 +40,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W500
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,10 +51,10 @@ import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 fun ParticipantsScreen(
     navController: NavController,
     participantsViewModel: ParticipantsViewModel,
-    eventId:Int
+    eventId:String
 )
 {
-    val participants by participantsViewModel.getParticipants(eventId).collectAsState(initial = emptyList())
+    val participants by participantsViewModel.getParticipantsForEvent(eventId).observeAsState(initial = emptyList())
 
     Scaffold(modifier = Modifier
         .fillMaxSize(),
@@ -103,7 +101,7 @@ fun ParticipantsScreen(
 }
 
 @Composable
-fun user(image:Int,nameSurname:String, email:String)
+fun user(image: String, nameSurname:String, email:String)
 {
     val userImage = remember { mutableStateOf(image) }
     val userNameSurname = remember { mutableStateOf(nameSurname) }

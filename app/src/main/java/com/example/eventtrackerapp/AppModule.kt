@@ -13,7 +13,6 @@ import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
 import com.example.eventtrackerapp.data.source.local.ExploreDao
 import com.example.eventtrackerapp.data.source.local.HistoryDao
 import com.example.eventtrackerapp.data.source.local.LikeDao
-import com.example.eventtrackerapp.data.source.local.ParticipationDao
 import com.example.eventtrackerapp.data.source.local.ProfileDao
 import com.example.eventtrackerapp.data.source.local.TagDao
 import com.google.firebase.firestore.FirebaseFirestore
@@ -86,12 +85,6 @@ object AppModule{
     @Singleton
     fun provideHistoryDao(database: EventTrackerDatabase): HistoryDao {
         return database.historyDao()
-    }
-
-    @Provides
-    @Singleton
-    fun provideParticipationDao(database: EventTrackerDatabase): ParticipationDao {
-        return database.participationDao()
     }
 
     @Provides

@@ -15,8 +15,8 @@ import kotlinx.coroutines.launch
 
 class ExploreViewModel(application:Application):AndroidViewModel(application) {
 
-    val exploreDao = EventTrackerDatabase.getDatabase(application,viewModelScope).exploreDao()
-    val historyDao = EventTrackerDatabase.getDatabase(application,viewModelScope).historyDao()
+    val exploreDao = EventTrackerDatabase.getDatabase(application).exploreDao()
+    val historyDao = EventTrackerDatabase.getDatabase(application).historyDao()
 
     val _searchList = MutableStateFlow<List<EventWithTags>>(arrayListOf())
     val searchList: StateFlow<List<EventWithTags>> = _searchList
