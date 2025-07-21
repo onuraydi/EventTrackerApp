@@ -23,7 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -42,8 +42,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,11 +55,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Event
-import com.example.eventtrackerapp.model.roommodels.EventWithTags
 import com.example.eventtrackerapp.model.roommodels.Tag
 import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
@@ -73,23 +71,31 @@ import com.example.eventtrackerapp.viewmodel.EventViewModel
 @Composable
 fun EditEventScreen(
     navController: NavHostController,
-    eventWithTag: EventWithTags,
+    eventId:String,
     eventViewModel: EventViewModel,
     categoryViewModel: CategoryViewModel,
-//    tagViewModel: TagViewModel,
     ownerId: String
 ) {
     val context = LocalContext.current
 
-    // Kategori verisini yükle
-    LaunchedEffect(Unit) {
-        categoryViewModel.getAllCategoryWithTags()
-    }
+
+    // TODO Burası tekrardan refactor edilecek
+
+
+//    // Kategori verisini yükle
+//    LaunchedEffect(Unit) {
+//        categoryViewModel.getAllCategoryWithTags()
+//    }
+
+    val categoryWithTags by categoryViewModel.categoryWithTags.observeAsState(emptyList())
+
+//    val allEventsWithRelations by eventViewModel.allEventsWithRelations.observeAsState(emptyList())
+
+    val eventWithTags = eventViewModel.getEventWithRelationsById(eventId).observeAsState().value
 
     // ViewModel'den state'ler
-    val categoryId = rememberSaveable { mutableStateOf(eventWithTag.event.categoryId) }
-    val categoryWithTags by categoryViewModel.categoryWithTags.collectAsState()
-    val category by categoryViewModel.category.collectAsStateWithLifecycle()
+    val categoryId = rememberSaveable { mutableStateOf(eventWithTags?.event?.categoryId)}
+//    val category = categoryWithTags.forEach { category -> category.category }
 
     // Seçili kategori adı ve tag'lar için state'ler
     val selectedCategoryName = rememberSaveable { mutableStateOf("") }
@@ -98,12 +104,12 @@ fun EditEventScreen(
     // Kategori ve tag verisi geldiğinde state'leri güncelle
     LaunchedEffect(categoryWithTags) {
         if (categoryWithTags.isNotEmpty()) {
-            val selectedCategory = categoryWithTags.firstOrNull { it.category.id == eventWithTag.event.categoryId }
+            val selectedCategory = categoryWithTags.firstOrNull { it.category.id == eventWithTags?.event?.categoryId}
             if (selectedCategory != null) {
-                selectedCategoryName.value = selectedCategory.category.name ?: ""
+                selectedCategoryName.value = selectedCategory.category.name
                 categoryId.value = selectedCategory.category.id
                 chosenTags.clear()
-                chosenTags.addAll(eventWithTag.tags)
+                eventWithTags?.tags?.let { chosenTags.addAll(it) }
             }
         }
     }
@@ -117,13 +123,13 @@ fun EditEventScreen(
     LaunchedEffect(categoryId.value, categoryWithTags) {
         val selected = categoryWithTags.firstOrNull { it.category.id == categoryId.value }
         selectedCategoryName.value = selected?.category?.name ?: ""
-        if (categoryId.value != eventWithTag.event.categoryId) {
+        if (categoryId.value != eventWithTags?.event?.categoryId) {
             chosenTags.clear()
         } else {
             chosenTags.clear()
-            chosenTags.addAll(eventWithTag.tags)
+            eventWithTags?.tags?.let { chosenTags.addAll(it) }
         }
-        tagViewModel.resetTag()
+        categoryViewModel.resetTag()
     }
 
     val isExpanded = rememberSaveable { mutableStateOf(false) }
@@ -146,7 +152,7 @@ fun EditEventScreen(
                     title = { Text("Edit Event", fontSize = 25.sp) },
                     navigationIcon = {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             "GoBack",
                             modifier = Modifier
                                 .padding(start = 8.dp)
@@ -162,21 +168,21 @@ fun EditEventScreen(
                     .fillMaxSize()
             ) {
 
-                val eventName = rememberSaveable { mutableStateOf(eventWithTag.event.name ?: "") }
+                val eventName = rememberSaveable { mutableStateOf(eventWithTags?.event?.name ?: "") }
                 val nameError = rememberSaveable { mutableStateOf(false) }
 
-                val eventDetail = rememberSaveable { mutableStateOf(eventWithTag.event.detail ?: "") }
+                val eventDetail = rememberSaveable { mutableStateOf(eventWithTags?.event?.detail ?: "") }
                 val detailError = rememberSaveable { mutableStateOf(false) }
 
-                val selectedDate = rememberSaveable { mutableStateOf<Long?>(eventWithTag.event.date) }
+                val selectedDate = rememberSaveable { mutableStateOf(eventWithTags?.event?.date) }
                 val dateError = rememberSaveable { mutableStateOf(false) }
 
                 val showModal = rememberSaveable { mutableStateOf(false) }
 
-                val eventDuration = rememberSaveable { mutableStateOf(eventWithTag.event.duration ?: "") }
+                val eventDuration = rememberSaveable { mutableStateOf(eventWithTags?.event?.duration ?: "") }
                 val durationError = rememberSaveable { mutableStateOf(false) }
 
-                val eventLocation = rememberSaveable { mutableStateOf(eventWithTag.event.location ?: "") }
+                val eventLocation = rememberSaveable { mutableStateOf(eventWithTags?.event?.location ?: "") }
                 val locationError = rememberSaveable { mutableStateOf(false) }
 
                 val categoryError = rememberSaveable { mutableStateOf(false) }
@@ -322,13 +328,13 @@ fun EditEventScreen(
                         {
                             categoryWithTags.forEach {
                                 DropdownMenuItem(
-                                    text = { Text("${it.category.name}") },
+                                    text = { Text(it.category.name) },
                                     onClick = {
-                                        selectedCategoryName.value = it.category.name ?: ""
+                                        selectedCategoryName.value = it.category.name
                                         categoryError.value = selectedCategoryName.value.isBlank()
                                         isExpanded.value = false
                                         categoryId.value = it.category.id
-                                        tagViewModel.updateSelectedCategoryTags(it)
+                                        categoryViewModel.updateSelectedCategoryTags(it)
                                     }
                                 )
                             }
@@ -344,7 +350,7 @@ fun EditEventScreen(
                             FilterChip(
                                 modifier = Modifier.padding(end = 8.dp),
                                 selected = isSelected,
-                                label = { Text(tag.name ?: "") },
+                                label = { Text(tag.name) },
                                 onClick = {
                                     if (chosenTags.any { it.id == tag.id }) {
                                         chosenTags.removeAll { it.id == tag.id }
@@ -384,7 +390,7 @@ fun EditEventScreen(
                                 FilterChip(
                                     modifier = Modifier.padding(end = 3.dp),
                                     selected = true,
-                                    label = { Text(tag.name ?: "", fontSize = 12.sp, maxLines = 1) },
+                                    label = { Text(tag.name, fontSize = 12.sp, maxLines = 1) },
                                     onClick = {
                                         chosenTags.removeAll { it.id == tag.id }
                                     },
@@ -425,19 +431,23 @@ fun EditEventScreen(
                                 categoryError.value = selectedCategoryName.value.isBlank()
                                 return@EventTrackerAppPrimaryButton
                             } else {
-                                val event = Event(
-                                    id = eventWithTag.event.id,
-                                    ownerId = ownerId,
-                                    name = eventName.value,
-                                    detail = eventDetail.value,
-                                    image = R.drawable.ic_launcher_background,
-                                    date = selectedDate.value,
-                                    duration = eventDuration.value,
-                                    location = eventLocation.value,
-                                    likeCount = 0,
-                                    categoryId = categoryId.value,
-                                )
-                                eventViewModel.updateEventWithTags(event = event, tags = chosenTags)
+                                val event = eventWithTags?.event?.id?.let {
+                                    categoryId.value?.let { it1 ->
+                                        Event(
+                                            id = it,
+                                            ownerId = ownerId,
+                                            name = eventName.value,
+                                            detail = eventDetail.value,
+                                            imageUrl = R.drawable.ic_launcher_background.toString(), // TODO Düzeltilecek
+                                            date = selectedDate.value!!,
+                                            duration = eventDuration.value,
+                                            location = eventLocation.value,
+                                            likeCount = 0,
+                                            categoryId = it1,
+                                        )
+                                    }
+                                }
+                                eventViewModel.updateEvent(event = event!!, selectedTags = chosenTags)
                                 navController.popBackStack()
                             }
                         })
