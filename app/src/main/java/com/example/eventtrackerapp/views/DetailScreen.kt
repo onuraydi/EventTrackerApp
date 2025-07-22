@@ -1,6 +1,7 @@
 package com.example.eventtrackerapp.views
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -15,6 +16,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +26,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
@@ -38,6 +43,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,7 +59,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Category
 import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
@@ -61,6 +71,8 @@ import com.example.eventtrackerapp.utils.CommentBottomSheet
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
+import kotlinx.coroutines.flow.Flow
+import java.io.File
 
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -70,11 +82,11 @@ fun DetailScreen(
     event: Event,
     navController: NavController,
     category: Category,
-    commentList: List<CommentWithProfileAndEvent>,
+    commentList: Flow<List<CommentWithProfileAndEvent>>,
     commentViewModel: CommentViewModel,
     likeViewModel:LikeViewModel,
     profileId:String,
-    participantsViewModel: ParticipantsViewModel,
+    participantsViewModel: ParticipantsViewModel
 )
 {
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -87,6 +99,8 @@ fun DetailScreen(
     val state by participantsViewModel.hasUserParticipated(event.id,profileId).observeAsState(false)
 
     val participantsCount by participantsViewModel.getParticipationCount(event.id).observeAsState(initial = 0)
+
+    val participants by participantsViewModel.getParticipants(event.id).collectAsStateWithLifecycle(initialValue = arrayListOf())
 
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -113,14 +127,14 @@ fun DetailScreen(
             .verticalScroll(rememberScrollState())) {
             Column() {
 
-                if (event != null && event.imageUrl != null && event.imageUrl != "") {
-                    Image(
-                        painter = painterResource(R.drawable.ic_launcher_foreground),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        contentScale = ContentScale.Crop
+                if (event != null && event.image != null && event.image != "") {
+                    SelectableImageBox(
+                        boxWidth = 200.dp,
+                        boxHeight = 200.dp,
+                        imagePath = event.image,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RectangleShape,
+                        placeHolder = painterResource(R.drawable.ic_launcher_background)
                     )
                 }
 
@@ -154,33 +168,29 @@ fun DetailScreen(
                         navController.navigate("participants_screen/${event.id}")
                 })
                 Spacer(Modifier.padding(top = 5.dp))
-                Row(modifier = Modifier
+                LazyRow(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
                     .clickable { navController.navigate("participants_screen/${event.id}") }) {
-                    if(participantsCount < 4)
-                    {
-                        repeat(participantsCount)
-                        {
-                            Image(
-                                // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
-                                painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                                Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer), shape = CircleShape)
-                                    .size(60.dp))
-                            Spacer(Modifier.padding(start = 10.dp))
-                        }
+                    items(participants.take(3)){participant->
+                        //.take(3) ilk 3 elemanı alır. Eğer 3'ten fazla olursa aşağısı çalışır
+                        //itemsIndexed de olabilir.
+                        SelectableImageBox(
+                            boxWidth = 60.dp,
+                            boxHeight = 60.dp,
+                            imagePath = participant.photo,
+                            modifier = Modifier,
+                            placeHolder = painterResource(R.drawable.ic_launcher_foreground),
+                            shape = CircleShape,
+                            borderStroke = BorderStroke(2.dp,MaterialTheme.colorScheme.primaryContainer)
+                        )
+                        Spacer(Modifier.padding(start = 10.dp))
                     }
-                    else
-                    {
-                        repeat(3)
-                        {
-                            Image(
-                                // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
-                                painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                                Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer), shape = CircleShape)
-                                    .size(60.dp))
-                            Spacer(Modifier.padding(start = 10.dp))
+                    if(participantsCount > 3){
+                        item {
+                            Text("+${participantsCount - 3} Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier)
                         }
-                        Text("+${participantsCount - 3} Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier
-                            .align(Alignment.CenterVertically))
                     }
                 }
                 Spacer(Modifier.padding(top = 20.dp))

@@ -1,11 +1,11 @@
-package com.example.eventtrackerapp.model.roommodels
+package com.example.eventtrackerapp.model
 
 import androidx.room.Embedded
 import androidx.room.Junction
 import androidx.room.Relation
 
 data class EventWithTags(
-    @Embedded val event: Event,
+    @Embedded val event:Event,
     @Relation(
         parentColumn = "id",
         entityColumn = "id",

@@ -1,4 +1,4 @@
-package com.example.eventtrackerapp.model.roommodels
+package com.example.eventtrackerapp.model
 
 import androidx.room.Embedded
 import androidx.room.Relation

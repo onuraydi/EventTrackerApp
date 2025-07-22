@@ -1,5 +1,6 @@
 package com.example.eventtrackerapp.views
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -24,6 +26,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,37 +38,46 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.roommodels.Profile
-import com.example.eventtrackerapp.utils.BottomNavBar
+import com.example.eventtrackerapp.model.Profile
+import java.io.File
+import com.example.eventtrackerapp.common.BottomNavBar
+import com.example.eventtrackerapp.common.EventTrackerExtendedFloatingActionButton
+import com.example.eventtrackerapp.common.SelectableImageBox
 
 
 @Composable
 fun ProfileScreen(
     navController: NavController,
     authViewModel:AuthViewModel,
-    profile: Profile
+    profile:Profile
     )
 {
-
-
-
     Scaffold(Modifier
         .fillMaxSize(),
         bottomBar = { BottomNavBar(navController = navController)}
     ) { innerPadding ->
-        Column(modifier = Modifier
-            .padding(innerPadding)
-            .padding(bottom = 70.dp)
-            .fillMaxSize()
-            .fillMaxHeight(),
+
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
             ) {
-                Image(painterResource(R.drawable.ic_launcher_background),null,Modifier
-                    .clip(CircleShape)
-                )
+            //Profil Fotoğrafı
+            SelectableImageBox(
+                boxWidth = 140.dp,
+                boxHeight = 140.dp,
+                imagePath = profile.photo,
+                modifier = Modifier,
+                placeHolder = painterResource(R.drawable.ic_launcher_foreground),
+                shape = CircleShape,
+                borderStroke = BorderStroke(1.dp,MaterialTheme.colorScheme.primaryContainer)
+            )
 
                 Spacer(Modifier.padding(10.dp))
 
@@ -72,115 +86,71 @@ fun ProfileScreen(
 
             // Hesabım
 
-            ExtendedFloatingActionButton(
-                onClick = {
-                    navController.navigate("my_account"){
+            // MY Account
+
+            EventTrackerExtendedFloatingActionButton(
+                text = "My Account",
+                onClick =
+                {
+                    navController.navigate("my_account")
+                    {
                         launchSingleTop = true
                     }
                 },
-                Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp)
-                    .background(MaterialTheme.colorScheme.background))
+                leadingIcon = Icons.Filled.Person,
+                leadingIconDescription = "Person"
+            )
+
+            // My Preferences
+
+            EventTrackerExtendedFloatingActionButton(
+                text = "My Preferences",
+                onClick =
                 {
-                Row(Modifier
-                    .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Person,null)
-                    Spacer(Modifier.padding(8.dp))
-                    Text("Hesabım",)
-                    Spacer(Modifier.weight(1f))
-                    Icon(Icons.Filled.KeyboardArrowRight,null)
-                }
-            }
-
-            // Tercihler
-
-            ExtendedFloatingActionButton(
-                onClick = {
-                    navController.navigate("preferences"){
+                    navController.navigate("preferences")
+                    {
                         launchSingleTop = true
                     }
-            },
-                Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp)
-                .background(MaterialTheme.colorScheme.background))
-            {
-                Row(Modifier
-                    .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Build,null)
-                    Spacer(Modifier.padding(8.dp))
-                    Text("Tercihler",)
-                    Spacer(Modifier.weight(1f))
-                    Icon(Icons.Filled.KeyboardArrowRight,null)
-                }
-            }
+                },
+                leadingIcon = Icons.Filled.Build,
+                leadingIconDescription = "Person"
+            )
 
-            // Eklediğim Etkinlikler
+            // My Events
 
-            ExtendedFloatingActionButton(
-                onClick = {
-                    navController.navigate("my_events"){
+            EventTrackerExtendedFloatingActionButton(
+                text = "My Events",
+                onClick =
+                {
+                    navController.navigate("my_events")
+                    {
                         launchSingleTop = true
                     }
-            },
-                Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp)
-                .background(MaterialTheme.colorScheme.background))
-            {
-                Row(Modifier
-                    .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Star,null)
-                    Spacer(Modifier.padding(8.dp))
-                    Text("Eklediğim Etkinlikler",)
-                    Spacer(Modifier.weight(1f))
-                    Icon(Icons.Filled.KeyboardArrowRight,null)
-                }
-            }
+                },
+                leadingIcon = Icons.Filled.Star,
+                leadingIconDescription = "Person"
+            )
 
-            // Çıkış yap
+            // Log Out
 
-            ExtendedFloatingActionButton(
-                onClick = {
+            EventTrackerExtendedFloatingActionButton(
+                text = "Log Out",
+                textColor = Color.Red,
+                onClick =
+                {
                     authViewModel.logOut()
-                    navController.navigate("login_screen"){
-                        popUpTo("profile"){
+                    navController.navigate("login_screen")
+                    {
+                        popUpTo("profile")
+                        {
                             inclusive = true
                         }
                     }
-            },
-                Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp)
-                .background(MaterialTheme.colorScheme.background))
-            {
-                Row(Modifier
-                    .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.ExitToApp,null, tint = Color.Red)
-                    Spacer(Modifier.padding(8.dp))
-                    Text("Çıkış Yap", color = Color.Red)
-                    Spacer(Modifier.weight(1f))
-                    Icon(Icons.Filled.KeyboardArrowRight,null, tint = Color.Red)
-                }
-            }
+                },
+                leadingIcon = Icons.AutoMirrored.Filled.ExitToApp,
+                leadingIconDescription = "Person",
+                tint = Color.Red
+            )
         }
     }
 }
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun ProfilePreview() {
-//    EventTrackerAppTheme {
-////        ProfileScreen();
-//    }
-//}

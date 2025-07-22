@@ -1,6 +1,7 @@
-package com.example.eventtrackerapp.model.roommodels
+package com.example.eventtrackerapp.model
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 
 @Entity(primaryKeys = ["eventId","tagId"])

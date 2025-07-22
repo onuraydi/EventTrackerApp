@@ -1,5 +1,6 @@
 package com.example.eventtrackerapp.views
 
+import android.net.Uri
 import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -33,16 +34,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.EventWithTags
 import com.example.eventtrackerapp.utils.BottomNavBar
+import com.example.eventtrackerapp.model.Event
+import com.example.eventtrackerapp.common.BottomNavBar
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.ExploreViewModel
+import java.io.File
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
@@ -51,33 +58,41 @@ fun ExploreScreen(
     navController:NavController,
     exploreViewModel: ExploreViewModel = viewModel()
 ){
+
     val searchResult by exploreViewModel.searchList.collectAsStateWithLifecycle()
     val historyList by exploreViewModel.historyList.collectAsStateWithLifecycle()
 
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            bottomBar = {BottomNavBar(navController = navController)}
+            bottomBar =
+            {
+                BottomNavBar(navController = navController)
+            }
+
         ) { innerPadding ->
 
             val query = rememberSaveable { mutableStateOf("") }
             val active = rememberSaveable { mutableStateOf(false) }
-
             val displayedEvents = if(query.value.trim().isEmpty()) eventList else searchResult
 
             Column(
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier
+                    .padding(innerPadding)
             ) {
+
                 SimpleSearchBar(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 5.dp),
                     query = query.value,
-                    onQueryChange = {
+                    onQueryChange =
+                    {
                         query.value = it
                         exploreViewModel.searchEvents(it)
                     },
                     active = active.value,
-                    onActiveChange = {
+                    onActiveChange =
+                    {
                         active.value = it
                     },
                     onSearch = {
@@ -90,17 +105,26 @@ fun ExploreScreen(
                         active.value = false
                     },
                     placeHolder = { Text("Search") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, "Search")
+                    leadingIcon =
+                    {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search"
+                        )
                     },
-                    trailingIcon = {
+                    trailingIcon =
+                    {
                         if (active.value) {
                             Icon(
-                                Icons.Default.Clear, "Clear",
-                                modifier = Modifier.clickable {
-                                    if (query.value.isNotEmpty()) {
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear",
+                                modifier = Modifier.clickable
+                                {
+                                    if (query.value.isNotEmpty())
+                                    {
                                         query.value = ""
-                                    } else {
+                                    } else
+                                    {
                                         active.value = false
                                     }
                                 },
@@ -108,7 +132,8 @@ fun ExploreScreen(
                         }
                     },
                     searchResult = searchResult,
-                    onHistoryClick = {
+                    onHistoryClick =
+                    {
                         query.value = it
                         exploreViewModel.searchEvents(it)
                         exploreViewModel.insertHistory(it)
@@ -116,7 +141,8 @@ fun ExploreScreen(
                     },
                     searchHistoryList = historyList.map{it.keyword},
                     navController = navController,
-                    deleteItem = {
+                    deleteItem =
+                    {
                         exploreViewModel.deleteHistoryItem(it)
                     }
                 )
@@ -127,8 +153,10 @@ fun ExploreScreen(
                     columns = StaggeredGridCells.Fixed(2),
                     verticalItemSpacing = 8.dp,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    content = {
-                        items(displayedEvents){
+                    content =
+                    {
+                        items(displayedEvents)
+                        {
                             MyImage(it,navController)
                         }
                     }
@@ -138,25 +166,19 @@ fun ExploreScreen(
     }
 
 @Composable
-fun MyImage(eventWithTag: EventWithTags, navController: NavController){
-    val randomHeights = remember { (150..300).random().dp }
-    Image(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(randomHeights)
-            .border(
-                border = BorderStroke(
-                    1.dp,
-                    Color.Black
-                )
-            )
-            .clickable {
-                navController.navigate("detail/${eventWithTag.event.id}")
-            },
-        painter = painterResource(R.drawable.ic_launcher_foreground),
-        contentDescription = "",
-        contentScale = ContentScale.Crop,
+fun MyImage(event:Event,navController: NavController){
+    SelectableImageBox(
+        boxWidth = 160.dp,
+        boxHeight = 200.dp,
+        imagePath = event.image,
+        modifier = Modifier,
+        placeHolder = painterResource(R.drawable.ic_launcher_background),
+        shape = RectangleShape,
+        onClick = {
+            navController.navigate("detail/${event.id}")
+        }
     )
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -216,7 +238,7 @@ fun SimpleSearchBar(
                                 .clickable {
                                     deleteItem(historyItem)
                                 }
-                            )
+                        )
                     }
                 }
             }
@@ -231,19 +253,13 @@ fun SimpleSearchBar(
                                 navController.navigate("detail/${eventWithTag.event.id}")
                             }
                     ){
-                        Icon(painterResource(R.drawable.baseline_event_24),"HistoryItem")
-                        Text(eventWithTag.event.name ?: "", modifier = Modifier.padding(start = 4.dp))
+                        Icon(
+                            painter = painterResource(R.drawable.baseline_event_24),
+                            contentDescription = "HistoryItem")
+                        Text(event.name ?: "", modifier = Modifier.padding(start = 4.dp))
                     }
                 }
             }
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewScreen(){
-//    EventTrackerAppTheme {
-//        //ExploreScreen()
-//    }
-//}

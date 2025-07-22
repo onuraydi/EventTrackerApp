@@ -1,4 +1,4 @@
-package com.example.eventtrackerapp.utils
+package com.example.eventtrackerapp.common
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,6 +30,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -47,6 +48,7 @@ import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Comment
 import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
+import kotlinx.coroutines.flow.Flow
 
 
 // TODO yorum kısmı dinamikleştirildikten sonra buradaki parametreler vb düzeltilecek
@@ -71,13 +73,15 @@ fun CommentBottomSheet(
         sheetState = sheetState,
         modifier = Modifier
             .navigationBarsPadding()
-            .imePadding()
+            .imePadding(),
+        containerColor = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxWidth()
                 .heightIn(min = 300.dp, max = 600.dp)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             // Başlık
             Text(
@@ -104,7 +108,7 @@ fun CommentBottomSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -153,7 +157,8 @@ fun CommentBottomSheet(
 @Composable
 fun CommentItem(commentWithProfile: CommentWithProfileAndEvent) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
         Image(

@@ -15,6 +15,9 @@ interface CategoryDao {
     @Query("SELECT * FROM categories")
     fun getAll():Flow<List<Category>>
 
+    @Query("SELECT * FROM categories WHERE id = :id ")
+    suspend fun getById(id:Int):Category
+
     @Transaction
     @Query("SELECT * FROM categories")
     fun getCategoryWithTags(): Flow<List<CategoryWithTag>>
@@ -25,4 +28,7 @@ interface CategoryDao {
 
     @Insert
     suspend fun insert(category: Category):Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllCategories(categories: List<Category>)
 }

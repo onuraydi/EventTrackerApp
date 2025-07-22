@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,17 +24,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.data.source.local.UserPreferences
-import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
-import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
-import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedButton
-import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.EventTrackerAppOutlinedButton
+import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
+import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
 @Composable
 fun LoginScreen(
     navController: NavController,
@@ -63,7 +60,7 @@ fun LoginScreen(
         Text(text = "LOG IN", fontSize = 25.sp, fontWeight = FontWeight.W500)
         Spacer(Modifier.padding(vertical = 20.dp))
 
-        EventTrackerAppAuthTextField(
+        EventTrackerAppOutlinedTextField(
             txt = "Email",
             state = userEmail,
             onValueChange = {
@@ -72,20 +69,11 @@ fun LoginScreen(
             },
             isError = emailError.value,
             leadingIcon = { Icon(Icons.Filled.MailOutline, "UserEmail") },
-            supportingText = {
-                if(emailError.value){
-                    Text(
-                        text = "Bu alan boş bırakılamaz!",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-            }
         )
 
         Spacer(Modifier.padding(vertical = 15.dp))
 
-        EventTrackerAppAuthTextField(
+        EventTrackerAppOutlinedTextField(
             txt = "Password",
             state = userPassword,
             onValueChange = {
@@ -105,15 +93,6 @@ fun LoginScreen(
                     Icon(painter = icon, "visibility")
                 }
             },
-            supportingText = {
-                if(passwordError.value){
-                    Text(
-                        text = "Bu alan boş bırakılamaz!",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-            }
         )
 
         Spacer(Modifier.padding(18.dp))

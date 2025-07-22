@@ -5,17 +5,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
+import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -83,12 +81,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Event
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
-import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
+import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.PermissionHelper
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
+import com.example.eventtrackerapp.viewmodel.TagViewModel
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Date
@@ -120,7 +123,8 @@ fun AddEventScreen(
     //Media Permission
     val permission = permissionViewModel.getPermissionName()
 
-    val imageUri by permissionViewModel.profileImageUri.collectAsState()
+    val imageUri by permissionViewModel.eventImageUri.collectAsStateWithLifecycle()
+    val imagePath = rememberSaveable { mutableStateOf("") } //resmin yolunu tutuyoruz
 
     //galeriye gidip fotoğraf seçmemizi sağlayacak
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -129,7 +133,10 @@ fun AddEventScreen(
         if(result.resultCode == Activity.RESULT_OK && result.data!=null){
             //kullanıcı resim seçti ve gelen intent boş değilse
             val data = result.data?.data
-            permissionViewModel.setImageUri(data)
+            if(data!=null){
+                val savedUri = PermissionHelper.saveImageToInternalStorage(context,data)
+                imagePath.value = savedUri.toString()
+            }
         }
     }
 
@@ -139,7 +146,7 @@ fun AddEventScreen(
     ) {granted->
         if(granted){
             //kullanıcı izin verdi
-            goToGallery(imagePickerLauncher)
+            PermissionHelper.goToGallery(imagePickerLauncher)
         }else{
             Toast.makeText(context,"İzin kalıcı olarak reddedildi. Lütfen ayarlardan izni verin",Toast.LENGTH_LONG).show()
         }
@@ -205,47 +212,32 @@ fun AddEventScreen(
                 ) {
                     Spacer(Modifier.padding(vertical = 12.dp))
 
-                    //Profil Fotoğrafı
-                    Box(
-                        Modifier
-                            .size(180.dp,160.dp)
-                            .border(border = BorderStroke(2.dp, Color.Black), shape = RoundedCornerShape(12.dp))
-                            .clickable {
-                                doRequestPermission(
-                                    context = context,
-                                    permission = permission,
-                                    viewModel = permissionViewModel,
-                                    permissionLauncher = permissionLauncher,
-                                    imagePickerLauncher = imagePickerLauncher
-                                )
-                            }
-                    ){
-                        if(imageUri!=null){
-                            AsyncImage(
-                                model = imageUri,
-                                contentDescription = "Selected Photo",
-                                Modifier
-                                    .fillMaxSize(1f)
-                                    .align(Alignment.Center)
-                            )
-                        }else{
-                            Icon(
-                                painter = painterResource(R.drawable.image_icon),
-                                contentDescription = "Add Image",
-                                modifier = Modifier
-                                    .fillMaxSize(1f)
-                                    .align(Alignment.Center)
-                                    .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
+
+                    //Event Fotoğrafı
+                    SelectableImageBox(
+                        boxWidth= 180.dp,
+                        boxHeight = 160.dp,
+                        imagePath = imagePath.value,
+                        modifier = Modifier,
+                        placeHolder = painterResource(R.drawable.image_icon),
+                        shape = RoundedCornerShape(12.dp),
+                        onClick = {
+                            PermissionHelper.requestPermission(
+                                context,
+                                permission = permission,
+                                viewModel = permissionViewModel,
+                                imagePickerLauncher = imagePickerLauncher,
+                                permissionLauncher = permissionLauncher
                             )
                         }
-                    }
+                    )
 
                     Spacer(Modifier.padding(vertical = 5.dp))
                     Text("Please add event photo")
 
                     //Event Name
                     Spacer(Modifier.padding(vertical = 12.dp))
-                    EventTrackerAppAuthTextField(
+                    EventTrackerAppOutlinedTextField(
                         txt = "Event Name",
                         state = eventName,
                         onValueChange = {
@@ -253,16 +245,11 @@ fun AddEventScreen(
                             nameError.value = eventName.value.isBlank()
                         },
                         isError = nameError.value,
-                        supportingText = {
-                            if(nameError.value){
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        }
                     )
 
                     //Event Detail
                     Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppAuthTextField(
+                    EventTrackerAppOutlinedTextField(
                         modifier = Modifier.heightIn(min = 120.dp, max = 200.dp),
                         txt = "Event Detail",
                         state = eventDetail,
@@ -271,11 +258,6 @@ fun AddEventScreen(
                             detailError.value = eventDetail.value.isBlank()
                         },
                         isError = detailError.value,
-                        supportingText = {
-                            if(detailError.value){
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        },
                         isSingleLine = false
                     )
 
@@ -285,7 +267,7 @@ fun AddEventScreen(
 
                     //Event Duration
                     Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppAuthTextField(
+                    EventTrackerAppOutlinedTextField(
                         txt = "Event Duration",
                         state = eventDuration,
                         onValueChange = {
@@ -293,16 +275,11 @@ fun AddEventScreen(
                             durationError.value = eventDuration.value.isBlank()
                         },
                         isError = durationError.value,
-                        supportingText = {
-                            if(durationError.value){
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        }
                     )
 
                     //Event Location
                     Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppAuthTextField(
+                    EventTrackerAppOutlinedTextField(
                         txt = "Event Location",
                         state = eventLocation,
                         onValueChange = {
@@ -310,11 +287,6 @@ fun AddEventScreen(
                             locationError.value = eventLocation.value.isBlank()
                         },
                         isError = locationError.value,
-                        supportingText = {
-                            if(locationError.value){
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        }
                     )
 
                     //Select Category
@@ -469,6 +441,7 @@ fun AddEventScreen(
                                     ownerId = ownerId,
                                     name = eventName.value,
                                     detail = eventDetail.value,
+                                    imageUrl = imagePath.value,
                                     date = selectedDate.value!!,
                                     duration = eventDuration.value,
                                     location = eventLocation.value,
@@ -486,31 +459,6 @@ fun AddEventScreen(
         }
     }
 
-fun doRequestPermission(
-    context: Context,
-    permission:String,
-    viewModel: PermissionViewModel,
-    permissionLauncher:ManagedActivityResultLauncher<String,Boolean>,
-    imagePickerLauncher:ManagedActivityResultLauncher<Intent,ActivityResult>
-){
-    if(ContextCompat.checkSelfPermission(context,permission)!=PackageManager.PERMISSION_GRANTED){
-        //izin reddedildi
-        if(viewModel.shouldShowRationale(context)){
-            Toast.makeText(context,"Fotoğraf yüklemek için galeri izni lazım",Toast.LENGTH_LONG).show()
-            permissionLauncher.launch(permission)
-        }else{
-            permissionLauncher.launch(permission)
-        }
-    }else{
-        //izin verildi
-        goToGallery(imagePickerLauncher)
-    }
-}
-
-fun goToGallery(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>){
-    val intent = Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-    launcher.launch(intent)
-}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,6 +1,7 @@
 package com.example.eventtrackerapp.views
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
@@ -51,11 +53,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.model.roommodels.Tag
@@ -63,9 +68,11 @@ import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
+import com.example.eventtrackerapp.viewmodel.TagViewModel
+import java.io.File
 
 
-@SuppressLint("NewApi")
+@SuppressLint("NewApi", "AutoboxingStateCreation")
 @ExperimentalLayoutApi
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,6 +81,7 @@ fun EditEventScreen(
     eventId:String,
     eventViewModel: EventViewModel,
     categoryViewModel: CategoryViewModel,
+    tagViewModel: TagViewModel,
     ownerId: String
 ) {
     val context = LocalContext.current
@@ -142,31 +150,29 @@ fun EditEventScreen(
         return
     }
 
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                    title = { Text("Edit Event", fontSize = 25.sp) },
-                    navigationIcon = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            "GoBack",
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .clickable { navController.popBackStack() }
-                        )
-                    }
-                )
-            }
-        ) { innerPadding ->
-            Box(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-            ) {
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize(),
+        topBar =
+        {
+            EventTrackerTopAppBar(
+                title = "Edit Event",
+                modifier = Modifier,
+                showBackButton = true,
+                onBackClick =
+                {
+                    navController.popBackStack()
+                },
+            )
+        }
+
+    ) { innerPadding ->
+
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
 
                 val eventName = rememberSaveable { mutableStateOf(eventWithTags?.event?.name ?: "") }
                 val nameError = rememberSaveable { mutableStateOf(false) }
@@ -177,7 +183,7 @@ fun EditEventScreen(
                 val selectedDate = rememberSaveable { mutableStateOf(eventWithTags?.event?.date) }
                 val dateError = rememberSaveable { mutableStateOf(false) }
 
-                val showModal = rememberSaveable { mutableStateOf(false) }
+            val showModal = rememberSaveable { mutableStateOf(false) }
 
                 val eventDuration = rememberSaveable { mutableStateOf(eventWithTags?.event?.duration ?: "") }
                 val durationError = rememberSaveable { mutableStateOf(false) }
@@ -185,139 +191,167 @@ fun EditEventScreen(
                 val eventLocation = rememberSaveable { mutableStateOf(eventWithTags?.event?.location ?: "") }
                 val locationError = rememberSaveable { mutableStateOf(false) }
 
-                val categoryError = rememberSaveable { mutableStateOf(false) }
+            val categoryError = rememberSaveable { mutableStateOf(false) }
 
-                Column(
+            val eventImage = rememberSaveable{mutableStateOf(eventWithTag.event.image)}
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 90.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Spacer(
+                    Modifier
+                        .padding(vertical = 12.dp)
+                )
+
+                SelectableImageBox(
+                    boxWidth = 180.dp,
+                    boxHeight = 160.dp,
+                    imagePath = eventImage.value,
+                    modifier = Modifier,
+                    placeHolder = painterResource(R.drawable.image_icon),
+                    shape = RoundedCornerShape(12.dp),
+                    onClick = {
+                        //TODO fotoğraf yükleme gelecek
+                    }
+                )
+
+                Spacer(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 90.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(vertical = 5.dp)
+                )
+
+                Text(
+                    text = "you are updated event photo"
+                )
+
+                Spacer(
+                    modifier = Modifier
+                        .padding(vertical = 12.dp)
+                )
+
+                EventTrackerAppOutlinedTextField(
+                    txt = "Event Name",
+                    state = eventName,
+                    onValueChange =
+                    {
+                        eventName.value = it
+                        nameError.value = eventName.value.isBlank()
+                    },
+                    isError = nameError.value,
+                )
+
+                Spacer(
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                )
+
+                EventTrackerAppOutlinedTextField(
+                    modifier = Modifier
+                        .heightIn(min = 120.dp, max = 200.dp),
+                    txt = "Event Detail",
+                    state = eventDetail,
+                    onValueChange =
+                    {
+                        eventDetail.value = it
+                        detailError.value = eventDetail.value.isBlank()
+                    },
+                    isError = detailError.value,
+                    isSingleLine = false
+                )
+
+                Spacer(
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                )
+
+                ShowDateModal(
+                    modifier = Modifier,
+                    dateState = selectedDate,
+                    modalState = showModal,
+                    dateErrorState = dateError,
+                    context = context
+                )
+
+                Spacer(
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                )
+
+                EventTrackerAppOutlinedTextField(
+                    txt = "Event Duration",
+                    state = eventDuration,
+                    onValueChange =
+                    {
+                        eventDuration.value = it
+                        durationError.value = eventDuration.value.isBlank()
+                    },
+                    isError = durationError.value,
+                )
+
+                Spacer(
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                )
+
+                EventTrackerAppOutlinedTextField(
+                    txt = "Event Location",
+                    state = eventLocation,
+                    onValueChange =
+                    {
+                        eventLocation.value = it
+                        locationError.value = eventLocation.value.isBlank()
+                    },
+                    isError = locationError.value,
+                )
+
+                Spacer(
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                )
+
+                ExposedDropdownMenuBox(
+                    expanded = isExpanded.value,
+                    onExpandedChange =
+                    {
+                        isExpanded.value = it
+                    }
                 ) {
-                    Spacer(Modifier.padding(vertical = 12.dp))
 
-                    //Profil Fotoğrafı
-                    Icon(
-                        painter = painterResource(R.drawable.image_icon),
-                        contentDescription = "Add Image",
-                        modifier = Modifier
-                            .size(180.dp, 160.dp)
-                            .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
-                            .clickable {
-                                /*TODO(Buraya fotoğraf yükleme gelecek)*/
-                            }
-                    )
-                    Spacer(Modifier.padding(vertical = 5.dp))
-                    Text("you are updated event photo")
-
-                    //Event Name
-                    Spacer(Modifier.padding(vertical = 12.dp))
-                    EventTrackerAppAuthTextField(
-                        txt = "Event Name",
-                        state = eventName,
-                        onValueChange = {
-                            eventName.value = it
-                            nameError.value = eventName.value.isBlank()
+                    OutlinedTextField(
+                        modifier = Modifier.menuAnchor(),
+                        value = selectedCategoryName.value,
+                        onValueChange = {},
+                        readOnly = true,
+                        placeholder =
+                        {
+                            Text("Event Category")
                         },
-                        isError = nameError.value,
-                        supportingText = {
-                            if (nameError.value) {
+                        trailingIcon =
+                        {
+                            ExposedDropdownMenuDefaults.TrailingIcon(isExpanded.value)
+                        },
+                        leadingIcon =
+                        {
+                            Icon(
+                                painter = painterResource(R.drawable.category_icon),
+                                contentDescription = "Category"
+                            )
+                        },
+                        isError = categoryError.value,
+                        supportingText =
+                        {
+                            if (categoryError.value)
+                            {
                                 Text("Bu alanı boş bırakamazsınız")
                             }
                         }
                     )
-
-                    //Event Detail
-                    Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppAuthTextField(
-                        modifier = Modifier.heightIn(min = 120.dp, max = 200.dp),
-                        txt = "Event Detail",
-                        state = eventDetail,
-                        onValueChange = {
-                            eventDetail.value = it
-                            detailError.value = eventDetail.value.isBlank()
-                        },
-                        isError = detailError.value,
-                        supportingText = {
-                            if (detailError.value) {
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        },
-                        isSingleLine = false
-                    )
-
-                    //Event Date
-                    Spacer(Modifier.padding(vertical = 8.dp))
-                    ShowDateModal(Modifier, selectedDate, showModal, dateError, context)
-
-                    //Event Duration
-                    Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppAuthTextField(
-                        txt = "Event Duration",
-                        state = eventDuration,
-                        onValueChange = {
-                            eventDuration.value = it
-                            durationError.value = eventDuration.value.isBlank()
-                        },
-                        isError = durationError.value,
-                        supportingText = {
-                            if (durationError.value) {
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        }
-                    )
-
-                    //Event Location
-                    Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppAuthTextField(
-                        txt = "Event Location",
-                        state = eventLocation,
-                        onValueChange = {
-                            eventLocation.value = it
-                            locationError.value = eventLocation.value.isBlank()
-                        },
-                        isError = locationError.value,
-                        supportingText = {
-                            if (locationError.value) {
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        }
-                    )
-
-                    //Select Category
-                    Spacer(Modifier.padding(vertical = 8.dp))
-                    ExposedDropdownMenuBox(
-                        expanded = isExpanded.value,
-                        onExpandedChange = {
-                            isExpanded.value = it
-                        }
-                    ) {
-
-                        OutlinedTextField(
-                            modifier = Modifier.menuAnchor(),
-                            value = selectedCategoryName.value,
-                            onValueChange = {},
-                            readOnly = true,
-                            placeholder = {
-                                Text("Event Category")
-                            },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(isExpanded.value)
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(R.drawable.category_icon),
-                                    contentDescription = "Category"
-                                )
-                            },
-                            isError = categoryError.value,
-                            supportingText = {
-                                if (categoryError.value) {
-                                    Text("Bu alanı boş bırakamazsınız")
-                                }
-                            }
-                        )
 
                         ExposedDropdownMenu(
                             expanded = isExpanded.value,
@@ -341,11 +375,21 @@ fun EditEventScreen(
                         }
                     }
 
-                    Spacer(Modifier.padding(vertical = 12.dp))
-                    Text("Update event tag")
-                    LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
-                        items(currentCategoryTags) { tag ->
-                            val isSelected = chosenTags.any { it.id == tag.id }
+                Spacer(
+                    modifier = Modifier
+                        .padding(vertical = 12.dp)
+                )
+
+                Text(
+                    text = "Update event tag"
+                )
+
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    items(currentCategoryTags)
+                    { tag ->
+                        val isSelected = chosenTags.any { it.id == tag.id }
 
                             FilterChip(
                                 modifier = Modifier.padding(end = 8.dp),
@@ -371,7 +415,10 @@ fun EditEventScreen(
                         }
                     }
 
-                    Spacer(Modifier.padding(vertical = 5.dp))
+                Spacer(
+                    modifier = Modifier
+                        .padding(vertical = 5.dp)
+                )
 
                     Box(
                         Modifier
@@ -402,57 +449,58 @@ fun EditEventScreen(
                         }
                     }
 
-                }
-
-                Spacer(Modifier.padding(vertical = 20.dp))
-
-                Box(
-                    Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 15.dp)
-                ) {
-                    EventTrackerAppPrimaryButton(
-                        text = "Update Event",
-                        onClick = {
-                            if (
-                                eventName.value.isBlank() ||
-                                eventDetail.value.isBlank() ||
-                                eventDuration.value.isBlank() ||
-                                eventLocation.value.isBlank() ||
-                                selectedCategoryName.value.isBlank() ||
-                                selectedDate.value == null ||
-                                chosenTags.isEmpty()
-                            ) {
-                                nameError.value = eventName.value.isBlank()
-                                detailError.value = eventDetail.value.isBlank()
-                                durationError.value = eventDuration.value.isBlank()
-                                locationError.value = eventLocation.value.isBlank()
-                                dateError.value = selectedDate.value == null
-                                categoryError.value = selectedCategoryName.value.isBlank()
-                                return@EventTrackerAppPrimaryButton
-                            } else {
-                                val event = eventWithTags?.event?.id?.let {
-                                    categoryId.value?.let { it1 ->
-                                        Event(
-                                            id = it,
-                                            ownerId = ownerId,
-                                            name = eventName.value,
-                                            detail = eventDetail.value,
-                                            imageUrl = R.drawable.ic_launcher_background.toString(), // TODO Düzeltilecek
-                                            date = selectedDate.value!!,
-                                            duration = eventDuration.value,
-                                            location = eventLocation.value,
-                                            likeCount = 0,
-                                            categoryId = it1,
-                                        )
-                                    }
-                                }
-                                eventViewModel.updateEvent(event = event!!, selectedTags = chosenTags)
-                                navController.popBackStack()
-                            }
-                        })
-                }
             }
 
+            Spacer(
+                modifier = Modifier
+                    .padding(vertical = 20.dp)
+            )
+
+            Box(
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 15.dp)
+            ) {
+                EventTrackerAppPrimaryButton(
+                    text = "Update Event",
+                    onClick = {
+                        if (
+                            eventName.value.isBlank() ||
+                            eventDetail.value.isBlank() ||
+                            eventDuration.value.isBlank() ||
+                            eventLocation.value.isBlank() ||
+                            selectedCategoryName.value.isBlank() ||
+                            selectedDate.value == null ||
+                            chosenTags.isEmpty()
+                        )
+                        {
+                            nameError.value = eventName.value.isBlank()
+                            detailError.value = eventDetail.value.isBlank()
+                            durationError.value = eventDuration.value.isBlank()
+                            locationError.value = eventLocation.value.isBlank()
+                            dateError.value = selectedDate.value == null
+                            categoryError.value = selectedCategoryName.value.isBlank()
+                            return@EventTrackerAppPrimaryButton
+                        } else
+                        {
+                            val event = Event(
+                                id = eventWithTag.event.id,
+                                ownerId = ownerId,
+                                name = eventName.value,
+                                detail = eventDetail.value,
+                                imageUrl = eventImage.value,
+                                date = selectedDate.value,
+                                duration = eventDuration.value,
+                                location = eventLocation.value,
+                                likeCount = 0,
+                                categoryId = categoryId.value,
+                            )
+                            eventViewModel.updateEventWithTags(event = event, tags = chosenTags)
+                            navController.popBackStack()
+                        }
+                    }
+                )
+            }
         }
     }
+}

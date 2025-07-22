@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -71,9 +72,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.data.source.local.UserPreferences
 import com.example.eventtrackerapp.model.roommodels.Category
 import com.example.eventtrackerapp.model.roommodels.CategoryWithTag
@@ -84,7 +87,11 @@ import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
+import com.example.eventtrackerapp.viewmodel.TagViewModel
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -112,6 +119,7 @@ fun CreateProfileScreen(
     val permission = permissionViewModel.getPermissionName()
 
     val imageUri by permissionViewModel.profileImageUri.collectAsStateWithLifecycle()
+    val imagePath = rememberSaveable { mutableStateOf("") }
 
     //galeriye gidip fotoğraf seçmemizi sağlacyacak
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -122,7 +130,10 @@ fun CreateProfileScreen(
             val data = result.data?.data
             //kullanıcının seçtiği resmi viewModel
             // tarafında doldurup burada imageUri ile aldık
-            permissionViewModel.setImageUri(data)
+            if(data!=null){
+                val savedUri = PermissionHelper.saveImageToInternalStorage(context,data)
+                imagePath.value = savedUri.toString()
+            }
         }
 
     }
@@ -132,7 +143,7 @@ fun CreateProfileScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted->
         if(granted){
-            openGallery(imagePickerLauncher)
+            PermissionHelper.goToGallery(imagePickerLauncher)
         }else{
             Toast.makeText(context,"İzin kalıcı olarak reddedildi. Lütfen ayarlardan izin verin",Toast.LENGTH_LONG).show()
         }
@@ -173,41 +184,24 @@ fun CreateProfileScreen(
                 ) {
                     Spacer(Modifier.padding(vertical = 15.dp))
 
-                    Box(
-                        Modifier
-                            .size(80.dp, 80.dp)
-                            .border(border = BorderStroke(2.dp, Color.Black), shape = CircleShape)
-                            .clickable {
-                                requestPermission(
-                                    context = context,
-                                    permission = permission,
-                                    viewModel = permissionViewModel,
-                                    imagePickerLauncher = imagePickerLauncher,
-                                    permissionLauncher = permissionLauncher
-                                )
-                            },
-                    ) {
-                        if(imageUri!=null){
-                            AsyncImage(
-                                model = imageUri,
-                                contentDescription = "Selected Photo",
-                                Modifier
-                                    .fillMaxSize(1f)
-                                    .align(Alignment.Center)
-                                    .clip(CircleShape),
-                                contentScale = ContentScale.FillBounds,
-                            )
-                        }else{
-                            Image(
-                                painterResource(R.drawable.profile_photo_add_icon),
-                                modifier = Modifier
-                                    .fillMaxSize(1f)
-                                    .align(Alignment.Center)
-                                    .padding(start = 5.dp),
-                                contentDescription = "PhotoAdd",
+                    //Profil Fotoğrafı
+                    SelectableImageBox(
+                        boxWidth = 80.dp,
+                        boxHeight = 80.dp,
+                        imagePath = imagePath.value,
+                        modifier = Modifier,
+                        placeHolder = painterResource(R.drawable.profile_photo_add_icon),
+                        shape = CircleShape,
+                        onClick = {
+                            PermissionHelper.requestPermission(
+                                context= context,
+                                permission = permission,
+                                viewModel = permissionViewModel,
+                                imagePickerLauncher = imagePickerLauncher,
+                                permissionLauncher = permissionLauncher,
                             )
                         }
-                    }
+                    )
 
                     Spacer(Modifier.padding(vertical = 5.dp))
 
@@ -217,7 +211,7 @@ fun CreateProfileScreen(
 
                     Spacer(Modifier.padding(vertical = 7.dp))
 
-                    EventTrackerAppAuthTextField(
+                    EventTrackerAppOutlinedTextField(
                         txt = "Fullname",
                         state = fullNameState,
                         onValueChange = {
@@ -229,7 +223,7 @@ fun CreateProfileScreen(
 
                     Spacer(Modifier.padding(vertical = 12.dp))
 
-                    EventTrackerAppAuthTextField(
+                    EventTrackerAppOutlinedTextField(
                         txt = "Username",
                         state = userNameState,
                         onValueChange = {
@@ -432,7 +426,7 @@ fun CreateProfileScreen(
                                 gender = gender.value,
                                 selectedCategoryList = selectedCompleteCategoryList.filterNotNull(),
                                 selectedTagList = selectedCompleteTagList.filterNotNull(),
-                                photo = R.drawable.ic_launcher_background.toString() // TODO Geçici olarak böyle değişecek
+                                photo = imagePath.value
                             )
                             profileViewModel.upsertProfile(profile)
                             navController.navigate("home"){
@@ -444,37 +438,17 @@ fun CreateProfileScreen(
                     }
                 }
             }
+
         }
     }
 
-
-fun requestPermission(
-    context: Context,
-    permission:String,
-    viewModel: PermissionViewModel,
-    permissionLauncher:ManagedActivityResultLauncher<String,Boolean>,
-    imagePickerLauncher:ManagedActivityResultLauncher<Intent,ActivityResult>
-){
-    if(ContextCompat.checkSelfPermission(context,permission)!= PackageManager.PERMISSION_GRANTED){
-        //izin reddedildi, sebebini göster ve izin iste
-        if(viewModel.shouldShowRationale(context)){
-            Toast.makeText(context,"Fotoğraf yüklemek için galeri izni lazım",Toast.LENGTH_LONG).show()
-            permissionLauncher.launch(permission)
-        }else{
-            //sebebi gösterilmedi, izin iste
-            permissionLauncher.launch(permission)
-        }
-    }else{
-        //izin verildi
-        openGallery(imagePickerLauncher)
-    }
-}
-
-fun openGallery(launcher:ManagedActivityResultLauncher<Intent,ActivityResult>){
-    val intent = Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-    launcher.launch(intent)
-}
-
+//@Preview(showBackground = true)
+//@Composable
+//fun Preview(){
+//    EventTrackerAppTheme {
+////        CreateProfileScreen()
+//    }
+//}
 
 
 

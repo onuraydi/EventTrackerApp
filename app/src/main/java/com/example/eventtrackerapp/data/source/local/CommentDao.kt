@@ -16,6 +16,16 @@ interface CommentDao {
     @Insert
     suspend fun insertComment(comment: Comment)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllComments(comments:List<Comment>)
+
+    @Query("SELECT * FROM comments")
+    fun getAllComment():Flow<List<Comment>>
+
+    @Transaction
+    @Query("SELECT * FROM comments WHERE eventId = :eventId")
+    fun getCommentsForEvent(eventId:String):Flow<List<Comment>>
+
     @Transaction
     @Query("SELECT * FROM comments WHERE eventId = :eventId")
     fun getCommentsForEvent(eventId:String):Flow<List<CommentWithProfileAndEvent>>

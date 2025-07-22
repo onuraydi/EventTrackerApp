@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.model.roommodels.Event
@@ -49,28 +50,45 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-            ),
-                actions = {
-                    IconButton(onClick = {navController.navigate("notification")}) {
-                        Icon(Icons.Filled.Notifications, contentDescription = null)
-                    }
-                },
+
+        topBar =
+        {
+            EventTrackerTopAppBar(
+                title = "Home",
                 modifier = Modifier,
-                title = {
-                    Text(text = "Ana Sayfa")
-                })
+                showBackButton = false,
+                actions = {
+                    IconButton(
+                        onClick = {navController.navigate("notification")}
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Notifications,
+                            contentDescription = "Notifications"
+                        )
+                    }
+                }
+            )
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = {navController.navigate("addEvent")}) {
-                Icon(Icons.Filled.Add, null)
+
+        floatingActionButton =
+        {
+            FloatingActionButton(
+                onClick = { navController.navigate("addEvent") })
+            {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Add Event"
+                )
             }
         },
 
-        bottomBar = {BottomNavBar(navController = navController)}
+        bottomBar =
+        {
+            BottomNavBar(
+                navController = navController
+            )
+        }
+
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -103,20 +121,35 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
     val commentCount by commentViewModel.getCommentCount(event.id).observeAsState(initial = 0)
 
 
-    Column (modifier = Modifier
-        .fillMaxWidth()
-        .padding(20.dp)
-        .border(BorderStroke(2.dp, Color.Black), shape = RoundedCornerShape(20.dp))
-        )
-    {
-        Image(painterResource(R.drawable.ic_launcher_foreground), null, modifier = Modifier
+    Column(
+        modifier = Modifier
             .fillMaxWidth()
-            .height(220.dp)
-            .align(Alignment.CenterHorizontally)
-            .clickable { navController.navigate("detail/${event.id}") }
-            .clip(RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)),
+            .padding(20.dp)
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .border(
+                BorderStroke(
+                    width = 2.dp,
+                    color = Color.Black  // TODO Belki bu kısımdaki renk de dark mode için standartlaştırılabilir.
+                ),
+                shape = RoundedCornerShape(20.dp),
+            )
+    )
+    {
 
-            contentScale = ContentScale.Crop)
+        SelectableImageBox(
+            boxWidth = 220.dp,
+            boxHeight = 220.dp,
+            imagePath = event.image,
+            modifier = Modifier.fillMaxWidth(),
+            placeHolder = painterResource(R.drawable.ic_launcher_background),
+            shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
+            onClick = {
+                navController.navigate("detail/${event.id}")
+            }
+        )
 
 
         Row() {
@@ -138,41 +171,54 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
                 Text(text = "${likeCount}",Modifier.align(Alignment.CenterVertically))
             }
 
-            Icon(painterResource(R.drawable.baseline_chat_bubble_outline_24),null, modifier = Modifier
-                .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end = 5.dp)
-                .clickable { showBottomSheet = true })
-            Text(text = "${commentCount}",Modifier.align(Alignment.CenterVertically))
-            Icon(Icons.Filled.Share ,null, modifier = Modifier
-                .padding(15.dp)
-                .clickable {  })
+            Icon(
+                painter = painterResource(R.drawable.baseline_chat_bubble_outline_24),
+                contentDescription = "Comments",
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
+                    .clickable
+                    {
+                        showBottomSheet = true
+                    }
+            )
+            Text(
+                text = commentCount.toString(),
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+            )
+
+            Icon(
+                imageVector = Icons.Filled.Share,
+                contentDescription = "Share",
+                modifier = Modifier
+                    .padding(15.dp)
+                    .clickable { }
+            )
         }
 
 
-        event.name.let {
-            Text(text= it, modifier = Modifier
-                .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
-                .clickable {  navController.navigate("detail/${event.id}") },
-                fontWeight = W500, fontSize = 20.sp
+        event.name?.let {
+            Text(
+                text = it,
+                modifier = Modifier
+                    .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
+                    .clickable
+                    {
+                        navController.navigate("detail/${event.id}")
+                    },
+                fontWeight = W500,
+                fontSize = 20.sp
             )
         }
 
         CommentBottomSheet(
             showSheet = showBottomSheet,
-            onDismiss = {showBottomSheet = false},
+            onDismiss = { showBottomSheet = false },
             comments = commentList,
             currentUserImage = painterResource(R.drawable.ic_launcher_foreground),
             commentViewModel = commentViewModel,
             profileId = profileId,
             eventId = event.id
-            )
-        }
+        )
     }
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun HomePreview() {
-//    EventTrackerAppTheme {
-//       // HomeScreen(eventList = listOf());
-//    }
-//}
+}
