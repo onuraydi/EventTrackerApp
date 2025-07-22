@@ -2,21 +2,13 @@ package com.example.eventtrackerapp.views
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
-import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
 import android.widget.Toast
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -63,9 +55,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -80,11 +70,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Event
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
@@ -93,10 +81,6 @@ import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
-import com.example.eventtrackerapp.viewmodel.TagViewModel
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Date
@@ -447,7 +431,7 @@ fun AddEventScreen(
                                     name = eventName.value,
                                     detail = eventDetail.value,
                                     image = imagePath.value,
-                                    date = selectedDate.value,
+                                    date = selectedDate.value!!,  // TODO ?
                                     duration = eventDuration.value,
                                     location = eventLocation.value,
                                     likeCount = 0,

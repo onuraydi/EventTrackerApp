@@ -1,7 +1,6 @@
 package com.example.eventtrackerapp.views
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -10,18 +9,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.data.source.local.UserPreferences
-import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
@@ -30,10 +24,8 @@ import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
-import com.example.eventtrackerapp.viewmodel.TagViewModel
 import com.example.eventtrackerapp.viewmodel.ThemeViewModel
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.delay
 
 @SuppressLint("NewApi")
 @OptIn(ExperimentalLayoutApi::class)
@@ -202,7 +194,7 @@ fun AppNavGraph(
                     val profile by profileLiveData.observeAsState()
 
                     profile?.let {profile->
-                        MyAccountScreen(navController,profile,profileViewModel)
+                        MyAccountScreen(navController,profile,profileViewModel,permissionViewModel)
                     }
                 }
             }

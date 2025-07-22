@@ -1,6 +1,5 @@
 package com.example.eventtrackerapp.model.roommodels
 
-import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -34,7 +33,7 @@ data class Event(
     var duration:String = "",
     var location:String = "",
     var categoryId:String = "",
-    var imageUrl:String = "",
+    var image:String = "",
     var likeCount:Int = 0,
 ){
 

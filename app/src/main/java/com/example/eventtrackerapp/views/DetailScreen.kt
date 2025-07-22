@@ -64,10 +64,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.common.CommentBottomSheet
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.model.roommodels.Category
 import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.model.roommodels.Event
-import com.example.eventtrackerapp.utils.CommentBottomSheet
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
@@ -99,6 +100,8 @@ fun DetailScreen(
     val state by participantsViewModel.hasUserParticipated(event.id,profileId).observeAsState(false)
 
     val participantsCount by participantsViewModel.getParticipationCount(event.id).observeAsState(initial = 0)
+
+    val participants by participantsViewModel.getParticipantsForEvent(event.id).observeAsState(arrayListOf())
 
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {

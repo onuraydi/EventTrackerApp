@@ -68,7 +68,7 @@ class ProfileRepository(
                         firebaseProfile?.let{fbProfile->
                             //firestore'dan gelen ID'lerle eşleştirmek için tüm kategori ve tag'leri çek
                             val allCategories = categoryDao.getAll().first() //flow olduğu için first
-                            val allTags = tagDao.getAll().first()
+                            val allTags = tagDao.getAll()
 
                             val roomProfile = ProfileMapper.toEntity(fbProfile,allTags,allCategories)
                             profileDao.add(roomProfile)
@@ -99,7 +99,7 @@ class ProfileRepository(
 
                     //Firestore'dan gelen tüm kategori ve tagleri bir kez çek
                     val allCategories = categoryDao.getAll().first()
-                    val allTags = tagDao.getAll().first()
+                    val allTags = tagDao.getAll()
 
                     //Firestore'dan gelenleri Room'a ekle/güncelle
                     firebaseProfiles.forEach { fbProfile->

@@ -62,13 +62,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
+import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.EventTrackerTopAppBar
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.model.roommodels.Tag
-import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
-import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
-import com.example.eventtrackerapp.viewmodel.TagViewModel
 import java.io.File
 
 
@@ -191,7 +192,7 @@ fun EditEventScreen(
 
                 val categoryError = rememberSaveable { mutableStateOf(false) }
 
-            val eventImage = rememberSaveable{mutableStateOf(eventWithTag.event.image)}
+                val eventImage = rememberSaveable{mutableStateOf(eventWithTags?.event?.image)}
 
             Column(
                 modifier = Modifier
@@ -494,7 +495,7 @@ fun EditEventScreen(
                                             ownerId = ownerId,
                                             name = eventName.value,
                                             detail = eventDetail.value,
-                                            imageUrl = R.drawable.ic_launcher_background.toString(), // TODO Düzeltilecek
+                                            image = R.drawable.ic_launcher_background.toString(), // TODO Düzeltilecek
                                             date = selectedDate.value!!,
                                             duration = eventDuration.value,
                                             location = eventLocation.value,
@@ -511,4 +512,4 @@ fun EditEventScreen(
             }
         }
     }
-}
+

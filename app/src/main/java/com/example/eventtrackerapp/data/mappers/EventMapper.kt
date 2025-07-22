@@ -16,7 +16,7 @@ object EventMapper {
             location = firebaseEvent.location,
             duration = firebaseEvent.duration,
             categoryId = firebaseEvent.categoryId,
-            imageUrl = firebaseEvent.imageUrl,
+            image = firebaseEvent.imageUrl,
             ownerId = firebaseEvent.ownerId
         )
     }
@@ -31,7 +31,7 @@ object EventMapper {
             ownerId = event.ownerId,
             location = event.location,
             duration = event.duration,
-            imageUrl = event.imageUrl, // TODO ?
+            imageUrl = event.image, // TODO ?
             likeCount = event.likeCount,
             categoryId = event.categoryId,
             detail = event.detail,

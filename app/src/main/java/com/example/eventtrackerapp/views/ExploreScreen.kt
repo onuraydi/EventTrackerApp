@@ -43,8 +43,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.common.BottomNavBar
+import com.example.eventtrackerapp.common.SelectableImageBox
+import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.model.roommodels.EventWithTags
-import com.example.eventtrackerapp.utils.BottomNavBar
 import com.example.eventtrackerapp.viewmodel.ExploreViewModel
 import java.io.File
 
@@ -154,7 +156,7 @@ fun ExploreScreen(
                     {
                         items(displayedEvents)
                         {
-                            MyImage(it,navController)
+                            MyImage(it.event,navController)
                         }
                     }
                 )
@@ -163,7 +165,7 @@ fun ExploreScreen(
     }
 
 @Composable
-fun MyImage(event:Event,navController: NavController){
+fun MyImage(event: Event, navController: NavController){
     SelectableImageBox(
         boxWidth = 160.dp,
         boxHeight = 200.dp,

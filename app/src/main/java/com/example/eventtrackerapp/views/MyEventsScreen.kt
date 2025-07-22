@@ -62,10 +62,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Event
-import coil.compose.AsyncImage
-import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.common.SelectableImageBox
-import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import java.io.File
 

@@ -33,11 +33,13 @@ import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.common.EventTrackerAppOutlinedButton
 import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.data.source.local.UserPreferences
 
 @Composable
 fun SignUpScreen(
     navController: NavController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    userPreferences: UserPreferences
 )
 {
 

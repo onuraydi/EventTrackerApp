@@ -1,20 +1,19 @@
-package com.example.eventtrackerapp.model
+package com.example.eventtrackerapp.model.roommodels
 
 import androidx.room.Embedded
 import androidx.room.Junction
 import androidx.room.Relation
 
-data class EventWithParticipants(
+data class EventWithTags(
     @Embedded val event:Event,
     @Relation(
         parentColumn = "id",
         entityColumn = "id",
         associateBy = Junction(
-            ProfileEventCrossRef::class,
+            value = EventTagCrossRef::class,
             parentColumn = "eventId",
-            entityColumn = "profileId"
+            entityColumn = "tagId",
         )
     )
-    val pariticipants:List<Profile>
-) {
-}
+    val tags:List<Tag>
+)

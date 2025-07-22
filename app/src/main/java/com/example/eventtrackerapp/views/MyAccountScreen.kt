@@ -55,6 +55,7 @@ import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.common.EventTrackerTopAppBar
 import com.example.eventtrackerapp.common.PermissionHelper
 import com.example.eventtrackerapp.common.SelectableImageBox
+import com.example.eventtrackerapp.model.roommodels.Profile
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import java.io.File
@@ -64,7 +65,7 @@ import java.io.File
 @Composable
 fun MyAccountScreen(
     navController:NavController,
-    profile:Profile,
+    profile: Profile,
     profileViewModel: ProfileViewModel,
     permissionViewModel: PermissionViewModel
 ) {
@@ -356,7 +357,7 @@ fun MyAccountScreen(
                             gender = gender.value,
                             photo = profilePhotoState.value,
                             selectedCategoryList = profile.selectedCategoryList,
-                            addedEvents = profile.addedEvents,
+                            addedEventIds = profile.addedEventIds,
                             selectedTagList = profile.selectedTagList
                         )
                         profileViewModel.updateProfile(updatedProfile)
