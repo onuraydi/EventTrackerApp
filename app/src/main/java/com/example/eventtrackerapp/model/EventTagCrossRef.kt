@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(primaryKeys = ["eventId","tagId"])
 data class EventTagCrossRef(
-    val eventId:Int,
-    val tagId:Int
+    val eventId:String,
+    val tagId:String
     ) {
 }

@@ -43,16 +43,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.Event
-import com.example.eventtrackerapp.common.BottomNavBar
-import com.example.eventtrackerapp.common.SelectableImageBox
+import com.example.eventtrackerapp.model.roommodels.EventWithTags
+import com.example.eventtrackerapp.utils.BottomNavBar
 import com.example.eventtrackerapp.viewmodel.ExploreViewModel
 import java.io.File
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun ExploreScreen(
-    eventList:List<Event>,
+    eventList:List<EventWithTags>,
     navController:NavController,
     exploreViewModel: ExploreViewModel = viewModel()
 ){
@@ -191,7 +190,7 @@ fun SimpleSearchBar(
     placeHolder: @Composable (()->Unit)? = null,
     leadingIcon: @Composable (()->Unit)? = null,
     trailingIcon: @Composable (()->Unit)? = null,
-    searchResult: List<Event>,
+    searchResult: List<EventWithTags>,
     navController: NavController,
     searchHistoryList: List<String>,
     onHistoryClick: (String)->Unit,
@@ -241,20 +240,18 @@ fun SimpleSearchBar(
                 }
             }
             else{
-                items(searchResult){event->
+                items(searchResult){eventWithTag->
                     Row(
                         Modifier
                             .padding(8.dp)
                             .fillMaxWidth()
                             .clickable {
-                                onSearch(event.name ?: "")
-                                navController.navigate("detail/${event.id}")
+                                onSearch(eventWithTag.event.name ?: "")
+                                navController.navigate("detail/${eventWithTag.event.id}")
                             }
                     ){
-                        Icon(
-                            painter = painterResource(R.drawable.baseline_event_24),
-                            contentDescription = "HistoryItem")
-                        Text(event.name ?: "", modifier = Modifier.padding(start = 4.dp))
+                        Icon(painterResource(R.drawable.baseline_event_24),"HistoryItem")
+                        Text(eventWithTag.event.name ?: "", modifier = Modifier.padding(start = 4.dp))
                     }
                 }
             }

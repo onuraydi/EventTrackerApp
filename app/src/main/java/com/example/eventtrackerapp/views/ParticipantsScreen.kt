@@ -34,6 +34,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -59,10 +60,10 @@ import java.io.File
 fun ParticipantsScreen(
     navController: NavController,
     participantsViewModel: ParticipantsViewModel,
-    eventId:Int
+    eventId:String
 )
 {
-    val participants by participantsViewModel.getParticipants(eventId).collectAsState(initial = emptyList())
+    val participants by participantsViewModel.getParticipantsForEvent(eventId).observeAsState(initial = emptyList())
 
     Scaffold(modifier = Modifier
         .fillMaxSize(),
@@ -109,7 +110,7 @@ fun ParticipantsScreen(
 }
 
 @Composable
-fun user(image:String,nameSurname:String, email:String)
+fun user(image: String, nameSurname:String, email:String)
 {
     val userImage = remember { mutableStateOf(image) }
     val userNameSurname = remember { mutableStateOf(nameSurname) }

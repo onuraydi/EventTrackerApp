@@ -183,10 +183,10 @@ fun PreferencesScreen(
 
                                         if(isSelected.value){
                                             //kategori eklenecek
-                                            profileViewModel.addTag(tag)
+                                            profileViewModel.addTag(tag,profile.id)
                                         }else{
                                             //kategori silinecek
-                                            profileViewModel.removeTag(tag.id)
+                                            profileViewModel.removeTag(tag.id,profile.id)
                                         }
                                     },
                                     label = {Text(tag.name ?: "")},

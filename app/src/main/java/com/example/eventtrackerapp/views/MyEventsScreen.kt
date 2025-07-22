@@ -60,6 +60,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
+import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.model.roommodels.Event
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.common.SelectableImageBox
@@ -72,10 +74,10 @@ import java.io.File
 fun MyEventsScreen(
     navController: NavController,
     myEvents:List<Event>,
-    deleteEvent:(id:Int)->Unit
+    deleteEvent:(event:Event)->Unit
 ){
     val showDialog = remember { mutableStateOf(false) }
-    val selectedEventId = remember { mutableIntStateOf(0) }
+    val selectedEvent = remember { mutableStateOf(Event()) }
 
         Scaffold(
             Modifier.fillMaxSize(),
@@ -181,7 +183,7 @@ fun MyEventsScreen(
                                             Icon(Icons.Default.Delete, "Delete")
                                         },
                                         onClick = {
-                                            selectedEventId.intValue = it.id
+                                            selectedEvent.value = it
                                             showDialog.value = true
                                         }
                                     )
@@ -195,7 +197,7 @@ fun MyEventsScreen(
                         dialogTitle = "Etkinlik Silinecek",
                         dialogText = "Eğer onaylarsan eklediğin etkinliği silmiş olacaksın." +
                                 " Sildiğin etkinliği bir daha geri alamazsın",
-                        onConfirmation = {deleteEvent(selectedEventId.value)},
+                        onConfirmation = {deleteEvent(selectedEvent.value)},
                         onDismissRequest = {showDialog.value = false}
                     )
                 }

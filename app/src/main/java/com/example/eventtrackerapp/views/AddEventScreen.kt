@@ -7,13 +7,16 @@ import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -38,7 +41,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Done
@@ -64,6 +67,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -79,7 +83,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.Event
+import com.example.eventtrackerapp.model.roommodels.Event
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
@@ -103,24 +107,22 @@ import java.util.Locale
 @Composable
 fun AddEventScreen(
     navController: NavController,
-    tagViewModel: TagViewModel = viewModel(),
-    categoryViewModel: CategoryViewModel = viewModel(),
-    eventViewModel: EventViewModel = viewModel(),
-    permissionViewModel: PermissionViewModel = viewModel(),
+    categoryViewModel: CategoryViewModel,
+    eventViewModel: EventViewModel,
+    permissionViewModel: PermissionViewModel,
     ownerId:String
 ) {
-    LaunchedEffect(Unit) {
-        tagViewModel.resetTag()
-    }
+//
+//    LaunchedEffect(Unit) {
+//        categoryViewModel.resetTag()
+//    }
     
-    val categoryWithTags by categoryViewModel.categoryWithTags.collectAsState()
-    val selectedTag by tagViewModel.selectedTag.collectAsStateWithLifecycle()
-    val chosenTags by tagViewModel.chosenTags.collectAsStateWithLifecycle()
-
-    val context = LocalContext.current
+    val categoryWithTags by categoryViewModel.categoryWithTags.observeAsState(emptyList())
+    val selectedTag by categoryViewModel.selectedTag.collectAsStateWithLifecycle()
+    val chosenTags by categoryViewModel.chosenTags.collectAsStateWithLifecycle()
     val selectedCategoryName = remember { mutableStateOf("") }
+    val context = LocalContext.current
 
-    val events by eventViewModel.allEventsWithTags.collectAsState(initial = emptyList())
 
     //TODO BU KISIM REFACTOR EDİLECEK: SEALED CLASS KULLANACAĞIM
     //Media Permission
@@ -165,7 +167,7 @@ fun AddEventScreen(
                     title = { Text("Add Event", fontSize = 25.sp) },
                     navigationIcon = {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             "GoBack",
                             modifier = Modifier
                                 .padding(start = 8.dp)
@@ -189,7 +191,7 @@ fun AddEventScreen(
                 val eventDetail = rememberSaveable { mutableStateOf("") }
                 val detailError = rememberSaveable{mutableStateOf(false)}
 
-                val selectedDate = rememberSaveable { mutableStateOf<Long?>(null) }
+                val selectedDate = rememberSaveable { mutableStateOf<Long?>(0) }
                 val dateError = rememberSaveable{mutableStateOf(false)}
 
                 val showModal = rememberSaveable { mutableStateOf(false) }
@@ -202,7 +204,7 @@ fun AddEventScreen(
 
                 val categoryError = rememberSaveable{mutableStateOf(false)}
 
-                val categoryId = rememberSaveable{ mutableStateOf(0) }
+                val categoryId = rememberSaveable{ mutableStateOf("") }
                 val isExpanded = rememberSaveable{ mutableStateOf(false)}
 
                 Column(
@@ -335,13 +337,13 @@ fun AddEventScreen(
                         {
                             categoryWithTags.forEach{
                                 DropdownMenuItem(
-                                    text = {Text("${it.category.name}")},
+                                    text = {Text(it.category.name)},
                                     onClick = {
-                                        selectedCategoryName.value = it.category.name ?: ""
+                                        selectedCategoryName.value = it.category.name
                                         categoryError.value = selectedCategoryName.value.isBlank()
                                         isExpanded.value = false
                                         categoryId.value = it.category.id
-                                        tagViewModel.updateSelectedCategoryTags(it)
+                                        categoryViewModel.updateSelectedCategoryTags(it)
                                     }
                                 )
                             }
@@ -359,10 +361,10 @@ fun AddEventScreen(
                                 modifier = Modifier.padding(end = 8.dp),
                                 selected = isSelected,
                                 label = {
-                                    Text(tag.name?:"")
+                                    Text(tag.name)
                                 },
                                 onClick = {
-                                    tagViewModel.toggleTag(tag)
+                                    categoryViewModel.toggleTag(tag)
                                 },
                                 trailingIcon = if (isSelected){
                                     {
@@ -399,9 +401,9 @@ fun AddEventScreen(
                                 FilterChip(
                                     modifier = Modifier.padding(end = 3.dp),
                                     selected = true,
-                                    label = {Text(tag.name?:"", fontSize = 12.sp, maxLines = 1)},
+                                    label = {Text(tag.name, fontSize = 12.sp, maxLines = 1)},
                                     onClick = {
-                                        tagViewModel.removeChosenTag(tag)
+                                        categoryViewModel.removeChosenTag(tag)
                                     },
                                     trailingIcon = {
                                         Icon(Icons.Default.Clear,"Clear")
@@ -450,15 +452,9 @@ fun AddEventScreen(
                                     location = eventLocation.value,
                                     likeCount = 0,
                                     categoryId = categoryId.value,
-
-                                    //participants = arrayListOf(),
-//                                category = Category(),
-//                                tagList = arrayListOf()
                                 )
-                                eventViewModel.insertEventWithTags(event = event, tags = chosenTags)
+                                eventViewModel.addEvent(event = event, selectedTags = chosenTags)
 
-
-                                println("etkinlik tagları"+events)
                                 navController.popBackStack()
                             }
                         })

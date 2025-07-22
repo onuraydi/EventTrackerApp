@@ -1,73 +1,72 @@
 package com.example.eventtrackerapp.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
-import com.example.eventtrackerapp.model.Category
-import com.example.eventtrackerapp.model.Profile
-import com.example.eventtrackerapp.model.Tag
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.example.eventtrackerapp.data.repositories.ProfileRepository
+import com.example.eventtrackerapp.model.roommodels.Profile
+import com.example.eventtrackerapp.model.roommodels.Tag
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ProfileViewModel(application: Application): AndroidViewModel(application) {
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
+    private val profileRepository:ProfileRepository
+): ViewModel() {
 
-    private val profileDao = EventTrackerDatabase.getDatabase(application,viewModelScope).profileDao()
 
-    private val _profileList = MutableStateFlow<List<Profile>>(arrayListOf())
-    private val _profile = MutableStateFlow<Profile>(Profile())
+    //Neden live data? ve bunu init {} içerisinde alabilir miyiz?
+    val profileList : LiveData<List<Profile>> = profileRepository.getAllProfiles().asLiveData()
 
-    val profileList: StateFlow<List<Profile>> = _profileList
-    val profile:StateFlow<Profile> = _profile
+    //Repository de gelen veriyi dinlerken global scope kullanıyoruz.
+    // Bunun için ekstra scope 'a gerek yok
+    fun getById(id:String): LiveData<Profile?>{
+        return profileRepository.getProfile(id).asLiveData()
+    }
 
-    fun getAll(){
-        viewModelScope.launch(Dispatchers.IO) {
-            _profileList.value = profileDao.getAll()
+    //aynı kayıtı eklemeyi engelleyen upsert işlemi. Aynı zamanda güncelleme işlemi de yapıyor.
+    fun upsertProfile(profile: Profile){
+        viewModelScope.launch{
+            profileRepository.upsertProfile(profile)
         }
     }
 
-    fun getById(id:String){
-        viewModelScope.launch(Dispatchers.IO) {
-            _profile.value = profileDao.getById(id)
+    //TODO Bunun için upsert var.
+    // Hem insert hem de update i aynı anda kullanıyor. Ne kadar mantıklı??
+    fun deleteProfile(profile: Profile){
+        viewModelScope.launch {
+            profileRepository.deleteProfile(profile)
         }
     }
 
-    fun insertProfile(profile:Profile){
-        viewModelScope.launch(Dispatchers.IO) {
-            profileDao.add(profile)
+    fun addTag(tag: Tag,id:String){
+        val profile = getById(id)
+        if (!profile.value?.selectedTagList.orEmpty().contains(tag)) {
+            val updatedList = profile.value?.selectedTagList.orEmpty() + tag
+            val updatedProfile = profile.value?.copy(selectedTagList = updatedList)
+            if (updatedProfile != null) {
+                updateProfile(updatedProfile)
+            }
         }
     }
 
-    fun addTag(tag: Tag){
-        if (!_profile.value.selectedTagList.orEmpty().contains(tag)) {
-            val updatedList = _profile.value.selectedTagList.orEmpty() + tag
-            val updatedProfile = _profile.value.copy(selectedTagList = updatedList)
-            _profile.value = updatedProfile
+    fun removeTag(tagId:String, id:String){
+        val profile = getById(id)
+        //id'ye göre silme
+        val updatedList = profile.value?.selectedTagList.orEmpty()
+            .filterNot { it.id == tagId }
+
+        val updatedProfile = profile.value?.copy(selectedTagList = updatedList)
+        if (updatedProfile != null) {
             updateProfile(updatedProfile)
         }
     }
 
-    fun removeTag(tagId:Int){
-        //id'ye göre silme
-        val updatedList = _profile.value.selectedTagList.orEmpty()
-            .filterNot { it.id == tagId }
-
-        val updatedProfile = _profile.value.copy(selectedTagList = updatedList)
-        _profile.value = updatedProfile
-        updateProfile(updatedProfile)
-    }
-
-    fun updateProfile(profile:Profile){
-        viewModelScope.launch(Dispatchers.IO) {
-            profileDao.update(profile)
-        }
-    }
-
-    fun deleteProfile(profile:Profile){
-        viewModelScope.launch(Dispatchers.IO) {
-            profileDao.delete(profile)
+    fun updateProfile(profile: Profile){
+        viewModelScope.launch{
+            profileRepository.upsertProfile(profile)
         }
     }
 }

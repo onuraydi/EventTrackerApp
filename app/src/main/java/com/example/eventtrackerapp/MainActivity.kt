@@ -37,8 +37,9 @@ import com.example.eventtrackerapp.viewmodel.ThemeViewModel
 import com.example.eventtrackerapp.views.AppNavGraph
 import com.example.eventtrackerapp.views.HomeScreen
 import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val themeViewModel: ThemeViewModel by viewModels()

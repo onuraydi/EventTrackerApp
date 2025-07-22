@@ -1,48 +1,36 @@
 package com.example.eventtrackerapp.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
-import com.example.eventtrackerapp.model.Comment
-import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
-import com.example.eventtrackerapp.model.Event
-import com.example.eventtrackerapp.model.Profile
-import kotlinx.coroutines.Dispatchers
+import com.example.eventtrackerapp.data.repositories.CommentRepository
+import com.example.eventtrackerapp.model.roommodels.Comment
+import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CommentViewModel(application: Application):AndroidViewModel(application) {
-    private val commentDao = EventTrackerDatabase.getDatabase(application,viewModelScope).commentDao()
+@HiltViewModel
+class CommentViewModel @Inject constructor(
+    private val commentRepository:CommentRepository
+): ViewModel() {
 
 
-    private val _comment = MutableStateFlow<CommentWithProfileAndEvent>(
-        CommentWithProfileAndEvent(
-            comment = Comment(),
-            profile = Profile(),
-            event = Event()
-        )
-    )
-
-    val comment:StateFlow<CommentWithProfileAndEvent> = _comment
-
-    fun addComment(profileId:String,eventId: Int,comment: String){
-        viewModelScope.launch(Dispatchers.IO) {
-            commentDao.insertComment(
-                Comment(profileId = profileId, eventId = eventId, comment = comment)
-            )
+    fun addComment(comment: Comment){
+        viewModelScope.launch {
+            commentRepository.upsertComment(comment)
         }
     }
 
     // TODO buraya güncelleme gerekebilir dao kısmında da suspend yapmak gerekebilir.
-    fun getComments(eventId: Int):Flow<List<CommentWithProfileAndEvent>>{
-            return commentDao.getCommentsForEvent(eventId)
+    fun getComments(eventId: String):LiveData<List<CommentWithProfileAndEvent>>{
+            return commentRepository.getCommentsForEvent(eventId).asLiveData()
     }
 
-    fun getCommentCount(eventId: Int):Flow<Int>
+    fun getCommentCount(eventId: String):LiveData<Int>
     {
-        return commentDao.getCommentCount(eventId)
+        return commentRepository.getCommentCountForEvent(eventId).asLiveData()
     }
 }

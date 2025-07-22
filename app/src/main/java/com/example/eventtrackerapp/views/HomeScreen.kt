@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,17 +21,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W500
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
-import com.example.eventtrackerapp.model.Event
-import com.example.eventtrackerapp.model.EventWithTags
-import com.example.eventtrackerapp.common.BottomNavBar
-import com.example.eventtrackerapp.common.CommentBottomSheet
-import com.example.eventtrackerapp.common.EventTrackerTopAppBar
-import com.example.eventtrackerapp.common.SelectableImageBox
+import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
+import com.example.eventtrackerapp.model.roommodels.Event
+import com.example.eventtrackerapp.model.roommodels.EventWithTags
+import com.example.eventtrackerapp.utils.BottomNavBar
+import com.example.eventtrackerapp.utils.CommentBottomSheet
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
+import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import kotlinx.coroutines.flow.Flow
 
@@ -99,7 +100,7 @@ fun HomeScreen(
             items(eventList)
             {
                 val commentList = commentViewModel.getComments(eventId = it.event.id)
-                EventRow(it.event, navController,commentList,commentViewModel,profileId,likeViewModel)
+                EventRow(it.event, navController,commentList.value,commentViewModel,profileId,likeViewModel)
             }
         }
     }
@@ -107,14 +108,17 @@ fun HomeScreen(
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-private fun EventRow(event:Event,navController: NavController, commentList:Flow<List<CommentWithProfileAndEvent>>,commentViewModel:CommentViewModel,profileId:String,likeViewModel: LikeViewModel) {
+private fun EventRow(event: Event, navController: NavController, commentList:List<CommentWithProfileAndEvent>, commentViewModel:CommentViewModel, profileId:String, likeViewModel: LikeViewModel)
+{
+    var eventViewModel: EventViewModel = viewModel()
 
-    var showBottomSheet by remember { mutableStateOf(false) }
 
-    val likeCount by likeViewModel.getLikeCount(event.id).collectAsState(initial = 0)
-    val isLiked by likeViewModel.isLikedByUser(event.id, profileId).collectAsState(initial = false)
+    var showBottomSheet by remember { mutableStateOf(false ) }
 
-    val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(initial = 0)
+    val likeCount = likeViewModel.getLikeCountForEvent(event.id)
+    val isLiked = likeViewModel.isEventLikedByUser(event.id,profileId)
+
+    val commentCount by commentViewModel.getCommentCount(event.id).observeAsState(initial = 0)
 
 
     Column(
@@ -147,47 +151,24 @@ private fun EventRow(event:Event,navController: NavController, commentList:Flow<
             }
         )
 
-        Row {
-            if (!isLiked) {
-                Icon(
-                    imageVector = Icons.Filled.FavoriteBorder,
-                    contentDescription = "Like",
-                    modifier = Modifier
-                        .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
-                        .clickable
-                        {
-                            likeViewModel.likeEvent(
-                                eventId = event.id,
-                                profileId = profileId
-                            )
-                        }
-                )
 
-                Text(
-                    text = likeCount.toString(),
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Filled.Favorite,
-                    contentDescription = "Liked",
-                    modifier = Modifier
-                        .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
-                        .clickable
-                        {
-                            likeViewModel.unlikeEvent(
-                                eventId = event.id,
-                                profileId = profileId
-                            )
-                        }
-                )
-
-                Text(
-                    text = likeCount.toString(),
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                )
+        Row() {
+            if(isLiked.value == false)
+            {
+                Icon(Icons.Filled.FavoriteBorder,null, modifier = Modifier
+                    .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
+                    .clickable {
+                        likeViewModel.toggleLike(eventId = event.id,profileId);
+                    })
+                Text(text = "${likeCount}",Modifier.align(Alignment.CenterVertically))
+            }else
+            {
+                Icon(Icons.Filled.Favorite,null, modifier = Modifier
+                    .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
+                    .clickable {
+                        likeViewModel.toggleLike(event.id,profileId)
+                    })
+                Text(text = "${likeCount}",Modifier.align(Alignment.CenterVertically))
             }
 
             Icon(
@@ -216,17 +197,11 @@ private fun EventRow(event:Event,navController: NavController, commentList:Flow<
         }
 
 
-        event.name?.let {
-            Text(
-                text = it,
-                modifier = Modifier
-                    .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
-                    .clickable
-                    {
-                        navController.navigate("detail/${event.id}")
-                    },
-                fontWeight = W500,
-                fontSize = 20.sp
+        event.name.let {
+            Text(text= it, modifier = Modifier
+                .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
+                .clickable {  navController.navigate("detail/${event.id}") },
+                fontWeight = W500, fontSize = 20.sp
             )
         }
 

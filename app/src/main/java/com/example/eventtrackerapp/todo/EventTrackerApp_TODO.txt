@@ -1,2 +1,0 @@
-- LoginScreen mutable değerler ekran değişince sıfırlanıyor. ViewModel dan bu değerler alınmalı.
-- Kullanıcıdan alınan fotoğraflar nasıl tutulmalı? Room'da mı yoksa firebase store
