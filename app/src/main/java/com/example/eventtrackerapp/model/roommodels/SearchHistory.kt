@@ -1,4 +1,4 @@
-package com.example.eventtrackerapp.model
+package com.example.eventtrackerapp.model.roommodels
 
 import androidx.room.Entity
 import androidx.room.Index
@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
     indices = [Index(value = ["keyword"], unique = true)]
 )
 data class SearchHistory(
-    @PrimaryKey(autoGenerate = true) val id:Int = 0,
+    @PrimaryKey(autoGenerate = true) val id:String = 0,
     val keyword:String,
     val timeStamp:Long = System.currentTimeMillis()
 )

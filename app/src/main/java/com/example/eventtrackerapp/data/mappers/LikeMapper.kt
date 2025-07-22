@@ -1,7 +1,7 @@
 package com.example.eventtrackerapp.data.mappers
 
-import com.example.eventtrackerapp.model.firebasemodels.FirebaseLike
 import com.example.eventtrackerapp.model.roommodels.Like
+import com.example.eventtrackerapp.model.firebasemodels.FirebaseLike
 
 object LikeMapper {
 
@@ -13,7 +13,7 @@ object LikeMapper {
         )
     }
 
-    fun toFirebaseModel(like:Like):FirebaseLike
+    fun toFirebaseModel(like: Like):FirebaseLike
     {
         return FirebaseLike(
             eventId = like.eventId,

@@ -122,8 +122,7 @@ fun AddEventScreen(
     //TODO BU KISIM REFACTOR EDİLECEK: SEALED CLASS KULLANACAĞIM
     //Media Permission
     val permission = permissionViewModel.getPermissionName()
-
-    val imageUri by permissionViewModel.eventImageUri.collectAsStateWithLifecycle()
+    
     val imagePath = rememberSaveable { mutableStateOf("") } //resmin yolunu tutuyoruz
 
     //galeriye gidip fotoğraf seçmemizi sağlayacak

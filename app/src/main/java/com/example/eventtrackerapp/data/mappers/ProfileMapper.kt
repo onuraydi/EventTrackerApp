@@ -1,13 +1,12 @@
 package com.example.eventtrackerapp.data.mappers
 
-import com.example.eventtrackerapp.model.firebasemodels.FirebaseProfile
 import com.example.eventtrackerapp.model.roommodels.Category
-import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.model.roommodels.Profile
 import com.example.eventtrackerapp.model.roommodels.Tag
+import com.example.eventtrackerapp.model.firebasemodels.FirebaseProfile
 
 object ProfileMapper {
-    fun toEntity(firebaseProfile: FirebaseProfile,allTag:List<Tag>, allCategory:List<Category>):Profile
+    fun toEntity(firebaseProfile: FirebaseProfile, allTag:List<Tag>, allCategory:List<Category>): Profile
     {
         val selectedTags = allTag.filter { firebaseProfile.selectedTagIds.contains(it.id) }
         val selectedCategories = allCategory.filter{ firebaseProfile.selectedCategoryIds.contains(it.id) }

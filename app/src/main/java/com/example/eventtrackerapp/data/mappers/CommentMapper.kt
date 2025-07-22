@@ -1,10 +1,10 @@
 package com.example.eventtrackerapp.data.mappers
 
-import com.example.eventtrackerapp.model.firebasemodels.FirebaseComment
 import com.example.eventtrackerapp.model.roommodels.Comment
+import com.example.eventtrackerapp.model.firebasemodels.FirebaseComment
 
 object CommentMapper {
-    fun toEntity(firebaseComment: FirebaseComment):Comment
+    fun toEntity(firebaseComment: FirebaseComment): Comment
     {
         return Comment(
             id = firebaseComment.id,

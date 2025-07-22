@@ -30,7 +30,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -48,7 +47,6 @@ import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Comment
 import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
-import kotlinx.coroutines.flow.Flow
 
 
 // TODO yorum kısmı dinamikleştirildikten sonra buradaki parametreler vb düzeltilecek

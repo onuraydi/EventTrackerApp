@@ -1,10 +1,10 @@
 package com.example.eventtrackerapp.data.mappers
 
-import com.example.eventtrackerapp.model.firebasemodels.FirebaseCategory
 import com.example.eventtrackerapp.model.roommodels.Category
+import com.example.eventtrackerapp.model.firebasemodels.FirebaseCategory
 
 object CategoryMapper {
-    fun toEntity(firebaseCategory: FirebaseCategory):Category
+    fun toEntity(firebaseCategory: FirebaseCategory): Category
     {
         return Category(
             id = firebaseCategory.id,
