@@ -42,20 +42,14 @@ class ProfileRepository(
 
     fun getProfile(profileId:String):Flow<Profile?>{
         return profileDao.getById(profileId)
-            .onEach {
-                listenForFirestoreProfileChanges(profileId)
-            }
     }
 
     fun getAllProfiles():Flow<List<Profile>>{
         return profileDao.getAll()
-            .onEach {
-                listenForAllFirestoreProfiles()
-            }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun listenForFirestoreProfileChanges(profileId:String){
+    fun listenForFirestoreProfileChanges(profileId:String){
         profilesCollection.document(profileId)
             .addSnapshotListener{snapshot, e->
                 if(e!=null){
@@ -83,7 +77,7 @@ class ProfileRepository(
             }
     }
 
-    private fun listenForAllFirestoreProfiles(){
+    fun listenForAllFirestoreProfiles(){
         profilesCollection.addSnapshotListener{snapshot, e->
             if(e!=null){
                 Log.w(TAG,"Listen failed for all profiles",e)

@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.concurrent.timerTask
@@ -42,19 +43,19 @@ class EventRepository (
     private val eventCollection = firestore.collection("events")
     private val attendancesCollection = "attendances"
 
-    init
-    {
-        listenForFireStoreEvents()
-    }
+//    init
+//    {
+//        listenForFireStoreEvents()
+//    }
 
     fun getAllEventsWithRelations(): Flow<List<EventWithTags>>
     {
         return eventDao.getAllEventsWithRelations()
-            .onEach {
+            //.onEach {
                 // Dinleyici zaten init bloğunda kurulduğu için burada ek bir şey yapmaya gerek yok.
                 // Flow'un ilk emit edildiğinde Firestore'dan veri çekmesi için onEach kullanılır.
                 // Burada Room'dan gelen veriyi hemen döndürüp, arka planda senkronizasyonu sürdürüyoruz.
-            }
+            //}
     }
 
     fun getEventWithRelationsById(eventId: String):Flow<EventWithTags?>
@@ -75,6 +76,7 @@ class EventRepository (
 
     suspend fun insertEvent(event: Event, tags:List<Tag>)
     {
+        event.id = UUID.randomUUID().toString()
         eventDao.insert(event)
         eventDao.deleteEventTagCrossRefsForEvent(eventId = event.id)
 
@@ -151,7 +153,7 @@ class EventRepository (
         return  eventDao.getEventWithParticipantsById(eventId)
     }
 
-    private fun listenForFirestoreAttendances()
+    fun listenForFirestoreAttendances()
     {
         firestore.collection(attendancesCollection).addSnapshotListener{snapshots, e ->
             if (e != null) {
@@ -196,7 +198,7 @@ class EventRepository (
         }
     }
 
-    private fun listenForFireStoreEvents()
+    fun listenForFireStoreEvents()
     {
         eventCollection.addSnapshotListener { snapshot, e ->
             if (e != null)

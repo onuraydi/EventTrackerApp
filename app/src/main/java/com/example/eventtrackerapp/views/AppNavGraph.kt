@@ -1,7 +1,10 @@
 package com.example.eventtrackerapp.views
 
 import android.annotation.SuppressLint
+import androidx.benchmark.perfetto.PerfettoConfig
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -76,28 +79,32 @@ fun AppNavGraph(
             }
 
             composable("home") {backStackEntry ->
-                val uid = auth.currentUser?.uid!!
+                val uid = auth.currentUser?.uid
 
-                //Yapay Zeka tarafından live data için önerilen kullanım şekli
-                val profileLiveData = remember(uid) {
-                    profileViewModel.getById(uid)
+                if(uid==null){
+                    Text("Kullanıcı bulunamadı")
+                    return@composable
                 }
-                val profile by profileLiveData.observeAsState()
+
+                val profile by profileViewModel.getById(uid).observeAsState()
 
                 if(profile!=null){
 
-                    val eventForUser = remember(profile!!.selectedTagList) {
-                        val tagIds = profile!!.selectedTagList.map { it.id } ?: emptyList()
-                        eventViewModel.getEventsForUser(tagIds)
-                    }
-                    println("selectedTagList"+profile!!.selectedTagList)
-                    val eventList by eventForUser.observeAsState()
+                    val eventList by eventViewModel.getEventsForUser(profile!!.selectedTagList.map { it.id }).observeAsState()
 
                     if(eventList!=null){
                         HomeScreen(eventList = eventList!!, navController = navController,commentViewModel,likeViewModel,uid)
+                    }else{
+                        Text("Liste boş geldi")
+                        CircularProgressIndicator()
+                        return@composable
                     }
+                }else{
+                    Text("PROFİL BOŞ GELİYOOOOOOOOOOOOOOOOOOOOOOOOOO")
+                    CircularProgressIndicator()
+                    return@composable
                 }
-            }
+                }
 
 
 

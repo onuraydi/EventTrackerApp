@@ -110,10 +110,8 @@ fun HomeScreen(
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-private fun EventRow(event: Event, navController: NavController, commentList:List<CommentWithProfileAndEvent>, commentViewModel:CommentViewModel, profileId:String, likeViewModel: LikeViewModel)
+private fun EventRow(event: Event, navController: NavController, commentList:List<CommentWithProfileAndEvent>?, commentViewModel:CommentViewModel, profileId:String, likeViewModel: LikeViewModel)
 {
-    var eventViewModel: EventViewModel = viewModel()
-
 
     var showBottomSheet by remember { mutableStateOf(false ) }
 
@@ -210,7 +208,7 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
         CommentBottomSheet(
             showSheet = showBottomSheet,
             onDismiss = { showBottomSheet = false },
-            comments = commentList,
+            comments = commentList ?: arrayListOf(),
             currentUserImage = painterResource(R.drawable.ic_launcher_foreground),
             commentViewModel = commentViewModel,
             profileId = profileId,

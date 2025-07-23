@@ -25,9 +25,9 @@ class CommentRepository(
     //Etkinliğe özel yorumları Room'dan al ve Firestore'dan dinle
     fun getCommentsForEvent(eventId:String):Flow<List<CommentWithProfileAndEvent>>{
         return commentDao.getCommentsForEvent(eventId)
-            .onEach {
-                listenForFirestoreCommentsForEvent(eventId)
-            }
+//            .onEach {
+//                listenForFirestoreCommentsForEvent(eventId)
+//            }
     }
 
     //Etkinliğe ait yorum sayısını getirme (Room'dan alınıyor)

@@ -20,10 +20,10 @@ class LikeRepository(
 ) {
     private val likesCollection = firestore.collection("likes")
 
-    init
-    {
-        listenForFireStoreLikes()
-    }
+//    init
+//    {
+//        listenForFireStoreLikes()
+//    }
 
 
     suspend fun toggleLike(eventId:String, profileId:String)
@@ -78,7 +78,7 @@ class LikeRepository(
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun listenForFireStoreLikes()
+    fun listenForFireStoreLikes()
     {
         likesCollection.addSnapshotListener { snapshot, e ->
             if (e != null)
