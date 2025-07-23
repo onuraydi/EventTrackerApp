@@ -21,7 +21,10 @@ class CategoryViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository
 ) : ViewModel()
 {
-
+    init {
+        categoryRepository.listenForFirestoreCategories()
+        categoryRepository.listenForFirestoreTags()
+    }
 
     val categoryWithTags: LiveData<List<CategoryWithTag>> = categoryRepository.getCategoriesWithTags().asLiveData()
     private val _selectedTags = MutableStateFlow<List<Tag>>(arrayListOf())

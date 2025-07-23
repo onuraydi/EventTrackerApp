@@ -23,5 +23,5 @@ interface TagDao {
     suspend fun insertAllTags(tags:List<Tag>)
 
     @Query("SELECT * FROM tags WHERE categoryId = :categoryId")
-    suspend fun getTagsByCategory(categoryId: Int): Flow<List<Tag>>
+    fun getTagsByCategory(categoryId: Int): Flow<List<Tag>>
 }
