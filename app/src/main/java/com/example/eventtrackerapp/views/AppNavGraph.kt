@@ -84,18 +84,14 @@ fun AppNavGraph(
                 }
                 val profile by profileLiveData.observeAsState()
 
-                if(profile!=null){
+                val eventForUser = remember(profile!!.selectedTagList) {
+                    val tagIds = profile!!.selectedTagList.map { it.id } ?: emptyList()
+                    eventViewModel.getEventsForUser(tagIds)
+                }
+                val eventList by eventForUser.observeAsState()
 
-                    val eventForUser = remember(profile!!.selectedTagList) {
-                        val tagIds = profile!!.selectedTagList.map { it.id } ?: emptyList()
-                        eventViewModel.getEventsForUser(tagIds)
-                    }
-                    println("selectedTagList"+profile!!.selectedTagList)
-                    val eventList by eventForUser.observeAsState()
-
-                    if(eventList!=null){
-                        HomeScreen(eventList = eventList!!, navController = navController,commentViewModel,likeViewModel,uid)
-                    }
+                if(eventList!=null){
+                    HomeScreen(eventList = eventList!!, navController = navController,commentViewModel,likeViewModel,uid)
                 }
             }
 

@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -119,6 +120,7 @@ class ProfileRepository(
 
     suspend fun upsertProfile(profile:Profile){
         //Room'a kaydet
+        profile.id = UUID.randomUUID().toString()
         profileDao.add(profile)
 
         //Sonra Firestore'a kaydet. Kaydetmeden önce firebase modele çevir(Category ve Tag listelerinin id'lerini al fb modele geçirir -> mapper)
