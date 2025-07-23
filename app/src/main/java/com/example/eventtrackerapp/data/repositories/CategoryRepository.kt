@@ -99,7 +99,7 @@ class CategoryRepository(
     }
 
 
-    private fun listenForFirestoreCategories()
+    fun listenForFirestoreCategories()
     {
         categoryCollection.addSnapshotListener {snapshot,e ->
             if (e != null)
@@ -120,7 +120,7 @@ class CategoryRepository(
         }
     }
 
-    private fun listenForFirestoreTags()
+    fun listenForFirestoreTags()
     {
         tagCollection.addSnapshotListener {snapshot, e ->
             if(e != null)
