@@ -2,6 +2,7 @@ package com.example.eventtrackerapp.model.roommodels
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -11,7 +12,8 @@ import androidx.room.PrimaryKey
         parentColumns = ["id"],
         childColumns = ["categoryId"],
         onDelete = ForeignKey.RESTRICT
-    )]
+    )],
+    indices = [Index(value = ["categoryId"])]
 )
 data class Tag(
     @PrimaryKey

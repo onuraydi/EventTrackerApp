@@ -3,7 +3,9 @@ package com.example.eventtrackerapp.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import com.example.eventtrackerapp.data.repositories.CategoryRepository
+import com.example.eventtrackerapp.model.roommodels.Category
 import com.example.eventtrackerapp.model.roommodels.CategoryWithTag
 import com.example.eventtrackerapp.model.roommodels.Tag
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,8 +21,7 @@ class CategoryViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository
 ) : ViewModel()
 {
-    // TODO ileride farklı işlemler de gelebilir
-    // TODO isim kategori ve tagı ortak olarak belirtecek şekilde değişecek
+
 
     val categoryWithTags: LiveData<List<CategoryWithTag>> = categoryRepository.getCategoriesWithTags().asLiveData()
     private val _selectedTags = MutableStateFlow<List<Tag>>(arrayListOf())
@@ -31,6 +32,18 @@ class CategoryViewModel @Inject constructor(
 
     fun getCategoryWithTagsById(categoryId: String): LiveData<CategoryWithTag?> {
         return categoryRepository.getCategoryWithTagsByCategoryId(categoryId).asLiveData()
+    }
+
+    fun addCategory(category: Category){
+        viewModelScope.launch {
+            categoryRepository.addCategory(category.id,category.name)
+        }
+    }
+
+    fun addTag(tag:Tag){
+        viewModelScope.launch {
+            categoryRepository.addTag(tag.id,tag.name,tag.categoryId)
+        }
     }
 
     fun resetTag(){

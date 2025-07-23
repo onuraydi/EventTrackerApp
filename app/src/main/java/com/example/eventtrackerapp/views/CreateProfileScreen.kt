@@ -430,9 +430,9 @@ fun CreateProfileScreen(
                             )
                             profileViewModel.upsertProfile(profile)
                             navController.navigate("home"){
-                                popUpTo("create_profile_screen"){
-                                    inclusive = true
-                                }
+//                                popUpTo("create_profile_screen"){
+//                                    inclusive = true
+//                                }
                             }
                         }
                     }
