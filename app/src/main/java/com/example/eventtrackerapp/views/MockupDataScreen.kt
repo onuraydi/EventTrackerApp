@@ -20,12 +20,14 @@ import androidx.compose.ui.unit.dp
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseCategory
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseEvent
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseTag
+import com.example.eventtrackerapp.model.roommodels.Category
+import com.example.eventtrackerapp.model.roommodels.Tag
 import java.util.UUID
 
 @Composable
 fun MockupDataScreen(
-    onCategorySubmit: (FirebaseCategory)->Unit,
-    onTagSubmit: (FirebaseTag)->Unit
+    onCategorySubmit:(Category)->Unit,
+    onTagSubmit: (tag: Tag)->Unit
 ){
     var categoryId by remember{mutableStateOf("")}
     var categoryName by remember{ mutableStateOf("") }
@@ -55,7 +57,7 @@ fun MockupDataScreen(
 
         Button(onClick = {
             if(categoryName.isNotBlank()&&categoryId.isNotBlank()){
-                onCategorySubmit(FirebaseCategory(id = categoryId, name = categoryName))
+                onCategorySubmit(Category(id = categoryId, name = categoryName))
             }
         }) {
             Text("Kategori Ekle")
@@ -74,7 +76,7 @@ fun MockupDataScreen(
         Button(onClick = {
             if(tagName.isNotBlank()){
                 val generatedTagId = UUID.randomUUID().toString()
-                onTagSubmit(FirebaseTag(id = generatedTagId, name = tagName, categoryId = categoryId))
+                onTagSubmit(Tag(id = generatedTagId, name = tagName, categoryId = categoryId))
                 tagName = ""
             }
         }) {

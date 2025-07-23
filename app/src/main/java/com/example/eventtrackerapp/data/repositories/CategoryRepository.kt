@@ -28,10 +28,10 @@ class CategoryRepository(
     private val tagCollection = firestore.collection("tags")
 
 
-    init {
-        listenForFirestoreCategories()
-        listenForFirestoreTags()
-    }
+//    init {
+//        listenForFirestoreCategories()
+//        listenForFirestoreTags()
+//    }
 
     suspend fun initializeCategoriesAndTags()
     {

@@ -26,6 +26,8 @@ class ProfileViewModel @Inject constructor(
         return profileRepository.getProfile(id).asLiveData()
     }
 
+    //TODO Bunun için upsert var.
+    // Hem insert hem de update i aynı anda kullanıyor. Ne kadar mantıklı??
     //aynı kayıtı eklemeyi engelleyen upsert işlemi. Aynı zamanda güncelleme işlemi de yapıyor.
     fun upsertProfile(profile: Profile){
         viewModelScope.launch{
@@ -33,8 +35,6 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    //TODO Bunun için upsert var.
-    // Hem insert hem de update i aynı anda kullanıyor. Ne kadar mantıklı??
     fun deleteProfile(profile: Profile){
         viewModelScope.launch {
             profileRepository.deleteProfile(profile)
