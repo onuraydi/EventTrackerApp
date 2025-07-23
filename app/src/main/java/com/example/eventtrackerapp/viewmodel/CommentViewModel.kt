@@ -9,6 +9,7 @@ import com.example.eventtrackerapp.model.roommodels.Comment
 import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,7 +27,10 @@ class CommentViewModel @Inject constructor(
 
     // TODO buraya güncelleme gerekebilir dao kısmında da suspend yapmak gerekebilir.
     fun getComments(eventId: String):LiveData<List<CommentWithProfileAndEvent>>{
-            return commentRepository.getCommentsForEvent(eventId).asLiveData()
+            return commentRepository.getCommentsForEvent(eventId)
+                .onEach {
+                    commentRepository.listenForFirestoreCommentsForEvent(eventId)
+                }.asLiveData()
     }
 
     fun getCommentCount(eventId: String):LiveData<Int>

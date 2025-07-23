@@ -8,6 +8,7 @@ import com.example.eventtrackerapp.data.repositories.ProfileRepository
 import com.example.eventtrackerapp.model.roommodels.Profile
 import com.example.eventtrackerapp.model.roommodels.Tag
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,16 +19,18 @@ class ProfileViewModel @Inject constructor(
 
 
     //Neden live data? ve bunu init {} içerisinde alabilir miyiz?
-    val profileList : LiveData<List<Profile>> = profileRepository.getAllProfiles().asLiveData()
+    val profileList : LiveData<List<Profile>> = profileRepository.getAllProfiles().onEach {
+        profileRepository.listenForAllFirestoreProfiles()
+    }.asLiveData()
 
     //Repository de gelen veriyi dinlerken global scope kullanıyoruz.
     // Bunun için ekstra scope 'a gerek yok
     fun getById(id:String): LiveData<Profile?>{
-        return profileRepository.getProfile(id).asLiveData()
+        return profileRepository.getProfile(id).onEach {
+            profileRepository.listenForFirestoreProfileChanges(id)
+        }.asLiveData()
     }
 
-    //TODO Bunun için upsert var.
-    // Hem insert hem de update i aynı anda kullanıyor. Ne kadar mantıklı??
     //aynı kayıtı eklemeyi engelleyen upsert işlemi. Aynı zamanda güncelleme işlemi de yapıyor.
     fun upsertProfile(profile: Profile){
         viewModelScope.launch{
@@ -35,6 +38,8 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    //TODO Bunun için upsert var.
+    // Hem insert hem de update i aynı anda kullanıyor. Ne kadar mantıklı??
     fun deleteProfile(profile: Profile){
         viewModelScope.launch {
             profileRepository.deleteProfile(profile)

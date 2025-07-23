@@ -21,6 +21,11 @@ class EventViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository
 ):ViewModel()
 {
+    init
+    {
+        eventRepository.listenForFirestoreAttendances()
+    }
+
     val allEventsWithRelations: LiveData<List<EventWithTags>> = eventRepository.getAllEventsWithRelations().asLiveData()
 
     fun getEventWithRelationsById(eventId:String):LiveData<EventWithTags?>

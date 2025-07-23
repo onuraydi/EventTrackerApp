@@ -42,20 +42,14 @@ class ProfileRepository(
 
     fun getProfile(profileId:String):Flow<Profile?>{
         return profileDao.getById(profileId)
-            .onEach {
-                listenForFirestoreProfileChanges(profileId)
-            }
     }
 
     fun getAllProfiles():Flow<List<Profile>>{
         return profileDao.getAll()
-            .onEach {
-                listenForAllFirestoreProfiles()
-            }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun listenForFirestoreProfileChanges(profileId:String){
+    fun listenForFirestoreProfileChanges(profileId:String){
         profilesCollection.document(profileId)
             .addSnapshotListener{snapshot, e->
                 if(e!=null){
@@ -67,6 +61,7 @@ class ProfileRepository(
                     val firebaseProfile = snapshot.toObject(FirebaseProfile::class.java)
                     GlobalScope.launch(Dispatchers.IO) {
                         firebaseProfile?.let{fbProfile->
+                            Log.d("profil","Snapshot geliyo: ${snapshot.data}")
                             //firestore'dan gelen ID'lerle eşleştirmek için tüm kategori ve tag'leri çek
                             val allCategories = categoryDao.getAll().first() //flow olduğu için first
                             val allTags = tagDao.getAll()
@@ -83,7 +78,7 @@ class ProfileRepository(
             }
     }
 
-    private fun listenForAllFirestoreProfiles(){
+    fun listenForAllFirestoreProfiles(){
         profilesCollection.addSnapshotListener{snapshot, e->
             if(e!=null){
                 Log.w(TAG,"Listen failed for all profiles",e)
@@ -120,7 +115,7 @@ class ProfileRepository(
 
     suspend fun upsertProfile(profile:Profile){
         //Room'a kaydet
-        profile.id = UUID.randomUUID().toString()
+        //profile.id = UUID.randomUUID().toString()
         profileDao.add(profile)
 
         //Sonra Firestore'a kaydet. Kaydetmeden önce firebase modele çevir(Category ve Tag listelerinin id'lerini al fb modele geçirir -> mapper)

@@ -22,6 +22,10 @@ class LikeViewModel @Inject constructor(
     private val likeRepository: LikeRepository
 ):ViewModel()
 {
+    init
+    {
+        likeRepository.listenForFireStoreLikes()
+    }
     fun getLikeCountForEvent(eventId:String): LiveData<Int>
     {
         return likeRepository.getLikeCountForEvent(eventId).asLiveData()
