@@ -95,7 +95,7 @@ fun DetailScreen(
     val likeCount = likeViewModel.getLikeCountForEvent(event.id)
     val isLiked = likeViewModel.isEventLikedByUser(event.id,profileId)
 
-    val commentCount by commentViewModel.getCommentCount(event.id).observeAsState()
+    val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(0)
 
     val state by participantsViewModel.hasUserParticipated(event.id,profileId).observeAsState(false)
 

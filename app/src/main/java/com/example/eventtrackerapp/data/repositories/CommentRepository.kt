@@ -54,26 +54,27 @@ class CommentRepository(
     }
 
     //Etkinliğe ait yorum sayısını getirme (Room'dan alınıyor)
-    fun getCommentCountForEvent(eventId:String):Flow<Int> = flow {
-        if (NetworkUtils.isNetworkAvailable(context))
-        {
-            try {
-                val commentSnapshot = commentsCollection.get().await()
-//                val firebaseComments = commentSnapshot.documents.mapNotNull { it.toObject(FirebaseComment::class.java) }
-//                val roomComments = firebaseComments.map { CommentMapper.toEntity(it) }
-
-
-                emit(commentDao.getCommentCount(eventId).first())
-            }
-            catch (e:Exception){
-                Log.e(TAG,"Firestore'dan veri alınamadı",e)
-                emit(commentDao.getCommentCount(eventId).first())
-            }
-        }else
-        {
-            emit(commentDao.getCommentCount(eventId).first())
-        }
-//        return commentDao.getCommentCount(eventId)
+    fun getCommentCountForEvent(eventId:String):Flow<Int>{
+    //= flow {
+//        if (NetworkUtils.isNetworkAvailable(context))
+//        {
+//            try {
+//                val commentSnapshot = commentsCollection.get().await()
+////                val firebaseComments = commentSnapshot.documents.mapNotNull { it.toObject(FirebaseComment::class.java) }
+////                val roomComments = firebaseComments.map { CommentMapper.toEntity(it) }
+//
+//
+//                emit(commentDao.getCommentCount(eventId).first())
+//            }
+//            catch (e:Exception){
+//                Log.e(TAG,"Firestore'dan veri alınamadı",e)
+//                emit(commentDao.getCommentCount(eventId).first())
+//            }
+//        }else
+//        {
+//            emit(commentDao.getCommentCount(eventId).first())
+//        }
+        return commentDao.getCommentCount(eventId)
     }
 
     //Firestore'dan belirli bir etkinliğe ait yorumları dinleme

@@ -91,10 +91,21 @@ fun AppNavGraph(
                 if(profile!=null){
 
                     val eventList by eventViewModel.getEventsForUser(profile!!.selectedTagList.map { it.id }).observeAsState()
-                    HomeScreen(eventList = eventList!!, navController = navController,commentViewModel,likeViewModel,uid)
 
+                    if(eventList!=null){
+                        HomeScreen(eventList = eventList!!, navController = navController,commentViewModel,likeViewModel,uid)
+                    }else{
+                        Text("Liste boş geldi")
+                        CircularProgressIndicator()
+                        return@composable
+                    }
+                }else{
+                    Text("PROFİL BOŞ GELİYOOOOOOOOOOOOOOOOOOOOOOOOOO")
+                    CircularProgressIndicator()
+                    return@composable
                 }
             }
+
 
 
 
@@ -112,13 +123,13 @@ fun AppNavGraph(
 
             composable("detail/{id}") { backStackEntry ->
 
-                val eventId = backStackEntry.arguments?.getString("id") ?: ""
+                val eventId = backStackEntry.arguments?.getString("id") ?: "asdasd"
 
                 // Event'i çağır
-                val eventLiveData = remember(eventId) {
-                    eventViewModel.getEventWithRelationsById(eventId)
-                }
-                val eventWithTags by eventLiveData.observeAsState()
+//                val eventLiveData = remember(eventId) {
+//                    eventViewModel.getEventWithRelationsById(eventId)
+//                }
+                val eventWithTags by eventViewModel.getEventWithRelationsById(eventId).observeAsState()
 
                 //Category'i al
                 val categoryLiveData = remember {
@@ -135,13 +146,12 @@ fun AppNavGraph(
                 }.map { it.category }.first()
 
                 if(eventWithTags!=null){
-//                    val commentList = commentViewModel.getComments(eventId = eventWithTags!!.event.id)
-                    val commentList = commentViewModel.commentList.observeAsState(emptyList())
+                    val commentList = commentViewModel.getComments(eventId = eventWithTags!!.event.id)
 
                     DetailScreen(event = eventWithTags!!.event,
                         navController = navController,
                         category = detailCategory,
-                        commentList = commentList.value,
+                        commentList = commentList.value!!,
                         commentViewModel = commentViewModel,
                         likeViewModel = likeViewModel,
                         profileId = uid,

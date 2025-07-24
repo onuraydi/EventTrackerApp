@@ -20,9 +20,6 @@ class CommentViewModel @Inject constructor(
     private val commentRepository:CommentRepository
 ): ViewModel() {
 
-    private val _commentList = MutableLiveData<List<CommentWithProfileAndEvent>>(emptyList())
-    val commentList: LiveData<List<CommentWithProfileAndEvent>> = _commentList
-
 
     fun addComment(comment: Comment){
         viewModelScope.launch {
@@ -31,15 +28,12 @@ class CommentViewModel @Inject constructor(
     }
 
     // TODO buraya güncelleme gerekebilir dao kısmında da suspend yapmak gerekebilir.
-    fun getComments(eventId: String) {
-        viewModelScope.launch {
-            val comments = commentRepository.getCommentsForEvent(eventId).first()
-            _commentList.value = comments
-        }
+    fun getComments(eventId: String):LiveData<List<CommentWithProfileAndEvent>>{
+        return commentRepository.getCommentsForEvent(eventId).asLiveData()
     }
 
-    fun getCommentCount(eventId: String):LiveData<Int>
+    fun getCommentCount(eventId: String):Flow<Int>
     {
-        return commentRepository.getCommentCountForEvent(eventId).asLiveData()
+        return commentRepository.getCommentCountForEvent(eventId)
     }
 }
