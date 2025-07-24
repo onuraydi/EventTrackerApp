@@ -25,12 +25,7 @@ class CategoryViewModel @Inject constructor(
 //        categoryRepository.listenForFirestoreTags()
 //    }
 
-    private val _categoryWithTags: StateFlow<List<CategoryWithTag>> =
-        categoryRepository.getCategoriesWithTags().stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    private val _categoryWithTags = MutableStateFlow<List<CategoryWithTag>>(emptyList())
     val categoryWithTags:StateFlow<List<CategoryWithTag>> = _categoryWithTags
 
     private val _selectedTags = MutableStateFlow<List<Tag>>(arrayListOf())
@@ -42,6 +37,13 @@ class CategoryViewModel @Inject constructor(
     private val _categoryWithTagsById = MutableStateFlow<CategoryWithTag?>(null)
     val categoryWithTagsById: StateFlow<CategoryWithTag?> = _categoryWithTagsById
 
+    fun getAllCategoryWithTags(){
+        viewModelScope.launch {
+            categoryRepository.getCategoriesWithTags().collect{
+                _categoryWithTags.value = it
+            }
+        }
+    }
     fun getCategoryWithTagsById(categoryId: String){
         viewModelScope.launch {
             categoryRepository.getCategoryWithTagsByCategoryId(categoryId).collect{

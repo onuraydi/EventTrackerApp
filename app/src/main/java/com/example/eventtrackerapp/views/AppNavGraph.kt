@@ -84,7 +84,7 @@ fun AppNavGraph(
                     return@composable
                 }
 
-                LaunchedEffect(Unit) {
+                LaunchedEffect(uid) {
                     profileViewModel.getById(uid)
                 }
                 val profile by profileViewModel.profile.collectAsStateWithLifecycle()
@@ -119,12 +119,15 @@ fun AppNavGraph(
 
                 val eventId = backStackEntry.arguments?.getString("id") ?: ""
 
-                LaunchedEffect(Unit) {
+                LaunchedEffect(eventId) {
                     eventViewModel.getEventWithRelationsById(eventId)
                 }
                 val eventWithTags by eventViewModel.eventWithRelations.collectAsStateWithLifecycle()
 
                 //Category'i al
+                LaunchedEffect(categoryViewModel.categoryWithTags) {
+                    categoryViewModel.getAllCategoryWithTags()
+                }
                 val category by categoryViewModel.categoryWithTags.collectAsStateWithLifecycle()
 
                 val uid = auth.currentUser?.uid!!
@@ -137,7 +140,7 @@ fun AppNavGraph(
 
                 if(eventWithTags!=null){
 
-                    LaunchedEffect(Unit) {
+                    LaunchedEffect(eventWithTags) {
                         commentViewModel.getComments(eventId)
                     }
                     val commentList by commentViewModel.commentList.collectAsStateWithLifecycle()
