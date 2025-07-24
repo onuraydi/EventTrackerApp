@@ -22,6 +22,9 @@ interface EventDao {
     @Insert
     suspend fun insert(event: Event)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(event : List<Event>)
+
     @Update
     suspend fun update(event: Event)
 
@@ -68,6 +71,9 @@ interface EventDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEventTagCrossRef(crossRef: EventTagCrossRef)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllEventTagCrossRef(crossRef: List<EventTagCrossRef>)
 
     @Delete
     suspend fun deleteEventTagCrossRef(crossRef: EventTagCrossRef)

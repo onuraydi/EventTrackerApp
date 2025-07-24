@@ -101,7 +101,11 @@ fun HomeScreen(
 
             items(eventList)
             {
-                val commentList = commentViewModel.getComments(eventId = it.event.id)
+//                val commentList = commentViewModel.getComments(eventId = it.event.id)
+                LaunchedEffect(commentViewModel.commentList) {
+                    commentViewModel.getComments(eventId = it.event.id)
+                }
+                val commentList = commentViewModel.commentList.observeAsState(emptyList())
                 EventRow(it.event, navController,commentList.value,commentViewModel,profileId,likeViewModel)
             }
         }
@@ -110,7 +114,7 @@ fun HomeScreen(
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-private fun EventRow(event: Event, navController: NavController, commentList:List<CommentWithProfileAndEvent>?, commentViewModel:CommentViewModel, profileId:String, likeViewModel: LikeViewModel)
+private fun EventRow(event: Event, navController: NavController, commentList:List<CommentWithProfileAndEvent>, commentViewModel:CommentViewModel, profileId:String, likeViewModel: LikeViewModel)
 {
 
     var showBottomSheet by remember { mutableStateOf(false ) }
@@ -208,7 +212,7 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
         CommentBottomSheet(
             showSheet = showBottomSheet,
             onDismiss = { showBottomSheet = false },
-            comments = commentList ?: arrayListOf(),
+            comments = commentList,
             currentUserImage = painterResource(R.drawable.ic_launcher_foreground),
             commentViewModel = commentViewModel,
             profileId = profileId,

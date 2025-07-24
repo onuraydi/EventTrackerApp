@@ -415,9 +415,9 @@ fun CreateProfileScreen(
                             genderError.value = gender.value.isBlank()
                             return@EventTrackerAppPrimaryButton
                         }else{
-                            scope.launch {
-                                userPreferences.setIsProfileCompleted(value = true)
-                            }
+//                            scope.launch {
+//                                userPreferences.setIsProfileCompleted(value = true)
+//                            }
                             val profile = Profile(
                                 id = uid,
                                 email = email,

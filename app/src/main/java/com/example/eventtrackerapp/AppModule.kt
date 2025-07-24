@@ -100,31 +100,31 @@ object AppModule{
     // Hilt'in zaten yukarıda tanımladığımız @Provides metotlarından sağlayacağı bağımlılıklardır.
     @Provides
     @Singleton
-    fun provideCategoryRepository(categoryDao: CategoryDao, tagDao: TagDao, firestore: FirebaseFirestore): CategoryRepository {
-        return CategoryRepository(categoryDao,tagDao,firestore)
+    fun provideCategoryRepository(categoryDao: CategoryDao, tagDao: TagDao, firestore: FirebaseFirestore, @ApplicationContext context: Context): CategoryRepository {
+        return CategoryRepository(categoryDao,tagDao,firestore,context)
     }
 
     @Provides
     @Singleton
-    fun provideCommentRepository(commentDao: CommentDao, firestore: FirebaseFirestore): CommentRepository {
-        return CommentRepository(commentDao,firestore)
+    fun provideCommentRepository(commentDao: CommentDao, firestore: FirebaseFirestore, @ApplicationContext context: Context): CommentRepository {
+        return CommentRepository(commentDao,firestore,context)
     }
 
     @Provides
     @Singleton
-    fun provideEventRepository(eventDao: EventDao, profileDao: ProfileDao, firestore: FirebaseFirestore): EventRepository {
-        return EventRepository(eventDao,profileDao,firestore)
+    fun provideEventRepository(eventDao: EventDao, profileDao: ProfileDao, firestore: FirebaseFirestore, @ApplicationContext context: Context): EventRepository {
+        return EventRepository(eventDao,profileDao,firestore,context)
     }
 
     @Provides
     @Singleton
-    fun provideLikeRepository(likeDao: LikeDao, firestore: FirebaseFirestore): LikeRepository {
-        return LikeRepository(likeDao,firestore)
+    fun provideLikeRepository(likeDao: LikeDao, firestore: FirebaseFirestore, @ApplicationContext context: Context): LikeRepository {
+        return LikeRepository(likeDao,firestore,context)
     }
 
     @Provides
     @Singleton
-    fun provideProfileRepository(profileDao: ProfileDao, categoryDao: CategoryDao, tagDao: TagDao, firestore: FirebaseFirestore): ProfileRepository {
-        return ProfileRepository(profileDao,categoryDao,tagDao,firestore)
+    fun provideProfileRepository(profileDao: ProfileDao, categoryDao: CategoryDao, tagDao: TagDao, firestore: FirebaseFirestore, @ApplicationContext context: Context): ProfileRepository {
+        return ProfileRepository(profileDao,categoryDao,tagDao,firestore,context)
     }
 }

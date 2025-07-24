@@ -1,6 +1,9 @@
 package com.example.eventtrackerapp.data.repositories
 
+import android.content.Context
 import android.util.Log
+import androidx.benchmark.json.BenchmarkData
+import com.example.eventtrackerapp.common.NetworkUtils
 import com.example.eventtrackerapp.data.mappers.CategoryMapper
 import com.example.eventtrackerapp.data.mappers.TagMapper
 import com.example.eventtrackerapp.data.source.local.CategoryDao
@@ -14,6 +17,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import okhttp3.Dispatcher
@@ -22,7 +27,8 @@ import okhttp3.Dispatcher
 class CategoryRepository(
     private val categoryDao: CategoryDao,
     private val tagDao: TagDao,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val context:Context
 ) {
     private val categoryCollection = firestore.collection("categories")
     private val tagCollection = firestore.collection("tags")
@@ -56,9 +62,32 @@ class CategoryRepository(
         }
     }
 
-    fun getCategoriesWithTags(): Flow<List<CategoryWithTag>>
-    {
-        return categoryDao.getCategoryWithTags()
+    fun getCategoriesWithTags(): Flow<List<CategoryWithTag>> = flow {
+        if(NetworkUtils.isNetworkAvailable(context))
+        {
+            try
+            {
+                val categorySnapshot = categoryCollection.get().await()
+                val firebaseCategories = categorySnapshot.documents.mapNotNull { it.toObject(FirebaseCategory::class.java) }
+                val roomCategories = firebaseCategories.map { CategoryMapper.toEntity(it) }
+
+                val tagSnapShot = tagCollection.get().await()
+                val firebaseTags = tagSnapShot.documents.mapNotNull { it.toObject(FirebaseTag::class.java) }
+                val roomTags = firebaseTags.map { TagMapper.toEntity(it) }
+
+
+                categoryDao.insertAllCategory(roomCategories)
+                tagDao.insertAllTags(roomTags)
+                emit(categoryDao.getCategoryWithTags().first())
+            }
+            catch (e:Exception)
+            {
+                Log.e(TAG,"Firestore'dan veri alınamadı, room'dan veri alınıyor",e)
+                emit(categoryDao.getCategoryWithTags().first())
+            }
+        }else{
+            emit(categoryDao.getCategoryWithTags().first())
+        }
     }
 
     fun getCategoryWithTagsByCategoryId(categoryId:String):Flow<CategoryWithTag?>
@@ -68,12 +97,12 @@ class CategoryRepository(
 
     suspend fun addCategory(id:String,name:String)
     {
-        val roomCategory = Category(id = id, name = name)
+//        val roomCategory = Category(id = id, name = name)
         val firebaseCategory = FirebaseCategory(id = id, name = name)
 
         try
         {
-            categoryDao.insertCategory(roomCategory)
+//            categoryDao.insertCategory(roomCategory)
             categoryCollection.document(id).set(firebaseCategory).await()
             Log.d(TAG,"Category '$name' added successfully to room and Firebase")
         } catch (e:Exception){
@@ -85,11 +114,11 @@ class CategoryRepository(
 
     suspend fun addTag(id:String, name:String, categoryId: String)
     {
-        val roomTag = Tag(id = id, name= name, categoryId = categoryId)
+//        val roomTag = Tag(id = id, name= name, categoryId = categoryId)
         val firebaseTag = FirebaseTag(id = id, name = name, categoryId = categoryId)
 
         try {
-            tagDao.insertTag(roomTag)
+//            tagDao.insertTag(roomTag)
             tagCollection.document(id).set(firebaseTag).await()
             Log.d(TAG,"Tag '$name' for category '$categoryId' added successfully to room and firebase")
         } catch (e:Exception){

@@ -1,6 +1,8 @@
 package com.example.eventtrackerapp.data.repositories
 
+import android.content.Context
 import android.util.Log
+import com.example.eventtrackerapp.common.NetworkUtils
 import com.example.eventtrackerapp.data.mappers.LikeMapper
 import com.example.eventtrackerapp.data.source.local.LikeDao
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseLike
@@ -11,12 +13,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class LikeRepository(
     private val likeDao: LikeDao,
-    private val firestore:FirebaseFirestore
+    private val firestore:FirebaseFirestore,
+    private val context:Context
 ) {
     private val likesCollection = firestore.collection("likes")
 
@@ -51,14 +55,46 @@ class LikeRepository(
         }
     }
 
-    fun getLikeCountForEvent(eventId: String):Flow<Int>
-    {
-        return likeDao.getLikeCountForEvent(eventId)
+    fun getLikeCountForEvent(eventId: String):Flow<Int> = flow {
+        if (NetworkUtils.isNetworkAvailable(context)){
+            try {
+                val likeSnapshot = likesCollection.get().await()
+                val firebaseLike = likeSnapshot.documents.mapNotNull { it.toObject(FirebaseLike::class.java) }
+                val roomlike = firebaseLike.map { LikeMapper.toEntity(it) }
+
+                likeDao.getLikeCountForEvent(eventId)
+                emit(likeDao.getLikeCountForEvent(eventId).first())
+            }
+            catch (e:Exception){
+                Log.e(TAG,"Etkinlik firestore'dan çekilemedi, roomdan geliyor",e)
+                emit(likeDao.getLikeCountForEvent(eventId).first())
+            }
+        }
+        else{
+            emit(likeDao.getLikeCountForEvent(eventId).first())
+        }
+//        return likeDao.getLikeCountForEvent(eventId)
     }
 
-    fun isEventLikedByUser(eventId:String,profileId: String):Flow<Boolean>
-    {
-        return likeDao.isEventLikedByUser(eventId,profileId)
+    fun isEventLikedByUser(eventId:String,profileId: String):Flow<Boolean> = flow {
+        if (NetworkUtils.isNetworkAvailable(context)){
+            try {
+                val likeSnapshot = likesCollection.get().await()
+                val firebaseLike = likeSnapshot.documents.mapNotNull { it.toObject(FirebaseLike::class.java) }
+                val roomlike = firebaseLike.map { LikeMapper.toEntity(it) }
+
+                likeDao.isEventLikedByUser(eventId,profileId)
+                emit(likeDao.isEventLikedByUser(eventId,profileId).first())
+            }
+            catch (e:Exception){
+                Log.e(TAG,"Etkinlik firestore'dan çekilemedi, roomdan geliyor",e)
+                emit( likeDao.isEventLikedByUser(eventId,profileId).first())
+            }
+        }
+        else{
+            emit( likeDao.isEventLikedByUser(eventId,profileId).first())
+        }
+//        return likeDao.isEventLikedByUser(eventId,profileId)
     }
 
     suspend fun deleteLikesForEvent(eventId: String)

@@ -1,6 +1,8 @@
 package com.example.eventtrackerapp.data.repositories
 
+import android.content.Context
 import android.util.Log
+import com.example.eventtrackerapp.common.NetworkUtils
 import com.example.eventtrackerapp.data.mappers.EventMapper
 import com.example.eventtrackerapp.data.source.local.CategoryDao
 import com.example.eventtrackerapp.data.source.local.EventDao
@@ -24,8 +26,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -38,7 +42,8 @@ import kotlin.concurrent.timerTask
 class EventRepository (
     private val eventDao:EventDao,
     private val profileDao: ProfileDao,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val context:Context
 ) {
     private val eventCollection = firestore.collection("events")
     private val attendancesCollection = "attendances"
@@ -48,30 +53,34 @@ class EventRepository (
 //        listenForFireStoreEvents()
 //    }
 
-    fun getAllEventsWithRelations(): Flow<List<EventWithTags>>
-    {
-        return eventDao.getAllEventsWithRelations()
-            //.onEach {
-                // Dinleyici zaten init bloğunda kurulduğu için burada ek bir şey yapmaya gerek yok.
-                // Flow'un ilk emit edildiğinde Firestore'dan veri çekmesi için onEach kullanılır.
-                // Burada Room'dan gelen veriyi hemen döndürüp, arka planda senkronizasyonu sürdürüyoruz.
-            //}
+    fun getAllEventsWithRelations(): Flow<List<EventWithTags>> = flow {
+        if (NetworkUtils.isNetworkAvailable(context)) {
+            syncEventsFromFirestoreOnce()
+        }
+        emitAll(eventDao.getAllEventsWithRelations())
     }
 
-    fun getEventWithRelationsById(eventId: String):Flow<EventWithTags?>
-    {
-        return eventDao.getEventWithRelationsById(eventId)
+    fun getEventWithRelationsById(eventId: String):Flow<EventWithTags?> = flow {
+        if (NetworkUtils.isNetworkAvailable(context)) {
+            syncEventsFromFirestoreOnce()
+        }
+        emitAll(eventDao.getEventWithRelationsById(eventId))
     }
 
     // seçtiği taglara göre getirecek
-    fun getEventsForUser(tagIds:List<String>):Flow<List<EventWithTags>>
-    {
-        return eventDao.getEventBySelectedTag(tagIds)
+    fun getEventsForUser(tagIds:List<String>):Flow<List<EventWithTags>> = flow {
+        if (NetworkUtils.isNetworkAvailable(context)) {
+            syncEventsFromFirestoreOnce()
+        }
+        emitAll(eventDao.getEventBySelectedTag(tagIds))
     }
 
     //kullanıcının eklediği etkinlikleri getirecek
-    fun getEventsForOwner(profileId:String):Flow<List<Event>>{
-        return eventDao.getEventsByOwner(profileId)
+    fun getEventsForOwner(profileId:String):Flow<List<Event>> = flow {
+        if (NetworkUtils.isNetworkAvailable(context)) {
+            syncEventsFromFirestoreOnce()
+        }
+        emitAll(eventDao.getEventsByOwner(profileId))
     }
 
     suspend fun insertEvent(event: Event, tags:List<Tag>)
@@ -152,6 +161,36 @@ class EventRepository (
     {
         return  eventDao.getEventWithParticipantsById(eventId)
     }
+
+
+    suspend fun syncEventsFromFirestoreOnce() {
+        try {
+            val snapshot = firestore.collection("events").get().await()
+            val firebaseEvents = snapshot.toObjects(FirebaseEvent::class.java)
+
+            val currentRoomEventIds = eventDao.getAllEventsWithRelations().first().map { it.event.id }.toSet()
+            val firebaseEventIds = firebaseEvents.map { it.id }.toSet()
+
+            firebaseEvents.forEach { firebaseEvent ->
+                val event = EventMapper.toEntity(firebaseEvent)
+                eventDao.insert(event)
+                eventDao.deleteEventTagCrossRefsForEvent(event.id)
+                firebaseEvent.tagIds.forEach { tagId ->
+                    eventDao.insertEventTagCrossRef(EventTagCrossRef(event.id, tagId))
+                }
+            }
+
+            val deletedEventIds = currentRoomEventIds - firebaseEventIds
+            deletedEventIds.forEach { id ->
+                eventDao.deleteEvent(Event(id = id))
+            }
+            Log.d(TAG, "Event sync completed.")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to sync events from Firestore", e)
+        }
+    }
+
+
 
     fun listenForFirestoreAttendances()
     {

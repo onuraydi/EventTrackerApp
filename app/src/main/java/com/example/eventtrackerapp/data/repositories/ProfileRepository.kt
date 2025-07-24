@@ -1,12 +1,17 @@
 package com.example.eventtrackerapp.data.repositories
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.ui.window.Popup
+import com.example.eventtrackerapp.common.NetworkUtils
+import com.example.eventtrackerapp.data.mappers.LikeMapper
 import com.example.eventtrackerapp.data.mappers.ProfileMapper
+import com.example.eventtrackerapp.data.repositories.LikeRepository.Companion
 import com.example.eventtrackerapp.data.source.local.CategoryDao
 import com.example.eventtrackerapp.data.source.local.EventDao
 import com.example.eventtrackerapp.data.source.local.ProfileDao
 import com.example.eventtrackerapp.data.source.local.TagDao
+import com.example.eventtrackerapp.model.firebasemodels.FirebaseLike
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseProfile
 import com.example.eventtrackerapp.model.roommodels.Profile
 import com.google.firebase.database.DataSnapshot
@@ -24,6 +29,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -36,16 +42,57 @@ class ProfileRepository(
     private val profileDao: ProfileDao,
     private val categoryDao: CategoryDao,
     private val tagDao: TagDao,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val context: Context
 ) {
     private val profilesCollection = firestore.collection("profiles")
 
-    fun getProfile(profileId:String):Flow<Profile?>{
-        return profileDao.getById(profileId)
+    fun getProfile(profileId:String):Flow<Profile?> = flow {
+        if (NetworkUtils.isNetworkAvailable(context)){
+            try {
+                val allCategories = categoryDao.getAll().first() //flow olduğu için first
+                val allTags = tagDao.getAll()
+
+                val profileSnapshot = profilesCollection.get().await()
+                val firebaseProfile = profileSnapshot.documents.mapNotNull { it.toObject(FirebaseProfile::class.java) }
+                val roomProfile = firebaseProfile.map { ProfileMapper.toEntity(it,allTags,allCategories) }
+
+                profileDao.insertAllProfiles(roomProfile)
+                profileDao.getById(profileId)
+                emit(profileDao.getById(profileId).first())
+            }
+            catch (e:Exception){
+                Log.e(TAG,"Etkinlik firestore'dan çekilemedi, roomdan geliyor",e)
+                emit(profileDao.getById(profileId).first())
+            }
+        }
+        else{
+            emit(profileDao.getById(profileId).first())
+        }
     }
 
-    fun getAllProfiles():Flow<List<Profile>>{
-        return profileDao.getAll()
+    fun getAllProfiles():Flow<List<Profile>> = flow {
+        if (NetworkUtils.isNetworkAvailable(context)){
+            try {
+                val allCategories = categoryDao.getAll().first() //flow olduğu için first
+                val allTags = tagDao.getAll()
+
+                val profileSnapshot = profilesCollection.get().await()
+                val firebaseProfile = profileSnapshot.documents.mapNotNull { it.toObject(FirebaseProfile::class.java) }
+                val roomProfile = firebaseProfile.map { ProfileMapper.toEntity(it, allTags, allCategories) }
+
+                profileDao.insertAllProfiles(roomProfile)
+                profileDao.getAll()
+                emit(profileDao.getAll().first())
+            }
+            catch (e:Exception){
+                Log.e(TAG,"Etkinlik firestore'dan çekilemedi, roomdan geliyor",e)
+                emit(profileDao.getAll().first())
+            }
+        }
+        else{
+            emit(profileDao.getAll().first())
+        }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -114,7 +161,7 @@ class ProfileRepository(
 
     suspend fun upsertProfile(profile:Profile){
         //Room'a kaydet
-        profile.id = UUID.randomUUID().toString()
+
         profileDao.add(profile)
 
         //Sonra Firestore'a kaydet. Kaydetmeden önce firebase modele çevir(Category ve Tag listelerinin id'lerini al fb modele geçirir -> mapper)

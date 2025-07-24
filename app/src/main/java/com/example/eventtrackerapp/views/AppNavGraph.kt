@@ -53,14 +53,14 @@ fun AppNavGraph(
 
     LaunchedEffect(true) {
         val hasSeenOnboarding = userPreferences.getHasSeenOnborading()
-        val isProfileCompleted = userPreferences.getIsProfileCompleted()
+//        val isProfileCompleted = userPreferences.getIsProfileCompleted()
 
         val isLoggedIn = auth.currentUser != null
 
         startDestination = when{
             !hasSeenOnboarding -> "onboarding_screen"
             !isLoggedIn -> "login_screen"
-            !isProfileCompleted -> "create_profile_screen"
+//            !isProfileCompleted -> "create_profile_screen"
             else -> "home"
         }
     }
@@ -91,20 +91,10 @@ fun AppNavGraph(
                 if(profile!=null){
 
                     val eventList by eventViewModel.getEventsForUser(profile!!.selectedTagList.map { it.id }).observeAsState()
+                    HomeScreen(eventList = eventList!!, navController = navController,commentViewModel,likeViewModel,uid)
 
-                    if(eventList!=null){
-                        HomeScreen(eventList = eventList!!, navController = navController,commentViewModel,likeViewModel,uid)
-                    }else{
-                        Text("Liste boş geldi")
-                        CircularProgressIndicator()
-                        return@composable
-                    }
-                }else{
-                    Text("PROFİL BOŞ GELİYOOOOOOOOOOOOOOOOOOOOOOOOOO")
-                    CircularProgressIndicator()
-                    return@composable
                 }
-                }
+            }
 
 
 
@@ -145,12 +135,13 @@ fun AppNavGraph(
                 }.map { it.category }.first()
 
                 if(eventWithTags!=null){
-                    val commentList = commentViewModel.getComments(eventId = eventWithTags!!.event.id)
+//                    val commentList = commentViewModel.getComments(eventId = eventWithTags!!.event.id)
+                    val commentList = commentViewModel.commentList.observeAsState(emptyList())
 
                     DetailScreen(event = eventWithTags!!.event,
                         navController = navController,
                         category = detailCategory,
-                        commentList = commentList.value!!,
+                        commentList = commentList.value,
                         commentViewModel = commentViewModel,
                         likeViewModel = likeViewModel,
                         profileId = uid,

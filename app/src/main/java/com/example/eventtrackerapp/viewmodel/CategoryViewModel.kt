@@ -9,8 +9,10 @@ import com.example.eventtrackerapp.model.roommodels.Category
 import com.example.eventtrackerapp.model.roommodels.CategoryWithTag
 import com.example.eventtrackerapp.model.roommodels.Tag
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import java.lang.Thread.State
 import javax.inject.Inject
@@ -32,6 +34,7 @@ class CategoryViewModel @Inject constructor(
 
     val selectedTag: StateFlow<List<Tag>> = _selectedTags
     val chosenTags: StateFlow<List<Tag>> = _chosenTags
+
 
     fun getCategoryWithTagsById(categoryId: String): LiveData<CategoryWithTag?> {
         return categoryRepository.getCategoryWithTagsByCategoryId(categoryId).asLiveData()

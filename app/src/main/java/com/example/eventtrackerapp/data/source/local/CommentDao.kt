@@ -15,6 +15,9 @@ interface CommentDao {
     @Insert
     suspend fun insertComment(comment:Comment)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAllComment(comment: List<Comment>)
+
     @Transaction
     @Query("SELECT * FROM comments WHERE eventId = :eventId")
     fun getCommentsForEvent(eventId:String):Flow<List<CommentWithProfileAndEvent>>
