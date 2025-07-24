@@ -92,16 +92,16 @@ fun DetailScreen(
 {
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    val likeCount = likeViewModel.getLikeCountForEvent(event.id)
-    val isLiked = likeViewModel.isEventLikedByUser(event.id,profileId)
+    val likeCount = likeViewModel.likeCount.collectAsStateWithLifecycle()
+    val isLiked = likeViewModel.isEventLikedByUser.collectAsStateWithLifecycle()
 
-    val commentCount by commentViewModel.getCommentCount(event.id).observeAsState()
+    val commentCount by commentViewModel.commentCount.collectAsStateWithLifecycle()
 
-    val state by participantsViewModel.hasUserParticipated(event.id,profileId).observeAsState(false)
+    val state by participantsViewModel.hasUserParticipated.collectAsStateWithLifecycle()
 
-    val participantsCount by participantsViewModel.getParticipationCount(event.id).observeAsState(initial = 0)
+    val participantsCount by participantsViewModel.participationCount.collectAsStateWithLifecycle()
 
-    val participants by participantsViewModel.getParticipantsForEvent(event.id).observeAsState(arrayListOf())
+    val participants by participantsViewModel.participationList.collectAsStateWithLifecycle()
 
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -180,7 +180,7 @@ fun DetailScreen(
                         SelectableImageBox(
                             boxWidth = 60.dp,
                             boxHeight = 60.dp,
-                            imagePath = participant.photo,
+                            imagePath = participant?.photo,
                             modifier = Modifier,
                             placeHolder = painterResource(R.drawable.ic_launcher_foreground),
                             shape = CircleShape,

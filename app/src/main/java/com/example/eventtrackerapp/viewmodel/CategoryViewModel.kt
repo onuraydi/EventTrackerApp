@@ -1,20 +1,17 @@
 package com.example.eventtrackerapp.viewmodel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.eventtrackerapp.data.repositories.CategoryRepository
 import com.example.eventtrackerapp.model.roommodels.Category
 import com.example.eventtrackerapp.model.roommodels.CategoryWithTag
 import com.example.eventtrackerapp.model.roommodels.Tag
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.lang.Thread.State
 import javax.inject.Inject
 
 
@@ -28,16 +25,29 @@ class CategoryViewModel @Inject constructor(
 //        categoryRepository.listenForFirestoreTags()
 //    }
 
-    val categoryWithTags: LiveData<List<CategoryWithTag>> = categoryRepository.getCategoriesWithTags().asLiveData()
+    private val _categoryWithTags: StateFlow<List<CategoryWithTag>> =
+        categoryRepository.getCategoriesWithTags().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+    val categoryWithTags:StateFlow<List<CategoryWithTag>> = _categoryWithTags
+
     private val _selectedTags = MutableStateFlow<List<Tag>>(arrayListOf())
     private val _chosenTags = MutableStateFlow<List<Tag>>(arrayListOf())
 
     val selectedTag: StateFlow<List<Tag>> = _selectedTags
     val chosenTags: StateFlow<List<Tag>> = _chosenTags
 
+    private val _categoryWithTagsById = MutableStateFlow<CategoryWithTag?>(null)
+    val categoryWithTagsById: StateFlow<CategoryWithTag?> = _categoryWithTagsById
 
-    fun getCategoryWithTagsById(categoryId: String): LiveData<CategoryWithTag?> {
-        return categoryRepository.getCategoryWithTagsByCategoryId(categoryId).asLiveData()
+    fun getCategoryWithTagsById(categoryId: String){
+        viewModelScope.launch {
+            categoryRepository.getCategoryWithTagsByCategoryId(categoryId).collect{
+                _categoryWithTagsById.value = it
+            }
+        }
     }
 
     fun addCategory(category: Category){

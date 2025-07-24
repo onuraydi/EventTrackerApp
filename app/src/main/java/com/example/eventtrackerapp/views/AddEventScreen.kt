@@ -101,7 +101,7 @@ fun AddEventScreen(
 //        categoryViewModel.resetTag()
 //    }
     
-    val categoryWithTags by categoryViewModel.categoryWithTags.observeAsState(emptyList())
+    val categoryWithTags by categoryViewModel.categoryWithTags.collectAsStateWithLifecycle()
     val selectedTag by categoryViewModel.selectedTag.collectAsStateWithLifecycle()
     val chosenTags by categoryViewModel.chosenTags.collectAsStateWithLifecycle()
     val selectedCategoryName = remember { mutableStateOf("") }

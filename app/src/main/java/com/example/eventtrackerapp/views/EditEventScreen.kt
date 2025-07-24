@@ -95,14 +95,14 @@ fun EditEventScreen(
 //        categoryViewModel.getAllCategoryWithTags()
 //    }
 
-    val categoryWithTags by categoryViewModel.categoryWithTags.observeAsState(emptyList())
+    val categoryWithTags by categoryViewModel.categoryWithTags.collectAsStateWithLifecycle()
 
 //    val allEventsWithRelations by eventViewModel.allEventsWithRelations.observeAsState(emptyList())
 
-    val eventWithTags = eventViewModel.getEventWithRelationsById(eventId).observeAsState().value
+    val eventWithTags = eventViewModel.eventWithRelations.collectAsStateWithLifecycle()
 
     // ViewModel'den state'ler
-    val categoryId = rememberSaveable { mutableStateOf(eventWithTags?.event?.categoryId)}
+    val categoryId = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.categoryId)}
 //    val category = categoryWithTags.forEach { category -> category.category }
 
     val selectedCategoryName = rememberSaveable { mutableStateOf("") }
@@ -110,12 +110,12 @@ fun EditEventScreen(
 
     LaunchedEffect(categoryWithTags) {
         if (categoryWithTags.isNotEmpty()) {
-            val selectedCategory = categoryWithTags.firstOrNull { it.category.id == eventWithTags?.event?.categoryId}
+            val selectedCategory = categoryWithTags.firstOrNull { it.category.id == eventWithTags.value?.event?.categoryId}
             if (selectedCategory != null) {
                 selectedCategoryName.value = selectedCategory.category.name
                 categoryId.value = selectedCategory.category.id
                 chosenTags.clear()
-                eventWithTags?.tags?.let { chosenTags.addAll(it) }
+                eventWithTags.value?.tags?.let { chosenTags.addAll(it) }
             }
         }
     }
@@ -129,11 +129,11 @@ fun EditEventScreen(
     LaunchedEffect(categoryId.value, categoryWithTags) {
         val selected = categoryWithTags.firstOrNull { it.category.id == categoryId.value }
         selectedCategoryName.value = selected?.category?.name ?: ""
-        if (categoryId.value != eventWithTags?.event?.categoryId) {
+        if (categoryId.value != eventWithTags.value?.event?.categoryId) {
             chosenTags.clear()
         } else {
             chosenTags.clear()
-            eventWithTags?.tags?.let { chosenTags.addAll(it) }
+            eventWithTags.value?.tags?.let { chosenTags.addAll(it) }
         }
         categoryViewModel.resetTag()
     }
@@ -173,26 +173,26 @@ fun EditEventScreen(
                 .fillMaxSize()
         ) {
 
-                val eventName = rememberSaveable { mutableStateOf(eventWithTags?.event?.name ?: "") }
+                val eventName = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.name ?: "") }
                 val nameError = rememberSaveable { mutableStateOf(false) }
 
-                val eventDetail = rememberSaveable { mutableStateOf(eventWithTags?.event?.detail ?: "") }
+                val eventDetail = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.detail ?: "") }
                 val detailError = rememberSaveable { mutableStateOf(false) }
 
-                val selectedDate = rememberSaveable { mutableStateOf(eventWithTags?.event?.date) }
+                val selectedDate = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.date) }
                 val dateError = rememberSaveable { mutableStateOf(false) }
 
                 val showModal = rememberSaveable { mutableStateOf(false) }
 
-                val eventDuration = rememberSaveable { mutableStateOf(eventWithTags?.event?.duration ?: "") }
+                val eventDuration = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.duration ?: "") }
                 val durationError = rememberSaveable { mutableStateOf(false) }
 
-                val eventLocation = rememberSaveable { mutableStateOf(eventWithTags?.event?.location ?: "") }
+                val eventLocation = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.location ?: "") }
                 val locationError = rememberSaveable { mutableStateOf(false) }
 
                 val categoryError = rememberSaveable { mutableStateOf(false) }
 
-                val eventImage = rememberSaveable{mutableStateOf(eventWithTags?.event?.image)}
+                val eventImage = rememberSaveable{mutableStateOf(eventWithTags.value?.event?.image)}
 
             Column(
                 modifier = Modifier
@@ -488,7 +488,7 @@ fun EditEventScreen(
                                 categoryError.value = selectedCategoryName.value.isBlank()
                                 return@EventTrackerAppPrimaryButton
                             } else {
-                                val event = eventWithTags?.event?.id?.let {
+                                val event = eventWithTags.value?.event?.id?.let {
                                     categoryId.value?.let { it1 ->
                                         Event(
                                             id = it,

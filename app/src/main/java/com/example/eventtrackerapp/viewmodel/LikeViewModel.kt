@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.eventtrackerapp.data.repositories.LikeRepository
 import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
 import com.example.eventtrackerapp.model.roommodels.Like
+import com.example.eventtrackerapp.model.roommodels.Profile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -22,14 +23,29 @@ class LikeViewModel @Inject constructor(
     private val likeRepository: LikeRepository
 ):ViewModel()
 {
-    fun getLikeCountForEvent(eventId:String): LiveData<Int>
+    private val _likeCount = MutableStateFlow<Int>(0)
+    val likeCount:StateFlow<Int> = _likeCount
+
+    private val _isEventLikedByUser = MutableStateFlow<Boolean>(false)
+    val isEventLikedByUser:StateFlow<Boolean> = _isEventLikedByUser
+
+
+    fun getLikeCountForEvent(eventId:String)
     {
-        return likeRepository.getLikeCountForEvent(eventId).asLiveData()
+        viewModelScope.launch {
+            likeRepository.getLikeCountForEvent(eventId).collect{
+                _likeCount.value = it
+            }
+        }
     }
 
-    fun isEventLikedByUser(eventId: String,profileId:String):LiveData<Boolean>
+    fun isEventLikedByUser(eventId: String,profileId:String)
     {
-        return likeRepository.isEventLikedByUser(eventId,profileId).asLiveData()
+        viewModelScope.launch {
+            likeRepository.isEventLikedByUser(eventId,profileId).collect{
+                _isEventLikedByUser.value = it
+            }
+        }
     }
 
     fun toggleLike(eventId: String,profileId: String)

@@ -8,6 +8,9 @@ import com.example.eventtrackerapp.data.repositories.ProfileRepository
 import com.example.eventtrackerapp.model.roommodels.Profile
 import com.example.eventtrackerapp.model.roommodels.Tag
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,20 +22,21 @@ class ProfileViewModel @Inject constructor(
 
 
     //Neden live data? ve bunu init {} içerisinde alabilir miyiz?
-    val profileList : LiveData<List<Profile>> = profileRepository.getAllProfiles()
-//        .onEach {
-//        profileRepository.listenForAllFirestoreProfiles()
-//    }
-        .asLiveData()
+//    val profileList : LiveData<List<Profile>> = profileRepository.getAllProfiles()
+////        .onEach {
+////        profileRepository.listenForAllFirestoreProfiles()
+////    }
+//        .asLiveData()
 
-    //Repository de gelen veriyi dinlerken global scope kullanıyoruz.
-    // Bunun için ekstra scope 'a gerek yok
-    fun getById(id:String): LiveData<Profile?>{
-        return profileRepository.getProfile(id)
-//            .onEach {
-//            profileRepository.listenForFirestoreProfileChanges(id)
-//        }
-            .asLiveData()
+    private val _profile = MutableStateFlow<Profile?>(Profile())
+    val profile:StateFlow<Profile?> = _profile
+
+    fun getById(id:String){
+        viewModelScope.launch {
+            profileRepository.getProfile(id).collect{profile->
+                _profile.value = profile
+            }
+        }
     }
 
     //aynı kayıtı eklemeyi engelleyen upsert işlemi. Aynı zamanda güncelleme işlemi de yapıyor.
@@ -51,7 +55,6 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun addTag(tag: Tag,id:String){
-        val profile = getById(id)
         if (!profile.value?.selectedTagList.orEmpty().contains(tag)) {
             val updatedList = profile.value?.selectedTagList.orEmpty() + tag
             val updatedProfile = profile.value?.copy(selectedTagList = updatedList)
@@ -62,7 +65,6 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun removeTag(tagId:String, id:String){
-        val profile = getById(id)
         //id'ye göre silme
         val updatedList = profile.value?.selectedTagList.orEmpty()
             .filterNot { it.id == tagId }

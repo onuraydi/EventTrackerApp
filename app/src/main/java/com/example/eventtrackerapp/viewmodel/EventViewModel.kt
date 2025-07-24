@@ -1,8 +1,6 @@
 package com.example.eventtrackerapp.viewmodel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.eventtrackerapp.data.repositories.CategoryRepository
 import com.example.eventtrackerapp.data.repositories.EventRepository
@@ -11,7 +9,11 @@ import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.model.roommodels.EventWithTags
 import com.example.eventtrackerapp.model.roommodels.Tag
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,14 +23,53 @@ class EventViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository
 ):ViewModel()
 {
-    val allEventsWithRelations: LiveData<List<EventWithTags>> = eventRepository.getAllEventsWithRelations().asLiveData()
+    //Bütün etkinlikler
+    private val _allEventsWithRelations =  MutableStateFlow<List<EventWithTags>>(emptyList())
+    val allEventsWithRelations:StateFlow<List<EventWithTags>> = _allEventsWithRelations
 
-    fun getEventWithRelationsById(eventId:String):LiveData<EventWithTags?>
-    {
-        return eventRepository.getEventWithRelationsById(eventId).asLiveData()
+    //Tek bir etkinlik(1)
+    private val _eventWithRelations = MutableStateFlow<EventWithTags?>(null)
+    val eventWithRelations:StateFlow<EventWithTags?> = _eventWithRelations
+
+
+    //Kullanıcının ana sayfasındaki etkinlikler(2)
+    private val _eventsForUser = MutableStateFlow<List<EventWithTags?>>(emptyList())
+    val eventsForUser:StateFlow<List<EventWithTags?>> = _eventsForUser
+
+
+    //Kullanıcının eklediği etkinlikler(3)
+    private val _eventsForOwner = MutableStateFlow<List<Event?>>(emptyList())
+    val eventsForOwner:StateFlow<List<Event?>> = _eventsForOwner
+
+
+    //Etkinliğe ait tag(4)
+    private val _tagForEvent = MutableStateFlow<String?>(null)
+    val tagForEvent:StateFlow<String?> = _tagForEvent
+
+    fun getAllEventsWithRelations(){
+        viewModelScope.launch {
+            eventRepository.getAllEventsWithRelations().collect{
+                _allEventsWithRelations.value = it
+            }
+        }
     }
 
-    val allcategoriesWithTags: LiveData<List<CategoryWithTag>> = categoryRepository.getCategoriesWithTags().asLiveData()
+    //(1)
+    fun getEventWithRelationsById(eventId:String)
+    {
+        viewModelScope.launch {
+            eventRepository.getEventWithRelationsById(eventId).collect{
+                _eventWithRelations.value = it
+            }
+        }
+    }
+
+    val allcategoriesWithTags: StateFlow<List<CategoryWithTag>> =
+        categoryRepository.getCategoriesWithTags().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     fun addEvent(event:Event,selectedTags: List<Tag>)
     {
@@ -37,9 +78,14 @@ class EventViewModel @Inject constructor(
         }
     }
 
-    fun getEventsForUser(tagIds:List<String>):LiveData<List<EventWithTags>>
+    //(2)
+    fun getEventsForUser(tagIds:List<String>)
     {
-        return eventRepository.getEventsForUser(tagIds).asLiveData()
+        viewModelScope.launch {
+            eventRepository.getEventsForUser(tagIds).collect{
+                _eventsForUser.value = it
+            }
+        }
     }
 
     fun updateEvent(event: Event,selectedTags: List<Tag>)
@@ -56,8 +102,27 @@ class EventViewModel @Inject constructor(
         }
     }
 
-    fun getEventsByOwnerId(profileId:String):LiveData<List<Event>>{
-        return eventRepository.getEventsForOwner(profileId).asLiveData()
+    //(3)
+    fun getEventsByOwnerId(profileId:String){
+        viewModelScope.launch {
+            eventRepository.getEventsForOwner(profileId).collect{
+                _eventsForOwner.value = it
+            }
+        }
+    }
+
+
+    // TODO bu metoda daha sonra bakılabilir liste döndürmesi sağlanabilir şuan tüm tagları tek bir string olarak dönüyor
+    //(4)
+    fun getTagNamesForEvent(eventId:String)
+    {
+        viewModelScope.launch {
+            eventRepository.getEventWithRelationsById(eventId).map { eventWithTags ->
+                eventWithTags?.tags?.joinToString { it.name }
+            }.collect{
+                _tagForEvent.value = it
+            }
+        }
     }
 
     // TODO etkinliğe ait kategorinin adını getirecek metot. Gerekirse tamamlanabilir
@@ -68,13 +133,4 @@ class EventViewModel @Inject constructor(
 //            eventWithTags.event.categoryId ==
 //        }
 //    }
-
-    // TODO bu metoda daha sonra bakılabilir liste döndürmesi sağlanabilir şuan tüm tagları tek bir string olarak dönüyor
-
-    fun getTagNamesForEvent(eventId:String): LiveData<String?>
-    {
-        return eventRepository.getEventWithRelationsById(eventId).map { eventWithTags ->
-            eventWithTags?.tags?.joinToString { it.name }
-        }.asLiveData()
-    }
 }

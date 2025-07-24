@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
@@ -63,7 +64,7 @@ fun ParticipantsScreen(
     eventId:String
 )
 {
-    val participants by participantsViewModel.getParticipantsForEvent(eventId).observeAsState(initial = emptyList())
+    val participants by participantsViewModel.participationList.collectAsStateWithLifecycle()
 
     Scaffold(modifier = Modifier
         .fillMaxSize(),
@@ -95,7 +96,7 @@ fun ParticipantsScreen(
             contentPadding = PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
 
-            items(participants){
+            items(participants.filterNotNull()){
                 it.photo?.let { it1 -> it.fullName?.let { it2 -> it.email?.let { it3 ->
                     user(it1, it2,
                         it3
