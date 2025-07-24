@@ -55,6 +55,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -100,7 +101,9 @@ fun AddEventScreen(
 //    LaunchedEffect(Unit) {
 //        categoryViewModel.resetTag()
 //    }
-    
+    LaunchedEffect(Unit) {
+        categoryViewModel.getAllCategoryWithTags()
+    }
     val categoryWithTags by categoryViewModel.categoryWithTags.collectAsStateWithLifecycle()
     val selectedTag by categoryViewModel.selectedTag.collectAsStateWithLifecycle()
     val chosenTags by categoryViewModel.chosenTags.collectAsStateWithLifecycle()
