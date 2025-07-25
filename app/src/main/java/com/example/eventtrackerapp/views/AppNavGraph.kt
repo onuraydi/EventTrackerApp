@@ -72,7 +72,7 @@ fun AppNavGraph(
             }
 
             composable("create_profile_screen") {
-                val categoryWithTags by categoryViewModel.categoryWithTags.observeAsState(emptyList())
+                val categoryWithTags by categoryViewModel.categoryWithTags().observeAsState(emptyList())
                 val uid = auth.currentUser?.uid
                 val email = auth.currentUser?.email
                 CreateProfileScreen(navController,categoryViewModel,profileViewModel,permissionViewModel,userPreferences,categoryWithTags,uid!!,email!!)
@@ -122,42 +122,38 @@ fun AppNavGraph(
             }
 
             composable("detail/{id}") { backStackEntry ->
-
-                val eventId = backStackEntry.arguments?.getString("id") ?: "asdasd"
-
-                // Event'i çağır
-//                val eventLiveData = remember(eventId) {
-//                    eventViewModel.getEventWithRelationsById(eventId)
-//                }
+                val eventId = backStackEntry.arguments?.getString("id") ?: ""
                 val eventWithTags by eventViewModel.getEventWithRelationsById(eventId).observeAsState()
+                val category by categoryViewModel.categoryWithTags().observeAsState(emptyList())
+                val uid = auth.currentUser?.uid ?: ""
 
-                //Category'i al
-                val categoryLiveData = remember {
-                    categoryViewModel.categoryWithTags
+                if (eventWithTags == null || category.isEmpty()) {
+                    // Yükleniyor göstergesi
+                    CircularProgressIndicator()
+                    return@composable
                 }
-                val category by categoryLiveData.observeAsState(emptyList())
 
-                val uid = auth.currentUser?.uid!!
+                val detailCategory = category
+                    .firstOrNull { cat -> cat.category.id == eventWithTags!!.event.categoryId }
+                    ?.category
 
-                // TODO bu metot belki değişebilir
-
-                val detailCategory = category.filter { cat ->
-                    cat.category.id == eventWithTags?.event?.categoryId
-                }.map { it.category }.first()
-
-                if(eventWithTags!=null){
-                    val commentList = commentViewModel.getComments(eventId = eventWithTags!!.event.id)
-
-                    DetailScreen(event = eventWithTags!!.event,
-                        navController = navController,
-                        category = detailCategory,
-                        commentList = commentList.value!!,
-                        commentViewModel = commentViewModel,
-                        likeViewModel = likeViewModel,
-                        profileId = uid,
-                        participantsViewModel= participantsViewModel,
-                    )
+                if (detailCategory == null) {
+                    Text("Kategori bulunamadı")
+                    return@composable
                 }
+
+                val commentList = commentViewModel.getComments(eventId = eventWithTags!!.event.id)
+
+                DetailScreen(
+                    event = eventWithTags!!.event,
+                    navController = navController,
+                    category = detailCategory,
+                    commentList = commentList.value ?: emptyList(),
+                    commentViewModel = commentViewModel,
+                    likeViewModel = likeViewModel,
+                    profileId = uid,
+                    participantsViewModel = participantsViewModel,
+                )
             }
 
 

@@ -81,6 +81,10 @@ interface EventDao {
     @Delete
     suspend fun deleteEvent(event: Event)
 
+
+    @Delete
+    suspend fun deleteAll(events: List<Event>)
+
     @Query("DELETE FROM EventTagCrossRef WHERE eventId = :eventId")
     suspend fun deleteEventTagCrossRefsForEvent(eventId: String)
 

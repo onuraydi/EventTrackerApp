@@ -7,37 +7,18 @@ import com.example.eventtrackerapp.data.mappers.EventMapper
 import com.example.eventtrackerapp.data.source.local.CategoryDao
 import com.example.eventtrackerapp.data.source.local.EventDao
 import com.example.eventtrackerapp.data.source.local.ProfileDao
-import com.example.eventtrackerapp.data.source.local.TagDao
-import com.example.eventtrackerapp.model.firebasemodels.FirebaseAttendance
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseEvent
 import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.model.roommodels.EventTagCrossRef
-import com.example.eventtrackerapp.model.roommodels.EventWithParticipants
 import com.example.eventtrackerapp.model.roommodels.EventWithTags
-import com.example.eventtrackerapp.model.roommodels.ProfileEventCrossRef
 import com.example.eventtrackerapp.model.roommodels.Tag
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.toObject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
-import kotlin.concurrent.timerTask
 
 class EventRepository (
     private val eventDao:EventDao,
@@ -46,41 +27,137 @@ class EventRepository (
     private val context:Context
 ) {
     private val eventCollection = firestore.collection("events")
-    private val attendancesCollection = "attendances"
-
-//    init
-//    {
-//        listenForFireStoreEvents()
-//    }
+    private val attendancesCollection = firestore.collection("attendances")
 
     fun getAllEventsWithRelations(): Flow<List<EventWithTags>> = flow {
         if (NetworkUtils.isNetworkAvailable(context)) {
-            syncEventsFromFirestoreOnce()
+            try {
+                val eventSnapshot = eventCollection.get().await()
+                val firebaseEvents = eventSnapshot.documents.mapNotNull { it.toObject(FirebaseEvent::class.java) }
+                val roomEvents = firebaseEvents.map { EventMapper.toEntity(it) }
+
+
+                roomEvents.forEach {
+                    eventDao.deleteEventTagCrossRefsForEvent(it.id)
+                }
+                eventDao.insertAll(roomEvents)
+
+                val eventTagCrossRefs = firebaseEvents.flatMap { firebaseEvent ->
+                    firebaseEvent.tagIds.map { tagId ->
+                        EventTagCrossRef(eventId = firebaseEvent.id, tagId = tagId)
+                    }
+                }
+                eventDao.insertAllEventTagCrossRef(eventTagCrossRefs)
+                emit(eventDao.getAllEventsWithRelations().first())
+
+            } catch (e: Exception) {
+                Log.e("EventRepo", "Firestore'dan event verisi alınamadı, roomdan geliyor", e)
+                emit(eventDao.getAllEventsWithRelations().first())
+            }
+        } else {
+            emit(eventDao.getAllEventsWithRelations().first())
         }
-        emitAll(eventDao.getAllEventsWithRelations())
     }
 
-    fun getEventWithRelationsById(eventId: String):Flow<EventWithTags?> = flow {
+
+    fun getEventWithRelationsById(eventId: String): Flow<EventWithTags?> = flow {
         if (NetworkUtils.isNetworkAvailable(context)) {
-            syncEventsFromFirestoreOnce()
+            try {
+                val eventSnapshot = eventCollection.get().await()
+                val firebaseEvents = eventSnapshot.documents.mapNotNull { it.toObject(FirebaseEvent::class.java) }
+                val roomEvents = firebaseEvents.map { EventMapper.toEntity(it) }
+
+                // Room'a event'leri ekle
+
+                roomEvents.forEach {
+                    eventDao.deleteEventTagCrossRefsForEvent(it.id)
+                }
+
+                eventDao.insertAll(roomEvents)
+
+                // Event-Tag ilişkilerini oluştur
+                val eventTagCrossRefs = firebaseEvents.flatMap { firebaseEvent ->
+                    firebaseEvent.tagIds.map { tagId ->
+                        EventTagCrossRef(eventId = firebaseEvent.id, tagId = tagId)
+                    }
+                }
+
+                eventDao.insertAllEventTagCrossRef(eventTagCrossRefs)
+                emitAll(eventDao.getEventWithRelationsById(eventId))
+
+            } catch (e: Exception) {
+                Log.e("EventRepo", "Firestore'dan event verisi alınamadı", e)
+                emitAll(eventDao.getEventWithRelationsById(eventId))
+            }
+        }else
+        {
+            emitAll(eventDao.getEventWithRelationsById(eventId))
         }
-        emitAll(eventDao.getEventWithRelationsById(eventId))
     }
 
-    // seçtiği taglara göre getirecek
-    fun getEventsForUser(tagIds:List<String>):Flow<List<EventWithTags>> = flow {
+    fun getEventsForUser(tagIds: List<String>): Flow<List<EventWithTags>> = flow {
         if (NetworkUtils.isNetworkAvailable(context)) {
-            syncEventsFromFirestoreOnce()
+            try {
+                val eventSnapshot = eventCollection.get().await()
+                val firebaseEvents = eventSnapshot.documents.mapNotNull { it.toObject(FirebaseEvent::class.java) }
+                val roomEvents = firebaseEvents.map { EventMapper.toEntity(it) }
+
+                roomEvents.forEach {
+                    eventDao.deleteEventTagCrossRefsForEvent(it.id)
+                }
+                eventDao.insertAll(roomEvents)
+
+                val eventTagCrossRefs = firebaseEvents.flatMap { firebaseEvent ->
+                    firebaseEvent.tagIds.map { tagId ->
+                        EventTagCrossRef(eventId = firebaseEvent.id, tagId = tagId)
+                    }
+                }
+                eventDao.insertAllEventTagCrossRef(eventTagCrossRefs)
+                emitAll(eventDao.getEventBySelectedTag(tagIds))
+
+            } catch (e: Exception) {
+                Log.e("EventRepo", "Firestore'dan event verisi alınamadı", e)
+                emitAll(eventDao.getEventBySelectedTag(tagIds))
+            }
         }
-        emitAll(eventDao.getEventBySelectedTag(tagIds))
+        else
+        {
+            emitAll(eventDao.getEventBySelectedTag(tagIds))
+        }
     }
 
-    //kullanıcının eklediği etkinlikleri getirecek
-    fun getEventsForOwner(profileId:String):Flow<List<Event>> = flow {
+
+    fun getEventsForOwner(profileId: String): Flow<List<Event>> = flow {
         if (NetworkUtils.isNetworkAvailable(context)) {
-            syncEventsFromFirestoreOnce()
+            try {
+                val eventSnapshot = eventCollection.get().await()
+                val firebaseEvents = eventSnapshot.documents.mapNotNull { it.toObject(FirebaseEvent::class.java) }
+                val roomEvents = firebaseEvents.map { EventMapper.toEntity(it) }
+
+                roomEvents.forEach {
+                    eventDao.deleteEventTagCrossRefsForEvent(it.id)
+                }
+                eventDao.insertAll(roomEvents)
+
+                val eventTagCrossRefs = firebaseEvents.flatMap { firebaseEvent ->
+                    firebaseEvent.tagIds.map { tagId ->
+                        EventTagCrossRef(eventId = firebaseEvent.id, tagId = tagId)
+                    }
+                }
+
+                eventDao.insertAllEventTagCrossRef(eventTagCrossRefs)
+                emitAll(eventDao.getEventsByOwner(profileId))
+
+            } catch (e: Exception) {
+                Log.e("EventRepo", "Firestore'dan veri alınamadı", e)
+                // Firestore başarısızsa Room'dan devam
+                emitAll(eventDao.getEventsByOwner(profileId))
+            }
         }
-        emitAll(eventDao.getEventsByOwner(profileId))
+        else
+        {
+            emitAll(eventDao.getEventsByOwner(profileId))
+        }
     }
 
     suspend fun insertEvent(event: Event, tags:List<Tag>)
@@ -124,151 +201,6 @@ class EventRepository (
             .addOnFailureListener { e -> Log.e(TAG, "Error deleting event from Firestore", e) }
 
         // TODO burada event silindiğinde like ve comment ile ilgii kısımları da silmek gerekebilir.
-    }
-
-    suspend fun toggleAttendance(eventId:String, profileId:String)
-    {
-        val firestoreDocId = "${eventId}-${profileId}"
-        val currentCrossRef = eventDao.getProfileEventCrossRef(eventId,profileId).firstOrNull()
-
-        val newAttendingStatus = !(currentCrossRef?.isAttending ?: false)
-
-        val updatedCrossRef = currentCrossRef?.copy(isAttending = newAttendingStatus) ?: ProfileEventCrossRef(profileId = profileId, eventId = eventId, isAttending = newAttendingStatus)
-        eventDao.insertOrUpdateProfileEventCrossRef(updatedCrossRef)
-
-        if (newAttendingStatus)
-        {
-            val firebaseAttendance = FirebaseAttendance(eventId = eventId, profileId = profileId)
-            firestore.collection(attendancesCollection).document(firestoreDocId).set(firebaseAttendance).await()
-        }
-        else
-        {
-            firestore.collection(attendancesCollection).document(firestoreDocId).delete().await()
-        }
-    }
-
-    fun getParticipationCountForEvent(eventId:String):Flow<Int>
-    {
-        return eventDao.getParticipationCountForEvent(eventId)
-    }
-
-    fun hasUserParticipated(eventId:String,profileId: String):Flow<Boolean>
-    {
-        return eventDao.hasUserParticipated(eventId,profileId).map { count -> count > 0 }
-    }
-
-    fun getEventWithParticipants(eventId:String):Flow<EventWithParticipants?>
-    {
-        return  eventDao.getEventWithParticipantsById(eventId)
-    }
-
-
-    suspend fun syncEventsFromFirestoreOnce() {
-        try {
-            val snapshot = firestore.collection("events").get().await()
-            val firebaseEvents = snapshot.toObjects(FirebaseEvent::class.java)
-
-            val currentRoomEventIds = eventDao.getAllEventsWithRelations().first().map { it.event.id }.toSet()
-            val firebaseEventIds = firebaseEvents.map { it.id }.toSet()
-
-            firebaseEvents.forEach { firebaseEvent ->
-                val event = EventMapper.toEntity(firebaseEvent)
-                eventDao.insert(event)
-                eventDao.deleteEventTagCrossRefsForEvent(event.id)
-                firebaseEvent.tagIds.forEach { tagId ->
-                    eventDao.insertEventTagCrossRef(EventTagCrossRef(event.id, tagId))
-                }
-            }
-
-            val deletedEventIds = currentRoomEventIds - firebaseEventIds
-            deletedEventIds.forEach { id ->
-                eventDao.deleteEvent(Event(id = id))
-            }
-            Log.d(TAG, "Event sync completed.")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to sync events from Firestore", e)
-        }
-    }
-
-
-
-    fun listenForFirestoreAttendances()
-    {
-        firestore.collection(attendancesCollection).addSnapshotListener{snapshots, e ->
-            if (e != null) {
-                Log.e(TAG, "Attendance listen failed", e)
-                return@addSnapshotListener
-            }
-
-            if (snapshots != null) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    snapshots.documentChanges.forEach{ dc ->
-                        val firebaseAttendance = dc.document.toObject(FirebaseAttendance::class.java)
-                        val eventId = firebaseAttendance.eventId
-                        val profileId = firebaseAttendance.profileId
-
-                        val existingCrossRef = eventDao.getProfileEventCrossRef(eventId, profileId).firstOrNull()
-
-                        when (dc.type)
-                        {
-                            com.google.firebase.firestore.DocumentChange.Type.ADDED,
-                            com.google.firebase.firestore.DocumentChange.Type.MODIFIED -> {
-                                val updatedCrossRef = existingCrossRef?.copy(
-                                    isAttending = true) ?: ProfileEventCrossRef(
-                                        profileId = profileId,
-                                        eventId = eventId,
-                                        isAttending = true
-                                    )
-                                eventDao.insertOrUpdateProfileEventCrossRef(updatedCrossRef)
-                            }
-                            com.google.firebase.firestore.DocumentChange.Type.REMOVED -> {
-                                if (existingCrossRef != null)
-                                {
-                                    val updatedCrossRef = existingCrossRef.copy(
-                                        isAttending = false
-                                    )
-                                    eventDao.insertOrUpdateProfileEventCrossRef(updatedCrossRef)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    fun listenForFireStoreEvents()
-    {
-        eventCollection.addSnapshotListener { snapshot, e ->
-            if (e != null)
-            {
-                Log.e(TAG, "Event listen failed",e)
-                return@addSnapshotListener
-            }
-            if (snapshot != null)
-            {
-                val firebaseEvents = snapshot.documents.mapNotNull { it.toObject(FirebaseEvent::class.java) }
-                GlobalScope.launch(Dispatchers.IO)
-                {
-                    val currentRoomEventIds  = eventDao.getAllEventsWithRelations().first().map { it.event.id }.toSet()
-                    val firebaseEventIds = firebaseEvents.map { it.id }.toSet()
-
-                    firebaseEvents.forEach { firebaseEvent ->
-                        val roomEvent = EventMapper.toEntity(firebaseEvent)
-                        eventDao.insert(roomEvent)
-
-                        eventDao.deleteEventTagCrossRefsForEvent(firebaseEvent.id)
-                        firebaseEvent.tagIds.forEach { tagId ->
-                            eventDao.insertEventTagCrossRef(EventTagCrossRef(firebaseEvent.id,tagId))
-                        }
-                    }
-                    val deletedEventIds = currentRoomEventIds.minus(firebaseEventIds)
-                    deletedEventIds.forEach { eventId ->
-                        eventDao.deleteEvent(Event(id = eventId))
-                    }
-                }
-            }
-        }
     }
 
     companion object

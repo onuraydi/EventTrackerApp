@@ -95,7 +95,7 @@ fun EditEventScreen(
 //        categoryViewModel.getAllCategoryWithTags()
 //    }
 
-    val categoryWithTags by categoryViewModel.categoryWithTags.observeAsState(emptyList())
+    val categoryWithTags by categoryViewModel.categoryWithTags().observeAsState(emptyList())
 
 //    val allEventsWithRelations by eventViewModel.allEventsWithRelations.observeAsState(emptyList())
 
