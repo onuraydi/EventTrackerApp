@@ -12,6 +12,12 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface LikeDao {
 
+    @Query("DELETE FROM likes WHERE eventId = :eventId")
+    suspend fun clearLikesForEvent(eventId: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllLikes(likes: List<Like>)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertLike(like: Like)
 

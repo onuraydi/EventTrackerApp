@@ -112,7 +112,7 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
 
     var showBottomSheet by remember { mutableStateOf(false ) }
 
-    val likeCount by likeViewModel.getLikeCountForEvent(event.id).collectAsState(0)
+    val likeCount by likeViewModel.getLikeCountForEvent(event.id).collectAsState(event.likeCount)
     val isLiked by likeViewModel.isEventLikedByUser(event.id,profileId).collectAsState(false)
 
     val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(0)

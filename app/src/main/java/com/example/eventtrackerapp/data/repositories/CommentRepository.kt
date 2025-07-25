@@ -9,6 +9,7 @@ import com.example.eventtrackerapp.model.firebasemodels.FirebaseComment
 import com.example.eventtrackerapp.model.roommodels.Comment
 import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -105,16 +106,28 @@ class CommentRepository(
     }
 
     //Yorum Ekle
-    suspend fun upsertComment(comment:Comment){
-        //Room'a kaydet
-        commentDao.insertComment(comment)
-
-        //Sonra Firestore'a kaydet
+    suspend fun upsertComment(comment: Comment) {
         val firebaseComment = CommentMapper.toFirebaseModel(comment)
-        commentsCollection.document(firebaseComment.id).set(firebaseComment)
-            .addOnSuccessListener { Log.d(TAG,"Comment successfully upserted to Firestore") }
-            .addOnFailureListener { e-> Log.w(TAG,"Error upserting comment to Firestore",e) }
+
+        commentsCollection.add(firebaseComment)
+            .addOnSuccessListener { documentRef ->
+                Log.d(TAG, "Comment successfully added to Firestore with auto ID: ${documentRef.id}")
+
+                // Yeni ID'yi veriye yaz
+                val updatedFirebaseComment = firebaseComment.copy(id = documentRef.id)
+                val roomComment = CommentMapper.toEntity(updatedFirebaseComment)
+
+                // Artık Room'a da hatasız eklenir
+                CoroutineScope(Dispatchers.IO).launch {
+                    commentDao.insertComment(roomComment)
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error adding comment to Firestore", e)
+            }
     }
+
+
 
     //Bir etkinliğe ait tüm yorumları silme(Event silinirken çağrılabilir)
     suspend fun deleteCommentsForEvent(eventId:String){

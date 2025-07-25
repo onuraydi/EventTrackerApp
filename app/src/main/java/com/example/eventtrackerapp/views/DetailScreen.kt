@@ -92,7 +92,7 @@ fun DetailScreen(
 {
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    val likeCount = likeViewModel.getLikeCountForEvent(event.id).collectAsState(0)
+    val likeCount = likeViewModel.getLikeCountForEvent(event.id).collectAsState(event.likeCount)
     val isLiked = likeViewModel.isEventLikedByUser(event.id,profileId).collectAsState(0)
 
     val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(0)

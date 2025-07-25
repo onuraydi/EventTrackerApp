@@ -5,26 +5,24 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 
 @Entity(
-    primaryKeys = ["profileId","eventId"],
     tableName = "likes",
+    primaryKeys = ["eventId", "profileId"],
     foreignKeys = [
-        ForeignKey(
-            entity = Profile::class,
-            parentColumns = ["id"],
-            childColumns = ["profileId"],
-            onDelete = ForeignKey.RESTRICT
-        ),
         ForeignKey(
             entity = Event::class,
             parentColumns = ["id"],
             childColumns = ["eventId"],
-            onDelete = ForeignKey.RESTRICT
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = Profile::class,
+            parentColumns = ["id"],
+            childColumns = ["profileId"],
+            onDelete = ForeignKey.CASCADE
         )
-    ],
-    indices = [Index("profileId"),Index("eventId")]
+    ]
 )
 data class Like(
-    val profileId:String = "",
-    val eventId: String = "",
-) {
-}
+    val eventId: String,
+    val profileId: String
+)
