@@ -42,7 +42,7 @@ class EventRepository (
 
 
                 roomEvents.forEach {
-                    eventDao.deleteEventTagCrossRefsForEvent(it.id)
+                    eventDao.deleteEvent(it)
                 }
                 eventDao.insertAll(roomEvents)
 
@@ -74,7 +74,7 @@ class EventRepository (
                 // Room'a event'leri ekle
 
                 roomEvents.forEach {
-                    eventDao.deleteEventTagCrossRefsForEvent(it.id)
+                    eventDao.deleteEvent(it)
                 }
 
                 eventDao.insertAll(roomEvents)
@@ -107,7 +107,7 @@ class EventRepository (
                 val roomEvents = firebaseEvents.map { EventMapper.toEntity(it) }
 
                 roomEvents.forEach {
-                    eventDao.deleteEventTagCrossRefsForEvent(it.id)
+                    eventDao.deleteEvent(it)
                 }
                 eventDao.insertAll(roomEvents)
 
@@ -139,7 +139,7 @@ class EventRepository (
                 val roomEvents = firebaseEvents.map { EventMapper.toEntity(it) }
 
                 roomEvents.forEach {
-                    eventDao.deleteEventTagCrossRefsForEvent(it.id)
+                    eventDao.deleteEvent(it)
                 }
                 eventDao.insertAll(roomEvents)
 
