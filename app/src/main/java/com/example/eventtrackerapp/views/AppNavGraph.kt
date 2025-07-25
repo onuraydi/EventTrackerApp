@@ -153,11 +153,7 @@ fun AppNavGraph(
                     return@composable
                 }
 
-
-                LaunchedEffect(eventWithTags) {
-                    commentViewModel.getComments(eventId)
-                }
-                val commentList by commentViewModel.commentList.collectAsStateWithLifecycle()
+                val commentList by commentViewModel.getComments(eventId).collectAsState(emptyList())
 
                 DetailScreen(event = eventWithTags!!.event,
                     navController = navController,

@@ -224,6 +224,7 @@ class EventRepository (
         }
         else
         {
+            eventDao.deleteProfileEventCrossRef(eventId,profileId)
             attendancesCollection.document(firestoreDocId).delete().await()
         }
     }

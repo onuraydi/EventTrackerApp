@@ -30,22 +30,14 @@ class LikeViewModel @Inject constructor(
     val isEventLikedByUser:StateFlow<Boolean> = _isEventLikedByUser
 
 
-    fun getLikeCountForEvent(eventId:String)
+    fun getLikeCountForEvent(eventId:String):Flow<Int>
     {
-        viewModelScope.launch {
-            likeRepository.getLikeCountForEvent(eventId).collect{
-                _likeCount.value = it
-            }
-        }
+        return likeRepository.getLikeCountForEvent(eventId)
     }
 
-    fun isEventLikedByUser(eventId: String,profileId:String)
+    fun isEventLikedByUser(eventId: String,profileId:String):Flow<Boolean>
     {
-        viewModelScope.launch {
-            likeRepository.isEventLikedByUser(eventId,profileId).collect{
-                _isEventLikedByUser.value = it
-            }
-        }
+        return likeRepository.isEventLikedByUser(eventId,profileId)
     }
 
     fun toggleLike(eventId: String,profileId: String)

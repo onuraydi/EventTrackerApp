@@ -64,7 +64,9 @@ fun ParticipantsScreen(
     eventId:String
 )
 {
-    val participants by participantsViewModel.participationList.collectAsStateWithLifecycle()
+    val participants by participantsViewModel.getParticipantsForEvent(eventId).collectAsState(
+        emptyList()
+    )
 
     Scaffold(modifier = Modifier
         .fillMaxSize(),

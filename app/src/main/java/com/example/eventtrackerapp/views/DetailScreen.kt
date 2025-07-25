@@ -92,12 +92,12 @@ fun DetailScreen(
 {
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    val likeCount = likeViewModel.likeCount.collectAsStateWithLifecycle()
-    val isLiked = likeViewModel.isEventLikedByUser.collectAsStateWithLifecycle()
+    val likeCount = likeViewModel.getLikeCountForEvent(event.id).collectAsState(0)
+    val isLiked = likeViewModel.isEventLikedByUser(event.id,profileId).collectAsState(0)
 
-    val commentCount by commentViewModel.commentCount.collectAsStateWithLifecycle()
+    val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(0)
 
-    val state by participantsViewModel.hasUserParticipated.collectAsStateWithLifecycle()
+    val state by participantsViewModel.hasUserParticipated(event.id,profileId).collectAsState(false)
 
     val participantsCount by participantsViewModel.getParticipationCount(event.id).collectAsState(0)
 
@@ -241,7 +241,7 @@ fun DetailScreen(
                                     likeViewModel.toggleLike(event.id,profileId)
                                 })
                             Text(
-                                text = "${likeCount}",
+                                text = "${likeCount.value}",
                                 Modifier.align(Alignment.CenterVertically)
                             )
                         } else {
@@ -251,7 +251,7 @@ fun DetailScreen(
                                     likeViewModel.toggleLike(event.id,profileId)
                                 })
                             Text(
-                                text = "${likeCount}",
+                                text = "${likeCount.value}",
                                 Modifier.align(Alignment.CenterVertically)
                             )
                         }

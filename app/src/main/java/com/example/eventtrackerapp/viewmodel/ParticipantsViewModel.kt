@@ -23,45 +23,20 @@ class ParticipantsViewModel @Inject constructor(
     private val eventRepository: EventRepository
 ) : ViewModel() {
 
-    private val _participationList = MutableStateFlow<List<Profile?>>(emptyList())
-    val participationList:StateFlow<List<Profile?>> = _participationList
-
-    private val _participationCount = MutableStateFlow<Int>(0)
-    val participationCount: StateFlow<Int> = _participationCount
-
-    private val _hasUserParticipated = MutableStateFlow<Boolean>(false)
-    val hasUserParticipated: StateFlow<Boolean> = _hasUserParticipated
-
-
     fun getParticipantsForEvent(eventId: String):Flow<List<Profile>>
     {
-//        viewModelScope.launch {
-//            eventRepository.getEventWithParticipants(eventId).map { it?.pariticipants ?: emptyList() }.collect{
-//                _participationList.value = it
-//            }
-//        }
         return eventRepository.getEventWithParticipants(eventId).map { it?.pariticipants ?: emptyList() }
-
     }
 
 
     fun getParticipationCount(eventId: String):Flow<Int>
     {
-//        viewModelScope.launch {
-//            eventRepository.getParticipationCountForEvent(eventId).collect{
-//                _participationCount.value = it
-//            }
-//        }
         return eventRepository.getParticipationCountForEvent(eventId)
     }
 
-    fun hasUserParticipated(eventId: String, profileId:String)
+    fun hasUserParticipated(eventId: String, profileId:String):Flow<Boolean>
     {
-        viewModelScope.launch {
-            eventRepository.hasUserParticipated(eventId,profileId).collect{
-                _hasUserParticipated.value = it
-            }
-        }
+        return eventRepository.hasUserParticipated(eventId,profileId)
     }
 
     fun toggleAttendance(eventId: String,profileId: String)

@@ -96,12 +96,10 @@ fun HomeScreen(
 
             items(eventList)
             {
-//                val commentList = commentViewModel.getComments(eventId = it.event.id)
-                LaunchedEffect(commentViewModel.commentList) {
-                    it?.event?.id?.let { eventId -> commentViewModel.getComments(eventId = eventId) }
-                }
-                val commentList = commentViewModel.commentList.collectAsStateWithLifecycle()
-                it?.event?.let { event -> EventRow(event, navController,commentList.value,commentViewModel,profileId,likeViewModel) }
+                val commentList = it?.event?.id?.let { id -> commentViewModel.getComments(id).collectAsState(
+                    emptyList()
+                ) }
+                it?.event?.let { event -> EventRow(event, navController,commentList?.value,commentViewModel,profileId,likeViewModel) }
             }
         }
     }
@@ -114,10 +112,10 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
 
     var showBottomSheet by remember { mutableStateOf(false ) }
 
-    val likeCount = likeViewModel.likeCount.collectAsStateWithLifecycle()
-    val isLiked = likeViewModel.isEventLikedByUser.collectAsStateWithLifecycle()
+    val likeCount by likeViewModel.getLikeCountForEvent(event.id).collectAsState(0)
+    val isLiked by likeViewModel.isEventLikedByUser(event.id,profileId).collectAsState(false)
 
-    val commentCount by commentViewModel.commentCount.collectAsStateWithLifecycle()
+    val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(0)
 
 
     Column(
@@ -152,7 +150,7 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
 
 
         Row() {
-            if(isLiked.value == false)
+            if(isLiked == false)
             {
                 Icon(Icons.Filled.FavoriteBorder,null, modifier = Modifier
                     .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)

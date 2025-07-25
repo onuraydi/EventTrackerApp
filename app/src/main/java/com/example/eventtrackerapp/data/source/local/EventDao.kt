@@ -68,6 +68,9 @@ interface EventDao {
     @Query("Select Count(*) FROM profile_event_cross_ref WHERE eventId = :eventId AND profileId = :profileId AND isAttending = 1")
     fun hasUserParticipated(eventId : String,profileId: String):Flow<Int>
 
+    @Query("DELETE FROM profile_event_cross_ref WHERE eventId = :eventId AND profileId = :profileId")
+    suspend fun deleteProfileEventCrossRef(eventId: String,profileId: String)
+
     @Transaction
     @Query("SELECT * FROM events WHERE id = :eventId LIMIT 1")
     fun getEventWithParticipantsById(eventId:String):Flow<EventWithParticipants?>
