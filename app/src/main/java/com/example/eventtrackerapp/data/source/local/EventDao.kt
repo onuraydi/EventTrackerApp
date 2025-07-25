@@ -56,6 +56,9 @@ interface EventDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateProfileEventCrossRef(crossRef: ProfileEventCrossRef)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllProfileEventCrossRef(crossRef: List<ProfileEventCrossRef>)
+
     @Query("SELECT * FROM profile_event_cross_ref WHERE eventId = :eventId AND profileId = :profileId LIMIT 1")
     fun getProfileEventCrossRef(eventId: String, profileId:String):Flow<ProfileEventCrossRef?>
 

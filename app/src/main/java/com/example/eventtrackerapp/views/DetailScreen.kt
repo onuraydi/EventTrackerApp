@@ -99,9 +99,11 @@ fun DetailScreen(
 
     val state by participantsViewModel.hasUserParticipated.collectAsStateWithLifecycle()
 
-    val participantsCount by participantsViewModel.participationCount.collectAsStateWithLifecycle()
+    val participantsCount by participantsViewModel.getParticipationCount(event.id).collectAsState(0)
 
-    val participants by participantsViewModel.participationList.collectAsStateWithLifecycle()
+    val participants by participantsViewModel.getParticipantsForEvent(event.id).collectAsState(
+        emptyList()
+    )
 
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {

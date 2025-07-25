@@ -95,11 +95,11 @@ fun EditEventScreen(
 //        categoryViewModel.getAllCategoryWithTags()
 //    }
 
-    val categoryWithTags by categoryViewModel.categoryWithTags.collectAsStateWithLifecycle()
+    val categoryWithTags by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
 
 //    val allEventsWithRelations by eventViewModel.allEventsWithRelations.observeAsState(emptyList())
 
-    val eventWithTags = eventViewModel.eventWithRelations.collectAsStateWithLifecycle()
+    val eventWithTags = eventViewModel.getEventWithRelationsById(eventId).collectAsState(null)
 
     // ViewModel'den state'ler
     val categoryId = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.categoryId)}

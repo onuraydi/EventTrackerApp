@@ -2,6 +2,7 @@ package com.example.eventtrackerapp.views
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,7 +71,7 @@ fun AppNavGraph(
             }
 
             composable("create_profile_screen") {
-                val categoryWithTags by categoryViewModel.categoryWithTags.collectAsStateWithLifecycle()
+                val categoryWithTags by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
                 val uid = auth.currentUser?.uid
                 val email = auth.currentUser?.email
                 CreateProfileScreen(navController,categoryViewModel,profileViewModel,permissionViewModel,userPreferences,categoryWithTags,uid!!,email!!)
@@ -84,20 +85,30 @@ fun AppNavGraph(
                     return@composable
                 }
 
-                LaunchedEffect(uid) {
-                    profileViewModel.getById(uid)
-                }
-                val profile by profileViewModel.profile.collectAsStateWithLifecycle()
+//                LaunchedEffect(profileViewModel.profile) {
+//                    profileViewModel.getById(uid)
+//                }
+                val profile by profileViewModel.getById(uid).collectAsState(null)
 
                 if(profile!=null){
 
-                    LaunchedEffect(Unit) {
-                        eventViewModel.getEventsForUser(profile!!.selectedTagList.map { it.id })
+//                    LaunchedEffect(Unit) {
+//                        eventViewModel.getEventsForUser(profile!!.selectedTagList.map { it.id })
+//                    }
+                    val eventList by eventViewModel.getEventsForUser(profile!!.selectedTagList.map { it.id }).collectAsState(
+                        emptyList()
+                    )
+
+                    if(eventList!=null){
+                        HomeScreen(eventList = eventList, navController = navController,commentViewModel,likeViewModel,uid)
+                    }else{
+                        CircularProgressIndicator()
+                        return@composable
                     }
-                    val eventList by eventViewModel.eventsForUser.collectAsStateWithLifecycle()
 
-                    HomeScreen(eventList = eventList, navController = navController,commentViewModel,likeViewModel,uid)
-
+                }else{
+                    CircularProgressIndicator()
+                    return@composable
                 }
             }
 
@@ -118,19 +129,18 @@ fun AppNavGraph(
             composable("detail/{id}") { backStackEntry ->
 
                 val eventId = backStackEntry.arguments?.getString("id") ?: ""
+                val uid = auth.currentUser?.uid!!
 
-                LaunchedEffect(eventId) {
-                    eventViewModel.getEventWithRelationsById(eventId)
-                }
-                val eventWithTags by eventViewModel.eventWithRelations.collectAsStateWithLifecycle()
+                val eventWithTags by eventViewModel.getEventWithRelationsById(eventId).collectAsState(null)
 
                 //Category'i al
-                LaunchedEffect(categoryViewModel.categoryWithTags) {
-                    categoryViewModel.getAllCategoryWithTags()
-                }
-                val category by categoryViewModel.categoryWithTags.collectAsStateWithLifecycle()
 
-                val uid = auth.currentUser?.uid!!
+                val category by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
+
+                if(eventWithTags == null || category.isEmpty()){
+                    CircularProgressIndicator()
+                    return@composable
+                }
 
                 // TODO bu metot belki değişebilir
 
@@ -138,23 +148,27 @@ fun AppNavGraph(
                     cat.category.id == eventWithTags?.event?.categoryId
                 }.map { it.category }.first()
 
-                if(eventWithTags!=null){
-
-                    LaunchedEffect(eventWithTags) {
-                        commentViewModel.getComments(eventId)
-                    }
-                    val commentList by commentViewModel.commentList.collectAsStateWithLifecycle()
-
-                    DetailScreen(event = eventWithTags!!.event,
-                        navController = navController,
-                        category = detailCategory,
-                        commentList = commentList,
-                        commentViewModel = commentViewModel,
-                        likeViewModel = likeViewModel,
-                        profileId = uid,
-                        participantsViewModel= participantsViewModel,
-                    )
+                if(detailCategory == null){
+                    CircularProgressIndicator()
+                    return@composable
                 }
+
+
+                LaunchedEffect(eventWithTags) {
+                    commentViewModel.getComments(eventId)
+                }
+                val commentList by commentViewModel.commentList.collectAsStateWithLifecycle()
+
+                DetailScreen(event = eventWithTags!!.event,
+                    navController = navController,
+                    category = detailCategory,
+                    commentList = commentList,
+                    commentViewModel = commentViewModel,
+                    likeViewModel = likeViewModel,
+                    profileId = uid,
+                    participantsViewModel= participantsViewModel,
+                )
+
             }
 
 
@@ -174,11 +188,7 @@ fun AppNavGraph(
 
                 if(uid!=null){
 
-                    LaunchedEffect(Unit) {
-                        profileViewModel.getById(uid)
-                    }
-
-                    val profile by profileViewModel.profile.collectAsStateWithLifecycle()
+                    val profile by profileViewModel.getById(uid).collectAsState(null)
 
                     profile?.let {
                         ProfileScreen(navController = navController,authViewModel, it)
@@ -191,11 +201,7 @@ fun AppNavGraph(
 
                 if(uid!=null){
 
-                    LaunchedEffect(Unit) {
-                        profileViewModel.getById(uid)
-                    }
-
-                    val profile by profileViewModel.profile.collectAsStateWithLifecycle()
+                    val profile by profileViewModel.getById(uid).collectAsState(null)
 
                     profile?.let {
                         MyAccountScreen(navController,profile!!,profileViewModel,permissionViewModel)
@@ -208,11 +214,7 @@ fun AppNavGraph(
 
                 if(uid!=null){
 
-                    LaunchedEffect(Unit) {
-                        profileViewModel.getById(uid)
-                    }
-
-                    val profile by profileViewModel.profile.collectAsStateWithLifecycle()
+                    val profile by profileViewModel.getById(uid).collectAsState(null)
 
                     val isDark = themeViewModel.isDarkTheme.collectAsState().value
 
@@ -265,7 +267,7 @@ fun AppNavGraph(
 //                LaunchedEffect(eventId) {
 //                    eventViewModel.getEventWithRelationsById(eventId)
 //                }
-//                val eventWithTags by eventViewModel.allEventsWithRelations.observeAsState(emptyList())
+//                val eventWithTags by eventViewModel.getEventWithRelationsById(eventId).collectAsState(null)
 
                 val uid = auth.currentUser?.uid
                 EditEventScreen(navController,eventId,eventViewModel,categoryViewModel,uid!!)

@@ -7,6 +7,7 @@ import com.example.eventtrackerapp.model.roommodels.Category
 import com.example.eventtrackerapp.model.roommodels.CategoryWithTag
 import com.example.eventtrackerapp.model.roommodels.Tag
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,8 +26,8 @@ class CategoryViewModel @Inject constructor(
 //        categoryRepository.listenForFirestoreTags()
 //    }
 
-    private val _categoryWithTags = MutableStateFlow<List<CategoryWithTag>>(emptyList())
-    val categoryWithTags:StateFlow<List<CategoryWithTag>> = _categoryWithTags
+//    private val _categoryWithTags = MutableStateFlow<List<CategoryWithTag>>(emptyList())
+//    val categoryWithTags:StateFlow<List<CategoryWithTag>> = _categoryWithTags
 
     private val _selectedTags = MutableStateFlow<List<Tag>>(arrayListOf())
     private val _chosenTags = MutableStateFlow<List<Tag>>(arrayListOf())
@@ -37,12 +38,13 @@ class CategoryViewModel @Inject constructor(
     private val _categoryWithTagsById = MutableStateFlow<CategoryWithTag?>(null)
     val categoryWithTagsById: StateFlow<CategoryWithTag?> = _categoryWithTagsById
 
-    fun getAllCategoryWithTags(){
-        viewModelScope.launch {
-            categoryRepository.getCategoriesWithTags().collect{
-                _categoryWithTags.value = it
-            }
-        }
+    fun getAllCategoryWithTags(): Flow<List<CategoryWithTag>> {
+//        viewModelScope.launch {
+//            categoryRepository.getCategoriesWithTags().collect{
+//                _categoryWithTags.value = it
+//            }
+//        }
+        return categoryRepository.getCategoriesWithTags()
     }
     fun getCategoryWithTagsById(categoryId: String){
         viewModelScope.launch {

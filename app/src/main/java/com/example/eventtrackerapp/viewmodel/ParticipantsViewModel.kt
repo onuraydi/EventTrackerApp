@@ -33,23 +33,26 @@ class ParticipantsViewModel @Inject constructor(
     val hasUserParticipated: StateFlow<Boolean> = _hasUserParticipated
 
 
-    fun getParticipantsForEvent(eventId: String)
+    fun getParticipantsForEvent(eventId: String):Flow<List<Profile>>
     {
-        viewModelScope.launch {
-            eventRepository.getEventWithParticipants(eventId).map { it?.pariticipants ?: emptyList() }.collect{
-                _participationList.value = it
-            }
-        }
+//        viewModelScope.launch {
+//            eventRepository.getEventWithParticipants(eventId).map { it?.pariticipants ?: emptyList() }.collect{
+//                _participationList.value = it
+//            }
+//        }
+        return eventRepository.getEventWithParticipants(eventId).map { it?.pariticipants ?: emptyList() }
+
     }
 
 
-    fun getParticipationCount(eventId: String)
+    fun getParticipationCount(eventId: String):Flow<Int>
     {
-        viewModelScope.launch {
-            eventRepository.getParticipationCountForEvent(eventId).collect{
-                _participationCount.value = it
-            }
-        }
+//        viewModelScope.launch {
+//            eventRepository.getParticipationCountForEvent(eventId).collect{
+//                _participationCount.value = it
+//            }
+//        }
+        return eventRepository.getParticipationCountForEvent(eventId)
     }
 
     fun hasUserParticipated(eventId: String, profileId:String)

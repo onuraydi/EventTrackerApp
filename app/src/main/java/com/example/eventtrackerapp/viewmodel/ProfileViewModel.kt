@@ -31,12 +31,13 @@ class ProfileViewModel @Inject constructor(
     private val _profile = MutableStateFlow<Profile?>(Profile())
     val profile:StateFlow<Profile?> = _profile
 
-    fun getById(id:String){
-        viewModelScope.launch {
-            profileRepository.getProfile(id).collect{profile->
-                _profile.value = profile
-            }
-        }
+    fun getById(id:String):Flow<Profile?>{
+//        viewModelScope.launch {
+//            profileRepository.getProfile(id).collect{profile->
+//                _profile.value = profile
+//            }
+//        }
+        return profileRepository.getProfile(id)
     }
 
     //aynı kayıtı eklemeyi engelleyen upsert işlemi. Aynı zamanda güncelleme işlemi de yapıyor.

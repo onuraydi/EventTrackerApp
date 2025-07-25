@@ -9,6 +9,7 @@ import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.model.roommodels.EventWithTags
 import com.example.eventtrackerapp.model.roommodels.Tag
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -55,13 +56,14 @@ class EventViewModel @Inject constructor(
     }
 
     //(1)
-    fun getEventWithRelationsById(eventId:String)
+    fun getEventWithRelationsById(eventId:String):Flow<EventWithTags?>
     {
-        viewModelScope.launch {
-            eventRepository.getEventWithRelationsById(eventId).collect{
-                _eventWithRelations.value = it
-            }
-        }
+//        viewModelScope.launch {
+//            eventRepository.getEventWithRelationsById(eventId).collect{
+//                _eventWithRelations.value = it
+//            }
+//        }
+        return eventRepository.getEventWithRelationsById(eventId)
     }
 
     val allcategoriesWithTags: StateFlow<List<CategoryWithTag>> =
@@ -79,13 +81,14 @@ class EventViewModel @Inject constructor(
     }
 
     //(2)
-    fun getEventsForUser(tagIds:List<String>)
+    fun getEventsForUser(tagIds:List<String>): Flow<List<EventWithTags>>
     {
-        viewModelScope.launch {
-            eventRepository.getEventsForUser(tagIds).collect{
-                _eventsForUser.value = it
-            }
-        }
+//        viewModelScope.launch {
+//            eventRepository.getEventsForUser(tagIds).collect{
+//                _eventsForUser.value = it
+//            }
+//        }
+        return eventRepository.getEventsForUser(tagIds)
     }
 
     fun updateEvent(event: Event,selectedTags: List<Tag>)

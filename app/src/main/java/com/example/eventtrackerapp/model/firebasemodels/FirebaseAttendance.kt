@@ -10,6 +10,10 @@ data class FirebaseAttendance(
 
     @get:PropertyName("profileId")
     @set:PropertyName("profileId")
-    var profileId:String = ""
+    var profileId:String = "",
+
+    @get:PropertyName("isAttending")
+    @set:PropertyName("isAttending")
+    var isAttending:Boolean = false
 ) {
 }
