@@ -31,6 +31,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
@@ -47,28 +49,35 @@ class ProfileRepository(
 ) {
     private val profilesCollection = firestore.collection("profiles")
 
-    fun getProfile(profileId:String):Flow<Profile?> = flow {
-        if (NetworkUtils.isNetworkAvailable(context)){
-            try {
-                val allCategories = categoryDao.getAll().first() //flow olduğu için first
-                val allTags = tagDao.getAll()
+    fun getProfile(profileId: String): Flow<Profile?> {
+        return profileDao.getById(profileId)
+            .onStart {
+                if (NetworkUtils.isNetworkAvailable(context)) {
+                    try {
+                        // Gerekli referans verilerini al
+                        val allCategories = categoryDao.getAll().first()
+                        val allTags = tagDao.getAll()
 
-                val profileSnapshot = profilesCollection.get().await()
-                val firebaseProfile = profileSnapshot.documents.mapNotNull { it.toObject(FirebaseProfile::class.java) }
-                val roomProfile = firebaseProfile.map { ProfileMapper.toEntity(it,allTags,allCategories) }
+                        // Firebase'den tüm profilleri çek (tek profil varsa query ile tek alabilirsin)
+                        val snapshot = profilesCollection.get().await()
+                        val firebaseProfiles = snapshot.documents.mapNotNull {
+                            it.toObject(FirebaseProfile::class.java)
+                        }
 
-                profileDao.insertAllProfiles(roomProfile)
-                profileDao.getById(profileId)
-                emit(profileDao.getById(profileId).first())
+                        val roomProfiles = firebaseProfiles.map {
+                            ProfileMapper.toEntity(it, allTags, allCategories)
+                        }
+
+                        profileDao.insertAllProfiles(roomProfiles)
+
+                        Log.d("ProfileRepo", "Firebase'den profil alındı ve Room'a yazıldı.")
+                    } catch (e: Exception) {
+                        Log.e("ProfileRepo", "Firebase'den veri alınamadı. Room verisi kullanılacak.", e)
+                    }
+                } else {
+                    Log.w("ProfileRepo", "İnternet yok, Room verisi gösterilecek.")
+                }
             }
-            catch (e:Exception){
-                Log.e(TAG,"Etkinlik firestore'dan çekilemedi, roomdan geliyor",e)
-                emit(profileDao.getById(profileId).first())
-            }
-        }
-        else{
-            emit(profileDao.getById(profileId).first())
-        }
     }
 
     fun getAllProfiles():Flow<List<Profile>> = flow {
@@ -95,69 +104,6 @@ class ProfileRepository(
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    fun listenForFirestoreProfileChanges(profileId:String){
-        profilesCollection.document(profileId)
-            .addSnapshotListener{snapshot, e->
-                if(e!=null){
-                    Log.w(TAG,"Listen failed for profile $profileId",e)
-                    return@addSnapshotListener
-                }
-
-                if(snapshot!=null && snapshot.exists()){
-                    val firebaseProfile = snapshot.toObject(FirebaseProfile::class.java)
-                    GlobalScope.launch(Dispatchers.IO) {
-                        firebaseProfile?.let{fbProfile->
-                            //firestore'dan gelen ID'lerle eşleştirmek için tüm kategori ve tag'leri çek
-                            val allCategories = categoryDao.getAll().first() //flow olduğu için first
-                            val allTags = tagDao.getAll()
-
-                            val roomProfile = ProfileMapper.toEntity(fbProfile,allTags,allCategories)
-                            profileDao.add(roomProfile)
-                        }
-                    }
-                }else if(snapshot!=null && !snapshot.exists()){
-                    GlobalScope.launch(Dispatchers.IO){
-                        profileDao.delete(Profile(id = profileId))
-                    }
-                }
-            }
-    }
-
-    fun listenForAllFirestoreProfiles(){
-        profilesCollection.addSnapshotListener{snapshot, e->
-            if(e!=null){
-                Log.w(TAG,"Listen failed for all profiles",e)
-                return@addSnapshotListener
-            }
-
-            if(snapshot!=null){
-                val firebaseProfiles = snapshot.documents.mapNotNull { it.toObject(FirebaseProfile::class.java) }
-
-                GlobalScope.launch(Dispatchers.IO){
-                    val currentRoomProfiles = profileDao.getAll().first()
-                    val currentRoomProfileIds = currentRoomProfiles.map { it.id }.toSet()
-                    val firebaseProfileIds = firebaseProfiles.map { it.id }.toSet()
-
-                    //Firestore'dan gelen tüm kategori ve tagleri bir kez çek
-                    val allCategories = categoryDao.getAll().first()
-                    val allTags = tagDao.getAll()
-
-                    //Firestore'dan gelenleri Room'a ekle/güncelle
-                    firebaseProfiles.forEach { fbProfile->
-                        val roomProfile = ProfileMapper.toEntity(fbProfile,allTags,allCategories)
-                        profileDao.add(roomProfile)
-                    }
-
-                    //Firestore'da silinenleri Room'dan sil
-                    val deletedProfileIds = currentRoomProfileIds.minus(firebaseProfileIds)
-                    deletedProfileIds.forEach{profileId->
-                        profileDao.delete(Profile(id = profileId))
-                    }
-                }
-            }
-        }
-    }
 
     suspend fun upsertProfile(profile:Profile){
         //Room'a kaydet

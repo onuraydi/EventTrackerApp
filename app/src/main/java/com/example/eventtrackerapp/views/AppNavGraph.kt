@@ -85,30 +85,27 @@ fun AppNavGraph(
                     return@composable
                 }
 
-//                LaunchedEffect(profileViewModel.profile) {
-//                    profileViewModel.getById(uid)
-//                }
                 val profile by profileViewModel.getById(uid).collectAsState(null)
 
-                if(profile!=null){
+                if(profile==null){
+                    CircularProgressIndicator()
+                    return@composable
+                }else{
+                    // TODO Sakın Silme !!!
+                    val categoryWithTags by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
+                    val selectedTag by categoryViewModel.selectedTag.collectAsStateWithLifecycle()
+                    val chosenTags by categoryViewModel.chosenTags.collectAsStateWithLifecycle()
 
-//                    LaunchedEffect(Unit) {
-//                        eventViewModel.getEventsForUser(profile!!.selectedTagList.map { it.id })
-//                    }
                     val eventList by eventViewModel.getEventsForUser(profile!!.selectedTagList.map { it.id }).collectAsState(
                         emptyList()
                     )
 
-                    if(eventList!=null){
-                        HomeScreen(eventList = eventList, navController = navController,commentViewModel,likeViewModel,uid)
-                    }else{
+                    if(eventList==null){
                         CircularProgressIndicator()
                         return@composable
+                    }else{
+                        HomeScreen(eventList = eventList, navController = navController,commentViewModel,likeViewModel,uid)
                     }
-
-                }else{
-                    CircularProgressIndicator()
-                    return@composable
                 }
             }
 
