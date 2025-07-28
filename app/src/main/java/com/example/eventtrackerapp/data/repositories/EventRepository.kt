@@ -137,9 +137,7 @@ class EventRepository (
                 val firebaseEvents = eventSnapshot.documents.mapNotNull { it.toObject(FirebaseEvent::class.java) }
                 val roomEvents = firebaseEvents.map { EventMapper.toEntity(it) }
 
-                roomEvents.forEach {
-                    eventDao.deleteEvent(it)
-                }
+
                 eventDao.insertAll(roomEvents)
 
                 val eventTagCrossRefs = firebaseEvents.flatMap { firebaseEvent ->
