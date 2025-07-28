@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
@@ -30,11 +29,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,10 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
 import com.example.eventtrackerapp.model.Event
-import com.example.eventtrackerapp.viewmodel.CommentViewModel
-import kotlinx.coroutines.flow.Flow
 import org.w3c.dom.Comment
 
 
@@ -59,16 +53,13 @@ import org.w3c.dom.Comment
 fun CommentBottomSheet(
     showSheet: Boolean,
     onDismiss: () -> Unit,
-    comments: Flow<List<CommentWithProfileAndEvent>>,
+    comments: List<Comment>,
+    onSendComment: (String) -> Unit,
     currentUserImage: Painter,
-    commentViewModel: CommentViewModel,
-    profileId:String,
-    eventId:Int
+    currentUserName: String,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var commentText by rememberSaveable() { mutableStateOf("") }
-
-    val commentList by comments.collectAsState(initial = emptyList())
+    var commentText by remember { mutableStateOf("") }
 
     if (!showSheet) return
 
@@ -100,8 +91,8 @@ fun CommentBottomSheet(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(commentList){
-                    CommentItem(it)
+                items(15) { comment ->
+                    CommentItem()
                 }
             }
 
@@ -135,7 +126,7 @@ fun CommentBottomSheet(
                         IconButton(
                             onClick = {
                                 if (commentText.isNotBlank()) {
-                                    commentViewModel.addComment(profileId,eventId,commentText)
+                                    onSendComment(commentText.trim())
                                     commentText = ""
                                 }
                             }
@@ -152,13 +143,12 @@ fun CommentBottomSheet(
 
 // TODO Buradaki comment model oluşturduktan sonra düzeltilecek
 @Composable
-fun CommentItem(comment: CommentWithProfileAndEvent) {
+fun CommentItem() {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
         Image(
-            // TODO burası sonra düzeltilecek
             painter = painterResource(R.drawable.ic_launcher_foreground),
             contentDescription = "Profil Resmi",
             modifier = Modifier
@@ -171,13 +161,13 @@ fun CommentItem(comment: CommentWithProfileAndEvent) {
 
         Column {
             Text(
-                text = "${comment.profile.userName}",
+                text = "kullanıcı adı",
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
                 color = Color.Black
             )
             Text(
-                text = "${comment.comment.comment}",
+                text = "bu nedirbu nedir bu nedir bu nedir bu nedir bu nedir bu nedir bu nedir v bu nedir bu nedir bu nedir",
                 fontSize = 14.sp,
                 color = Color.DarkGray,
                 modifier = Modifier.padding(top = 2.dp)

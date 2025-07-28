@@ -1,20 +1,16 @@
 package com.example.eventtrackerapp.views
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
@@ -27,7 +23,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,34 +33,25 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.BottomNavBar
-import com.example.eventtrackerapp.viewmodel.ExploreViewModel
 
-@SuppressLint("SuspiciousIndentation")
 @Composable
 fun ExploreScreen(
     eventList:List<Event>,
-    navController:NavController,
-    exploreViewModel: ExploreViewModel = viewModel()
+    navController:NavController
 ){
-    val searchResult by exploreViewModel.searchList.collectAsStateWithLifecycle()
-    val historyList by exploreViewModel.historyList.collectAsStateWithLifecycle()
-
+    EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {BottomNavBar(navController = navController)}
         ) { innerPadding ->
-
             val query = rememberSaveable { mutableStateOf("") }
             val active = rememberSaveable { mutableStateOf(false) }
-
-            val displayedEvents = if(query.value.trim().isEmpty()) eventList else searchResult
+            val searchList = remember { mutableStateListOf<String?>() }
 
             Column(
                 modifier = Modifier.padding(innerPadding)
@@ -77,19 +63,13 @@ fun ExploreScreen(
                     query = query.value,
                     onQueryChange = {
                         query.value = it
-                        exploreViewModel.searchEvents(it)
                     },
                     active = active.value,
                     onActiveChange = {
                         active.value = it
                     },
                     onSearch = {
-                        if(query.value.trim().isNotEmpty()){
-                            query.value = it.trim()
-                            exploreViewModel.searchEvents(query.value) //arama yap
-                            exploreViewModel.insertHistory(query.value) //geçmişe ekle
-                            active.value = false
-                        }
+                        searchList.add(query.value.trim())
                         active.value = false
                     },
                     placeHolder = { Text("Search") },
@@ -110,20 +90,8 @@ fun ExploreScreen(
                             )
                         }
                     },
-                    searchResult = searchResult,
-                    onHistoryClick = {
-                        query.value = it
-                        exploreViewModel.searchEvents(it)
-                        exploreViewModel.insertHistory(it)
-                        active.value = false
-                    },
-                    searchHistoryList = historyList.map{it.keyword},
-                    navController = navController,
-                    deleteItem = {
-                        exploreViewModel.deleteHistoryItem(it)
-                    }
+                    searchResult = searchList.filterNotNull()
                 )
-
                 LazyVerticalStaggeredGrid(
                     modifier = Modifier
                         .padding(top = 16.dp, start = 8.dp, end = 8.dp),
@@ -131,7 +99,7 @@ fun ExploreScreen(
                     verticalItemSpacing = 8.dp,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     content = {
-                        items(displayedEvents){
+                        items(eventList) {
                             MyImage(it,navController)
                         }
                     }
@@ -139,6 +107,7 @@ fun ExploreScreen(
             }
         }
     }
+}
 
 @Composable
 fun MyImage(event:Event,navController: NavController){
@@ -174,11 +143,7 @@ fun SimpleSearchBar(
     placeHolder: @Composable (()->Unit)? = null,
     leadingIcon: @Composable (()->Unit)? = null,
     trailingIcon: @Composable (()->Unit)? = null,
-    searchResult: List<Event>,
-    navController: NavController,
-    searchHistoryList: List<String>,
-    onHistoryClick: (String)->Unit,
-    deleteItem: (String)-> Unit
+    searchResult: List<String>
 ){
     //ekranın genişlemesini tutan state
     SearchBar(
@@ -192,61 +157,21 @@ fun SimpleSearchBar(
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon
     ){
-        LazyColumn(
-            contentPadding = PaddingValues(4.dp)
-        ) {
-            if(query.isEmpty()){
-                items(searchHistoryList){historyItem->
-                    Row(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth()
-                            .clickable {
-                                onHistoryClick(historyItem)
-                            }
-                    ){
-                        Icon(
-                            painterResource(R.drawable.history_icon),
-                            "HistoryItem",
-                            Modifier.weight(1f)
-                            )
-                        Text(historyItem, modifier = Modifier.weight(4f).padding(start = 4.dp))
-                        Icon(
-                            Icons.Default.Clear,
-                            "Clear",
-                            Modifier
-                                .weight(1f)
-                                .clickable {
-                                    deleteItem(historyItem)
-                                }
-                            )
-                    }
-                }
-            }
-            else{
-                items(searchResult){event->
-                    Row(
-                        Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth()
-                            .clickable {
-                                onSearch(event.name ?: "")
-                                navController.navigate("detail/${event.id}")
-                            }
-                    ){
-                        Icon(painterResource(R.drawable.baseline_event_24),"HistoryItem")
-                        Text(event.name ?: "", modifier = Modifier.padding(start = 4.dp))
-                    }
-                }
+        searchResult.forEach {
+            Row {
+                Icon(
+                    painterResource(R.drawable.history_icon),"History"
+                )
+                Text(it)
             }
         }
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewScreen(){
-//    EventTrackerAppTheme {
-//        //ExploreScreen()
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun PreviewScreen(){
+    EventTrackerAppTheme {
+        //ExploreScreen()
+    }
+}

@@ -36,13 +36,10 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,31 +52,18 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.Category
-import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
-import com.example.eventtrackerapp.viewmodel.ProfileViewModel
-import com.example.eventtrackerapp.viewmodel.ThemeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun PreferencesScreen(
-    navController: NavController,
-    profile:Profile,
-    profileViewModel: ProfileViewModel = viewModel(),
-    isDark:Boolean,
-    themeViewModel: ThemeViewModel
-){
+fun PreferencesScreen(navController: NavController){
+    EventTrackerAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
+                CenterAlignedTopAppBar(
                     title = {Text("Preferences")},
                     navigationIcon = {
                         IconButton(
@@ -98,7 +82,8 @@ fun PreferencesScreen(
         )
         { innerPadding->
 
-            val myTags = rememberSaveable{ mutableStateOf(profile.selectedTagList.orEmpty().toList()) }
+            val myCategories = remember{mutableStateListOf<String?>("Seçili1","Seçili2","Seçili3")}
+            val isSelected = rememberSaveable{mutableStateOf(false)}
             val isEdit = rememberSaveable { mutableStateOf(false) }
 
 
@@ -110,35 +95,22 @@ fun PreferencesScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
-                    //Bildirimler
-                    // TODO SONRA AÇILACAK
-//                    CardRow("Notifications") {
-//                        Icon(Icons.Default.Notifications,
-//                            "Notification",
-//                            Modifier.size(32.dp)
-//                        )
-//                    }
-
-                    //DarkMode
-                    CardRow(
-                        preference = "Dark Mode",
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(R.drawable.dark_mode_icon),
-                                contentDescription = "DarkMode",
-                                modifier = Modifier.size(32.dp)
-                            )
-                        },
-                        isChecked = isDark,
-                        onCheckedChange = { themeViewModel.toogleTheme(it) }
-                    )
+                    CardRow("Notifications") {
+                        Icon(Icons.Default.Notifications,
+                            "Notification",
+                            Modifier.size(32.dp)
+                        )
+                    }
+                    CardRow("Dark Mode"){
+                        Icon(painter = painterResource(R.drawable.dark_mode_icon),
+                            "DarkMode",
+                            Modifier.size(32.dp)
+                        )
+                    }
 
                     Spacer(Modifier.padding(vertical = 12.dp))
-
-                    //Kategorilerim
                     Row {
-                        Text("My Tags", modifier = Modifier.weight(5f))
+                        Text("My Categories", modifier = Modifier.weight(5f))
                         Text(
                             text = if(isEdit.value){
                                 "Confirm"
@@ -151,11 +123,51 @@ fun PreferencesScreen(
                                 .weight(1f)
                                 .clickable {
                                     isEdit.value = !isEdit.value
-                                    if(!isEdit.value){
-                                        myTags.value = profile.selectedTagList.orEmpty().toList()
-                                    }
                                 }
                         )
+                    }
+
+                    if(isEdit.value){
+                        LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
+                            val categories = arrayListOf(
+                                "Yazılım",
+                                "Yapay Zeka",
+                                "Back-End",
+                                "Front-End",
+                                "Teknoloji",
+                                "Örnek",
+                                "Örnek2",
+                                "Örnek3",
+                                "Örnek4"
+                            )
+                            items(categories) {
+                                FilterChip(
+                                    modifier = Modifier.padding(end = 8.dp),
+                                    selected = isSelected.value,
+                                    label = { Text(it) },
+                                    onClick = {
+                                        isSelected.value = !isSelected.value
+                                        if (myCategories.contains(it)) {
+                                            myCategories.add(it)
+                                        } else {
+                                            myCategories.remove(it)
+                                        }
+                                    },
+                                    trailingIcon = if (isSelected.value) {
+                                        {
+                                            Icon(
+                                                Icons.Filled.Done,
+                                                "Done",
+                                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                            )
+                                        }
+                                    } else {
+                                        null
+                                    }
+
+                                )
+                            }
+                        }
                     }
 
                     Box(
@@ -171,82 +183,76 @@ fun PreferencesScreen(
                             Modifier.padding(5.dp),
                             maxItemsInEachRow = 4
                         ) {
-                            myTags.value.forEach {tag ->
-
-                                val isSelected = rememberSaveable{ mutableStateOf(true) }
+                            myCategories.filterNotNull().forEach {
                                 FilterChip(
-                                    modifier = Modifier.padding(end = 8.dp),
+                                    modifier = Modifier.padding(end = 5.dp),
                                     selected = isSelected.value,
-                                    enabled = isEdit.value,
                                     onClick = {
                                         isSelected.value = !isSelected.value
-
-                                        if(isSelected.value){
-                                            //kategori eklenecek
-                                            profileViewModel.addTag(tag)
-                                        }else{
-                                            //kategori silinecek
-                                            profileViewModel.removeTag(tag.id)
-                                        }
+                                        myCategories.remove(it)
                                     },
-                                    label = {Text(tag.name ?: "")},
+                                    label = {Text(it)},
                                     trailingIcon = {
-                                        if(myTags.value.contains(tag)){
-                                            Icon(Icons.Default.Clear,"Clear")
-                                        }
-                                    }
+                                        Icon(Icons.Default.Clear,"Clear")
+                                    },
+                                    enabled = isEdit.value
                                 )
                             }
+
                         }
+
                     }
+
+
                 }
             }
 
         }
     }
+}
 
 @Composable
 fun CardRow(
-    preference: String,
-    leadingIcon: @Composable (() -> Unit)? = null,
-    isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
+    preference:String,
+    leadingIcon: @Composable (() ->Unit)? = null,
+)
+{
+    val isChecked = rememberSaveable { mutableStateOf(false) }
     Card(
-        modifier = Modifier
+        Modifier
             .fillMaxWidth()
             .heightIn(min = 72.dp),
         elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(0.5.dp, Color.LightGray)
+        border = BorderStroke(0.5.dp,Color.LightGray)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
+            Modifier.fillMaxWidth()
                 .padding(horizontal = 10.dp)
                 .heightIn(min = 72.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            leadingIcon?.invoke()
+            leadingIcon?.let { it() }
 
-            Text(
-                text = preference,
-                fontSize = 21.sp,
-                modifier = Modifier.weight(1f)
-            )
+            Text(text = preference, fontSize = 21.sp, modifier = Modifier.weight(1f))
 
             Switch(
-                checked = isChecked,
-                onCheckedChange = onCheckedChange
+                checked = isChecked.value,
+                onCheckedChange = {
+                    isChecked.value = it
+                }
             )
+
         }
+
+    }
+
+}
+@Preview(showBackground = true)
+@Composable
+fun ShowMyScreen(){
+    EventTrackerAppTheme {
+        //PreferencesScreen()
     }
 }
-//@Preview(showBackground = true)
-//@Composable
-//fun ShowMyScreen(){
-//    EventTrackerAppTheme {
-//        //PreferencesScreen()
-//    }
-//}

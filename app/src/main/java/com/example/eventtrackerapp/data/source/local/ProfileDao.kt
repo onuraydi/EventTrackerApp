@@ -14,7 +14,7 @@ interface ProfileDao {
     suspend fun getAll(): List<Profile>
 
     @Query("SELECT * FROM profiles WHERE id = :id")
-    suspend fun getById(id: String): Profile
+    suspend fun getById(id: Int): Profile
 
     @Insert
     suspend fun add(profile: Profile)

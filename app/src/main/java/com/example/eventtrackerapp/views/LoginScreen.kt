@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.data.source.local.UserPreferences
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
 import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedButton
@@ -39,8 +38,7 @@ import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
 @Composable
 fun LoginScreen(
     navController: NavController,
-    authViewModel: AuthViewModel,
-    userPreferences: UserPreferences
+    authViewModel: AuthViewModel
 ){
     val loginRequest by authViewModel.loginRequest
 
@@ -154,10 +152,10 @@ fun LoginScreen(
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewLoginScreen(){
-//    EventTrackerAppTheme {
-////        LoginScreen()
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun PreviewLoginScreen(){
+    EventTrackerAppTheme {
+//        LoginScreen()
+    }
+}

@@ -13,8 +13,6 @@ class AuthViewModel:ViewModel() {
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
 
-
-
     fun signUp(onResult: (Boolean, String?) -> Unit) {
         isLoading = true
         authRepository.signUp(signUpRequest.email, signUpRequest.password, signUpRequest.repeatPassword) { success, error ->
@@ -32,10 +30,5 @@ class AuthViewModel:ViewModel() {
 
     fun login(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
         authRepository.login(email, password, onResult)
-    }
-
-    fun logOut()
-    {
-        authRepository.logOut()
     }
 }

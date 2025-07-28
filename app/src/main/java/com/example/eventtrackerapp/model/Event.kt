@@ -1,14 +1,11 @@
 package com.example.eventtrackerapp.model
 
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 
 @Entity(tableName = "events")
 data class Event(
-    @PrimaryKey(autoGenerate = true) var id:Int = 0,
-    val ownerId:String? = "",
     var name:String? = "",
     var detail: String? = "",
     var date:Long? = 0,
@@ -19,7 +16,7 @@ data class Event(
     var likeCount:Int = 0,
     //val participants:List<Profile> = arrayListOf(),
 
-    //TODO Yorumlar eklenecek
+    // Yorumlar eklenecek
 ){
-
+    @PrimaryKey(autoGenerate = true) var id:Int = 0;
 }

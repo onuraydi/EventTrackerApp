@@ -3,16 +3,12 @@ package com.example.eventtrackerapp.data.source.local
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.example.eventtrackerapp.model.Event
 import com.example.eventtrackerapp.model.EventTagCrossRef
 import com.example.eventtrackerapp.model.EventWithTags
-import com.example.eventtrackerapp.model.Tag
-import com.google.android.gms.auth.api.accounttransfer.AuthenticatorTransferCompletionStatus
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EventDao {
@@ -24,41 +20,24 @@ interface EventDao {
     suspend fun getById(id:Int):Event
 
     @Insert
-    suspend fun add(event: Event):Long
+    suspend fun add(event: Event)
 
     @Update
-    suspend fun update(event: Event):Int
+    suspend fun update(event: Event)
 
-    @Query("delete from events where id = :eventId")
-    suspend fun delete(eventId: Int)
+    @Delete
+    suspend fun delete(event: Event)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Query("UPDATE events SET likeCount = likeCount + 1 WHERE id = :eventId")
+    suspend fun incrementLike(eventId:Int)
+
+    @Query("UPDATE events SET likeCount = likeCount + 1 WHERE id = :eventId")
+    suspend fun decrementLike(eventId:Int)
+
+    @Insert
     suspend fun insertEventTags(crossRef: List<EventTagCrossRef>)
-
-    @Update
-    suspend fun updateEventWithTags(crossRef: List<EventTagCrossRef>)
 
     @Transaction
     @Query("SELECT * FROM events")
-    fun getAllEventsWithTags(): Flow<List<EventWithTags>>
-
-    @Query("select * from events where ownerId = :ownerId")
-    fun getEventsByOwner(ownerId:String):Flow<List<Event>>
-
-    @Transaction
-    @Query("SELECT * FROM events WHERE id = :eventId")
-    suspend fun getEventWithTagsByEventId(eventId:Int):EventWithTags
-
-    // TODO ??
-    @Transaction
-    @Query("""
-    SELECT DISTINCT E.*
-    FROM events E
-    INNER JOIN EventTagCrossRef ETC ON E.id = ETC.eventId
-    WHERE ETC.tagId IN (:tagIds)
-""")
-    suspend fun getEventBySelectedTag(tagIds:List<Int>):List<EventWithTags>
-
-    @Query("DELETE FROM EventTagCrossRef WHERE eventId = :eventId")
-    suspend fun deleteTagsForEvent(eventId: Int)
+    suspend fun getAllEventsWithTags():List<EventWithTags>
 }

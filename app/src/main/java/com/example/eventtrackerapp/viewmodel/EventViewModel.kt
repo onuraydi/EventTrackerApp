@@ -3,19 +3,12 @@ package com.example.eventtrackerapp.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
 import com.example.eventtrackerapp.model.Event
-import com.example.eventtrackerapp.model.EventTagCrossRef
-import com.example.eventtrackerapp.model.EventWithTags
-import com.example.eventtrackerapp.model.Tag
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import java.lang.Thread.State
 
 class EventViewModel(application:Application): AndroidViewModel(application) {
 
@@ -24,17 +17,8 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
     private val _eventList = MutableStateFlow<List<Event>>(arrayListOf())
     private val _event = MutableStateFlow<Event>(Event())
 
-    private val _eventWithTag = MutableStateFlow<List<EventWithTags>>(arrayListOf())
-    private val _eventWithTagItem = MutableStateFlow<EventWithTags>(EventWithTags(Event(), emptyList()))
-
     val eventList:StateFlow<List<Event>> = _eventList
     val event:StateFlow<Event> = _event
-
-    val eventWithTag:StateFlow<List<EventWithTags>> = _eventWithTag
-    val eventWithTagItem:StateFlow<EventWithTags> = _eventWithTagItem
-
-    private val _eventsByOwner = MutableStateFlow<List<Event>>(arrayListOf())
-    val eventsByOwner:StateFlow<List<Event>> = _eventsByOwner
 
     fun getAllEvents(){
         viewModelScope.launch(Dispatchers.IO) {
@@ -60,65 +44,25 @@ class EventViewModel(application:Application): AndroidViewModel(application) {
         }
     }
 
-    fun deleteEvent(eventId: Int) {
+    fun deleteEvent(event: Event) {
         viewModelScope.launch(Dispatchers.IO) {
-            eventDao.delete(eventId)
+            eventDao.delete(event)
         }
     }
 
-    fun getEventWithTagByEventId(eventId: Int)
-    {
+    fun incrementLike(eventId:Int){
         viewModelScope.launch(Dispatchers.IO) {
-            _eventWithTagItem.value = eventDao.getEventWithTagsByEventId(eventId)
+            eventDao.incrementLike(eventId)
+            _event.value = eventDao.getById(eventId)
+            _eventList.value = eventDao.getAll()
         }
     }
 
-
-
-
-    fun getEventBySelectedTag(tagIds :List<Int>){
+    fun decrementLike(eventId:Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            _eventWithTag.value = eventDao.getEventBySelectedTag(tagIds)
-        }
-    }
-
-
-    fun getFilteredEvents(selectedTagIds: List<Tag>): Flow<List<EventWithTags>> {
-        return eventDao.getAllEventsWithTags().map { allEvents ->
-            allEvents.filter { event ->
-                event.tags.any { tag -> tag in selectedTagIds }
-            }
-        }
-    }
-
-    fun insertEventWithTags(event: Event,tags: List<Tag>){
-        viewModelScope.launch(Dispatchers.IO) {
-            val eventId = eventDao.add(event).toInt()
-            val refs = tags.map { tag ->
-                EventTagCrossRef(eventId = eventId,tagId = tag.id)
-            }
-            eventDao.insertEventTags(refs)
-        }
-    }
-
-    fun updateEventWithTags(event: Event, tags: List<Tag>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            eventDao.update(event)
-            eventDao.deleteTagsForEvent(event.id)
-            val refs = tags.map { tag ->
-                EventTagCrossRef(eventId = event.id, tagId = tag.id)
-            }
-            eventDao.insertEventTags(refs)
-        }
-    }
-
-    val allEventsWithTags: Flow<List<EventWithTags>> = eventDao.getAllEventsWithTags()
-
-    fun getEventByOwner(ownerId:String){
-        viewModelScope.launch {
-            eventDao.getEventsByOwner(ownerId).collect{data->
-                _eventsByOwner.value = data
-            }
+            eventDao.decrementLike(eventId)
+            _event.value = eventDao.getById(eventId)
+            _eventList.value = eventDao.getAll()
         }
     }
 }
