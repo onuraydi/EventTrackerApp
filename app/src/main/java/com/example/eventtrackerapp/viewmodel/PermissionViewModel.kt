@@ -9,9 +9,6 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 
 class PermissionViewModel():ViewModel() {
 

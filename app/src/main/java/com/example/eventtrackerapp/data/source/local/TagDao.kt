@@ -2,10 +2,8 @@ package com.example.eventtrackerapp.data.source.local
 
 import androidx.room.Dao
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.eventtrackerapp.model.roommodels.Tag
-import kotlinx.coroutines.flow.Flow
+import com.example.eventtrackerapp.model.Tag
 
 @Dao
 interface TagDao {
@@ -14,14 +12,11 @@ interface TagDao {
     suspend fun getAll():List<Tag>
 
     @Query("select * from tags where id = :id")
-    suspend fun getById(id:Int): Tag
+    suspend fun getById(id:Int):Tag
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTag(tag: Tag)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllTags(tags:List<Tag>)
+    @Insert
+    suspend fun insert(tag:Tag):Long
 
     @Query("SELECT * FROM tags WHERE categoryId = :categoryId")
-    fun getTagsByCategory(categoryId: Int): Flow<List<Tag>>
+    suspend fun getTagsByCategory(categoryId: Int): List<Tag>
 }

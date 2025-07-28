@@ -1,23 +1,25 @@
 package com.example.eventtrackerapp.views
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.data.source.local.UserPreferences
+import com.example.eventtrackerapp.model.Profile
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
@@ -26,24 +28,27 @@ import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
+import com.example.eventtrackerapp.viewmodel.TagViewModel
 import com.example.eventtrackerapp.viewmodel.ThemeViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
 
 @SuppressLint("NewApi")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    eventViewModel: EventViewModel = hiltViewModel(),
-    categoryViewModel: CategoryViewModel = hiltViewModel(),
-    authViewModel: AuthViewModel = hiltViewModel(),
-    profileViewModel: ProfileViewModel = hiltViewModel(),
-    commentViewModel: CommentViewModel = hiltViewModel(),
-    likeViewModel: LikeViewModel = hiltViewModel(),
-    participantsViewModel: ParticipantsViewModel = hiltViewModel(),
-    exploreViewModel: ExploreViewModel = hiltViewModel(),
-    permissionViewModel:PermissionViewModel = hiltViewModel(),
-    themeViewModel: ThemeViewModel = hiltViewModel(),
+    eventViewModel: EventViewModel = viewModel(),
+    categoryViewModel: CategoryViewModel = viewModel(),
+    tagViewModel: TagViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel(),
+    commentViewModel: CommentViewModel = viewModel(),
+    likeViewModel: LikeViewModel = viewModel(),
+    participantsViewModel: ParticipantsViewModel = viewModel(),
+    exploreViewModel: ExploreViewModel = viewModel(),
+    permissionViewModel:PermissionViewModel = viewModel(),
+    themeViewModel: ThemeViewModel = viewModel(),
     auth: FirebaseAuth,
     userPreferences: UserPreferences,
 ){
@@ -52,14 +57,14 @@ fun AppNavGraph(
 
     LaunchedEffect(true) {
         val hasSeenOnboarding = userPreferences.getHasSeenOnborading()
-//        val isProfileCompleted = userPreferences.getIsProfileCompleted()
+        val isProfileCompleted = userPreferences.getIsProfileCompleted()
 
         val isLoggedIn = auth.currentUser != null
 
         startDestination = when{
             !hasSeenOnboarding -> "onboarding_screen"
             !isLoggedIn -> "login_screen"
-//            !isProfileCompleted -> "create_profile_screen"
+            !isProfileCompleted -> "create_profile_screen"
             else -> "home"
         }
     }
@@ -71,51 +76,43 @@ fun AppNavGraph(
             }
 
             composable("create_profile_screen") {
-                val categoryWithTags by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
+                LaunchedEffect(Unit) {
+                    categoryViewModel.getAllCategoryWithTags()
+                }
+                val categoryWithTags by categoryViewModel
+                    .categoryWithTags.collectAsStateWithLifecycle(initialValue = emptyList())
                 val uid = auth.currentUser?.uid
                 val email = auth.currentUser?.email
-                CreateProfileScreen(navController,categoryViewModel,profileViewModel,permissionViewModel,userPreferences,categoryWithTags,uid!!,email!!)
+                CreateProfileScreen(navController,tagViewModel,profileViewModel,permissionViewModel,userPreferences,categoryWithTags,uid,email)
             }
 
             composable("home") {backStackEntry ->
-                val uid = auth.currentUser?.uid
-
-                if(uid==null){
-                    Text("Kullanıcı bulunamadı")
-                    return@composable
+                val uid = auth.currentUser?.uid!!
+                LaunchedEffect(uid) {
+                    profileViewModel.getById(uid)
                 }
 
-                val profile by profileViewModel.getById(uid).collectAsState(null)
+                val profile by profileViewModel.profile.collectAsStateWithLifecycle()
 
-                if(profile==null){
-                    CircularProgressIndicator()
-                    return@composable
-                }else{
-                    // TODO Sakın Silme !!!
-                    val categoryWithTags by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
-                    val selectedTag by categoryViewModel.selectedTag.collectAsStateWithLifecycle()
-                    val chosenTags by categoryViewModel.chosenTags.collectAsStateWithLifecycle()
+                LaunchedEffect(profile.selectedTagList) {
+                    val tagIds = profile.selectedTagList?.map { it.id } ?: emptyList()
+                    eventViewModel.getEventBySelectedTag(tagIds)
 
-                    val eventList by eventViewModel.getEventsForUser(profile!!.selectedTagList.map { it.id }).collectAsState(
-                        emptyList()
-                    )
-
-                    if(eventList==null){
-                        CircularProgressIndicator()
-                        return@composable
-                    }else{
-                        HomeScreen(eventList = eventList, navController = navController,commentViewModel,likeViewModel,uid)
-                    }
                 }
-            }
+                println("selectedTagList"+profile.selectedTagList)
+                val eventList by eventViewModel.eventWithTag.collectAsState()
 
+                HomeScreen(eventList = eventList, navController = navController,commentViewModel,likeViewModel,uid) }
 
 
             composable("addEvent") {
                 val uid = auth.currentUser?.uid
-
+                LaunchedEffect(Unit) {
+                    categoryViewModel.getAllCategoryWithTags()
+                }
                 AddEventScreen(
                     navController = navController,
+                    tagViewModel,
                     categoryViewModel,
                     eventViewModel,
                     permissionViewModel,
@@ -125,107 +122,79 @@ fun AppNavGraph(
 
             composable("detail/{id}") { backStackEntry ->
 
-                val eventId = backStackEntry.arguments?.getString("id") ?: ""
-                val uid = auth.currentUser?.uid!!
+                val eventId = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: 0
 
-                val eventWithTags by eventViewModel.getEventWithRelationsById(eventId).collectAsState(null)
-
-                //Category'i al
-
-                val category by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
-
-                if(eventWithTags == null || category.isEmpty()){
-                    CircularProgressIndicator()
-                    return@composable
+                // Event'i çağır
+                LaunchedEffect(eventId) {
+                    eventViewModel.getEventById(eventId)
                 }
 
-                // TODO bu metot belki değişebilir
+                val event by eventViewModel.event.collectAsState()
 
-                val detailCategory = category.filter { cat ->
-                    cat.category.id == eventWithTags?.event?.categoryId
-                }.map { it.category }.first()
+                val category by categoryViewModel.category.collectAsState()
 
-                if(detailCategory == null){
-                    CircularProgressIndicator()
-                    return@composable
+                LaunchedEffect(event?.categoryId) {
+                    val categoryID = event?.categoryId ?: 0
+                    if (categoryID != 0) {
+                        categoryViewModel.getCategoryById(categoryID)
+                    }
                 }
+                var uid = auth.currentUser?.uid!!
 
-                val commentList by commentViewModel.getComments(eventId).collectAsState(emptyList())
-
-                DetailScreen(event = eventWithTags!!.event,
-                    navController = navController,
-                    category = detailCategory,
-                    commentList = commentList,
-                    commentViewModel = commentViewModel,
-                    likeViewModel = likeViewModel,
-                    profileId = uid,
-                    participantsViewModel= participantsViewModel,
-                )
-
+                var commentList = commentViewModel.getComments(eventId = event.id)
+                DetailScreen(event = event, navController = navController, category = category, commentList,commentViewModel,likeViewModel,uid,participantsViewModel)
             }
 
 
             composable("explorer"){
-
                 LaunchedEffect(Unit) {
-                    eventViewModel.getAllEventsWithRelations()
+                    eventViewModel.getAllEvents()
                 }
-                val eventList by eventViewModel.allEventsWithRelations.collectAsStateWithLifecycle()
-
+                val eventList by eventViewModel.eventList.collectAsStateWithLifecycle()
                 ExploreScreen(eventList,navController,exploreViewModel)
-
             }
 
             composable("profile") {
-                val uid = auth.currentUser?.uid
-
-                if(uid!=null){
-
-                    val profile by profileViewModel.getById(uid).collectAsState(null)
-
-                    profile?.let {
-                        ProfileScreen(navController = navController,authViewModel, it)
-                    }
+                var uid = auth.currentUser?.uid
+                LaunchedEffect(Unit) {
+                    profileViewModel.getById(uid!!)
                 }
+
+                val profile by profileViewModel.profile.collectAsStateWithLifecycle()
+
+
+                ProfileScreen(navController = navController,authViewModel,profile)
             }
 
             composable("my_account") {
-                val uid = auth.currentUser?.uid
-
-                if(uid!=null){
-
-                    val profile by profileViewModel.getById(uid).collectAsState(null)
-
-                    profile?.let {
-                        MyAccountScreen(navController,profile!!,profileViewModel,permissionViewModel)
-                    }
+                var uid = auth.currentUser?.uid
+                LaunchedEffect(Unit) {
+                    profileViewModel.getById(uid!!)
                 }
+                val profile by profileViewModel.profile.collectAsStateWithLifecycle()
+                MyAccountScreen(navController,profile,profileViewModel)
             }
 
             composable("preferences"){
                 val uid = auth.currentUser?.uid
-
-                if(uid!=null){
-
-                    val profile by profileViewModel.getById(uid).collectAsState(null)
-
-                    val isDark = themeViewModel.isDarkTheme.collectAsState().value
-
-                    profile?.let{profile->
-                        PreferencesScreen(navController,profile,profileViewModel,isDark,themeViewModel)
-                    }
-
+                LaunchedEffect(Unit){
+                    profileViewModel.getById(uid ?: "")
                 }
+
+                val profile by profileViewModel.profile.collectAsStateWithLifecycle()
+
+                val isDark = themeViewModel.isDarkTheme.collectAsState().value
+
+
+                PreferencesScreen(navController,profile,profileViewModel,isDark,themeViewModel)
             }
 
             composable("my_events"){
-                val uid = auth.currentUser?.uid!!
-
+                val uid = auth.currentUser?.uid
                 LaunchedEffect(Unit) {
-                    eventViewModel.getEventsByOwnerId(uid)
+                    eventViewModel.getEventByOwner(uid ?: "")
                 }
-                val myEvents by eventViewModel.eventsForOwner.collectAsStateWithLifecycle()
-
+                val myEvents by eventViewModel.eventsByOwner.collectAsStateWithLifecycle()
                 MyEventsScreen(navController,myEvents){
                     eventViewModel.deleteEvent(it)
                 }
@@ -249,21 +218,21 @@ fun AppNavGraph(
 
             composable("participants_screen/{id}") {backStackEntry ->
 
-                val eventId = backStackEntry.arguments?.getString("id")?.toString() ?: ""
+                val eventId = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: 0
                 // TODO Event Id değeri gelmiyor o yüzden crash yiyoruz
                 println("eventId:" + eventId)
                 ParticipantsScreen(navController,participantsViewModel, eventId)
             }
 
             composable("edit_event_screen/{id}") {backStackEntry ->
-                val eventId = backStackEntry.arguments?.getString("id").toString() ?: ""
-//                LaunchedEffect(eventId) {
-//                    eventViewModel.getEventWithRelationsById(eventId)
-//                }
-//                val eventWithTags by eventViewModel.getEventWithRelationsById(eventId).collectAsState(null)
+                val eventId = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: 0
+                LaunchedEffect(eventId) {
+                    eventViewModel.getEventWithTagByEventId(eventId)
+                }
+                val eventWithTags by eventViewModel.eventWithTagItem.collectAsStateWithLifecycle()
 
                 val uid = auth.currentUser?.uid
-                EditEventScreen(navController,eventId,eventViewModel,categoryViewModel,uid!!)
+                EditEventScreen(navController,eventWithTags,eventViewModel,categoryViewModel,tagViewModel,uid!!)
             }
         }
     }

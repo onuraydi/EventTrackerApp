@@ -14,10 +14,6 @@ supportAnnotations = "28.0.0"
 datastoreCoreAndroid = "1.1.7"
 pagerVersion = ".7.2"
 foundationLayoutAndroid = "1.7.2"
-firebaseDatabaseKtx = "21.0.0"
-firebaseFirestoreKtx = "25.1.4"
-foundationAndroid = "1.7.2"
-runtimeLivedata = "1.8.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,10 +35,6 @@ androidx-benchmark-common = { group = "androidx.benchmark", name = "benchmark-co
 support-annotations = { group = "com.android.support", name = "support-annotations", version.ref = "supportAnnotations" }
 androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
 foundation-pager = {group = "androidx.compose.foundation", name = "foundation", version.ref = "pagerVersion"}
-firebase-database-ktx = { group = "com.google.firebase", name = "firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
-firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
-androidx-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "foundationAndroid" }
-androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 
 
 [plugins]

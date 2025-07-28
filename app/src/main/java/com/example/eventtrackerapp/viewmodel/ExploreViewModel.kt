@@ -4,9 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
-import com.example.eventtrackerapp.model.roommodels.Event
-import com.example.eventtrackerapp.model.roommodels.EventWithTags
-import com.example.eventtrackerapp.model.roommodels.SearchHistory
+import com.example.eventtrackerapp.model.Event
+import com.example.eventtrackerapp.model.SearchHistory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,11 +14,11 @@ import kotlinx.coroutines.launch
 
 class ExploreViewModel(application:Application):AndroidViewModel(application) {
 
-    val exploreDao = EventTrackerDatabase.getDatabase(application).exploreDao()
-    val historyDao = EventTrackerDatabase.getDatabase(application).historyDao()
+    val exploreDao = EventTrackerDatabase.getDatabase(application,viewModelScope).exploreDao()
+    val historyDao = EventTrackerDatabase.getDatabase(application,viewModelScope).historyDao()
 
-    val _searchList = MutableStateFlow<List<EventWithTags>>(arrayListOf())
-    val searchList: StateFlow<List<EventWithTags>> = _searchList
+    val _searchList = MutableStateFlow<List<Event>>(arrayListOf())
+    val searchList: StateFlow<List<Event>> = _searchList
 
     //DAO’dan gelen Flow’u StateFlow’a dönüştür,
     // UI'da gözlemlenebilir hale getir, sadece ihtiyaç duyulunca çalışsın,

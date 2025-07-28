@@ -14,7 +14,7 @@ class UserPreferences(private val context: Context) {
 
     companion object {
         val HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
-//        val IS_PROFILE_COMPLETED = booleanPreferencesKey("is_profile_completed")
+        val IS_PROFILE_COMPLETED = booleanPreferencesKey("is_profile_completed")
     }
 
     suspend fun setHasSeenOnboarding(value:Boolean){
@@ -25,11 +25,11 @@ class UserPreferences(private val context: Context) {
         return context.dataStore.data.map { it[HAS_SEEN_ONBOARDING] ?: false }.first()
     }
 
-//    suspend fun setIsProfileCompleted(value:Boolean) {
-//        context.dataStore.edit { it[IS_PROFILE_COMPLETED] = value }
-//    }
-//
-//    suspend fun getIsProfileCompleted() : Boolean {
-//        return context.dataStore.data.map { it[IS_PROFILE_COMPLETED] ?: false  }.first()
-//    }
+    suspend fun setIsProfileCompleted(value:Boolean) {
+        context.dataStore.edit { it[IS_PROFILE_COMPLETED] = value }
+    }
+
+    suspend fun getIsProfileCompleted() : Boolean {
+        return context.dataStore.data.map { it[IS_PROFILE_COMPLETED] ?: false  }.first()
+    }
 }

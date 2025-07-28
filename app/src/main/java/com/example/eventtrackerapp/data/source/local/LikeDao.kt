@@ -2,42 +2,26 @@ package com.example.eventtrackerapp.data.source.local
 
 import androidx.room.Dao
 import androidx.room.Index
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.eventtrackerapp.model.roommodels.Like
+import com.example.eventtrackerapp.model.Like
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LikeDao {
 
-    @Query("DELETE FROM likes WHERE eventId = :eventId")
-    suspend fun clearLikesForEvent(eventId: String)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllLikes(likes: List<Like>)
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertLike(like: Like)
+    suspend fun insertLike(like:Like)
 
-    @Query("SELECT * FROM likes")
-    fun getAllLikes():Flow<List<Like>>
 
-    @Delete
-    suspend fun deleteLike(like:Like)
+    @Query("DELETE FROM likes WHERE profileId = :profileId AND eventId = :eventId")
+    suspend fun deleteLike(profileId:String,eventId:Int)
 
-    @Query("DELETE FROM likes WHERE eventId = :eventId")
-    suspend fun deleteLikeForEvent(eventId: String)
+    @Query("SELECT COUNT(*) FROM likes WHERE eventId = :eventId")
+    fun getLikeCount(eventId: Int):Flow<Int>
 
-    @Query("DELETE FROM likes WHERE profileId = :profileId")
-    suspend fun deleteLikeForProfile(profileId: String)
-
-    // LİMİT 1?
-    @Query("SELECT EXISTS(SELECT 1 FROM likes WHERE eventId = :eventId AND profileId = :profileId LIMIT 1)")
-    fun isEventLikedByUser(eventId: String,profileId: String):Flow<Boolean>
-
-    @Query("SELECT COUNT(profileId) FROM likes WHERE eventId = :eventId")
-    fun getLikeCountForEvent(eventId: String):Flow<Int>
+    @Query("SELECT EXISTS(SELECT 1 FROM likes WHERE profileId = :profileId AND eventId = :eventId)")
+    fun hasUserLiked(eventId: Int, profileId: String): Flow<Boolean>
 
 }
