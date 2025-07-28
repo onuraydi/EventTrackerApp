@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.example.eventtrackerapp.model.roommodels.CachedImage
 import com.example.eventtrackerapp.model.roommodels.Category
 import com.example.eventtrackerapp.model.roommodels.Comment
 import com.example.eventtrackerapp.model.roommodels.Event
@@ -15,8 +16,8 @@ import com.example.eventtrackerapp.model.roommodels.ProfileEventCrossRef
 import com.example.eventtrackerapp.model.roommodels.SearchHistory
 import com.example.eventtrackerapp.model.roommodels.Tag
 
-@Database(entities = [Category::class, Tag::class, Event::class, Profile::class, Comment::class, Like::class, EventTagCrossRef::class, ProfileEventCrossRef::class, SearchHistory::class],
-    version = 12)
+@Database(entities = [Category::class, Tag::class, Event::class, Profile::class, Comment::class, Like::class, EventTagCrossRef::class, ProfileEventCrossRef::class, SearchHistory::class,CachedImage::class],
+    version = 13)
 @TypeConverters(Converter::class)
 abstract class EventTrackerDatabase : RoomDatabase(){
 
@@ -29,6 +30,7 @@ abstract class EventTrackerDatabase : RoomDatabase(){
     abstract fun likeDao():LikeDao
     abstract fun exploreDao():ExploreDao
     abstract fun historyDao():HistoryDao
+    abstract fun cachedImageDao():CachedImageDao
     //bu fonksiyon çağrıldığı yerde eğer database objesi oluşturulduysa aynı
     //obje üzerinden süreç işler.
 

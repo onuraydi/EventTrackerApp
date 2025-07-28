@@ -3,6 +3,7 @@ package com.example.eventtrackerapp.views
 import android.app.Activity
 import android.content.Context
 import android.icu.text.SimpleDateFormat
+import android.net.Uri
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -55,11 +56,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -83,6 +82,7 @@ import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
+import com.example.eventtrackerapp.viewmodel.StorageViewModel
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Date
@@ -96,6 +96,7 @@ fun AddEventScreen(
     categoryViewModel: CategoryViewModel,
     eventViewModel: EventViewModel,
     permissionViewModel: PermissionViewModel,
+    storageViewModel: StorageViewModel,
     ownerId:String
 ) {
 //
@@ -114,8 +115,9 @@ fun AddEventScreen(
     //Media Permission
     val permission = permissionViewModel.getPermissionName()
 
-    val imageUri by permissionViewModel.eventImageUri.collectAsStateWithLifecycle()
-    val imagePath = rememberSaveable { mutableStateOf("") } //resmin yolunu tutuyoruz
+    val uriData = remember{mutableStateOf<Uri?>(null)}
+    val galleryData = rememberSaveable{mutableStateOf("")}
+    val imagePath = storageViewModel.imagePath.collectAsStateWithLifecycle()//resmin yolunu tutuyoruz
 
     //galeriye gidip fotoğraf seçmemizi sağlayacak
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -123,10 +125,12 @@ fun AddEventScreen(
     ) {result->
         if(result.resultCode == Activity.RESULT_OK && result.data!=null){
             //kullanıcı resim seçti ve gelen intent boş değilse
-            val data = result.data?.data
-            if(data!=null){
-                val savedUri = PermissionHelper.saveImageToInternalStorage(context,data)
-                imagePath.value = savedUri.toString()
+            uriData.value = result.data?.data
+            if(uriData!=null){
+                val localPath = uriData.value?.let { PermissionHelper.saveImageToInternalStorage(context, it) }
+                if(localPath!=null){
+                    galleryData.value = localPath
+                }
             }
         }
     }
@@ -208,7 +212,7 @@ fun AddEventScreen(
                     SelectableImageBox(
                         boxWidth= 180.dp,
                         boxHeight = 160.dp,
-                        imagePath = imagePath.value,
+                        imagePath = galleryData.value,
                         modifier = Modifier,
                         placeHolder = painterResource(R.drawable.image_icon),
                         shape = RoundedCornerShape(12.dp),
@@ -428,18 +432,23 @@ fun AddEventScreen(
                                 categoryError.value = selectedCategoryName.value.isBlank()
                                 return@EventTrackerAppPrimaryButton
                             } else {
-                                val event = Event(
-                                    ownerId = ownerId,
-                                    name = eventName.value,
-                                    detail = eventDetail.value,
-                                    image = imagePath.value,
-                                    date = selectedDate.value!!,  // TODO ?
-                                    duration = eventDuration.value,
-                                    location = eventLocation.value,
-                                    likeCount = 0,
-                                    categoryId = categoryId.value,
-                                )
-                                eventViewModel.addEvent(event = event, selectedTags = chosenTags)
+                                uriData.value?.let { storageViewModel.setImageToStorage(it,ownerId) }
+                                val event = imagePath.value?.let {
+                                    Event(
+                                        ownerId = ownerId,
+                                        name = eventName.value,
+                                        detail = eventDetail.value,
+                                        image = it,
+                                        date = selectedDate.value!!,  // TODO ?
+                                        duration = eventDuration.value,
+                                        location = eventLocation.value,
+                                        likeCount = 0,
+                                        categoryId = categoryId.value,
+                                    )
+                                }
+                                if (event != null) {
+                                    eventViewModel.addEvent(event = event, selectedTags = chosenTags)
+                                }
 
                                 navController.popBackStack()
                             }

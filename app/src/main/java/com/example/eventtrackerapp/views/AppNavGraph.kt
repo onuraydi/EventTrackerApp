@@ -26,6 +26,7 @@ import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
+import com.example.eventtrackerapp.viewmodel.StorageViewModel
 import com.example.eventtrackerapp.viewmodel.ThemeViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -44,6 +45,7 @@ fun AppNavGraph(
     exploreViewModel: ExploreViewModel = hiltViewModel(),
     permissionViewModel:PermissionViewModel = hiltViewModel(),
     themeViewModel: ThemeViewModel = hiltViewModel(),
+    storageViewModel: StorageViewModel = hiltViewModel(),
     auth: FirebaseAuth,
     userPreferences: UserPreferences,
 ){
@@ -119,6 +121,7 @@ fun AppNavGraph(
                     categoryViewModel,
                     eventViewModel,
                     permissionViewModel,
+                    storageViewModel,
                     uid ?: ""
                 )
             }

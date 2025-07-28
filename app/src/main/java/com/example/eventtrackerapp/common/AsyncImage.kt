@@ -1,15 +1,14 @@
 package com.example.eventtrackerapp.common
 
-import android.util.Size
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,30 +42,26 @@ fun SelectableImageBox(
                 onClick()
             }
     ) {
-        if(imagePath!=""){
-            val imageFile = imagePath?.let { File(it) }
-            if (imageFile!=null && imageFile.exists()) {
-                AsyncImage(
-                    model = imageFile,
-                    contentDescription = "Selected Photo",
-                    modifier
-                        .fillMaxSize(1f)
-                        .align(Alignment.Center)
-                        .clip(shape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                //eğer dosya boş geldiyse
-                Image(
-                    painter = placeHolder,
-                    contentDescription = "Selected Photo",
-                    modifier
-                        .fillMaxSize(1f)
-                        .align(Alignment.Center)
-                        .clip(shape),
-                    contentScale = ContentScale.Crop
-                )
+
+        val model = remember(imagePath){
+            when{
+                imagePath.isNullOrEmpty() -> null
+                imagePath.startsWith("http") -> imagePath//url
+                else-> File(imagePath)//cihaz yolu
             }
+        }
+
+        if(model!= null){
+            AsyncImage(
+                model = model,
+                contentDescription = "Selected Photo",
+                modifier
+                    .fillMaxSize(1f)
+                    .align(Alignment.Center)
+                    .clip(shape),
+                contentScale = ContentScale.Crop
+            )
+
         }else{
             //eğer fotoğraf yolu boş geldiyse
             Image(

@@ -6,6 +6,8 @@ import com.example.eventtrackerapp.data.repositories.CommentRepository
 import com.example.eventtrackerapp.data.repositories.EventRepository
 import com.example.eventtrackerapp.data.repositories.LikeRepository
 import com.example.eventtrackerapp.data.repositories.ProfileRepository
+import com.example.eventtrackerapp.data.repositories.StorageCacheRepository
+import com.example.eventtrackerapp.data.source.local.CachedImageDao
 import com.example.eventtrackerapp.data.source.local.CategoryDao
 import com.example.eventtrackerapp.data.source.local.CommentDao
 import com.example.eventtrackerapp.data.source.local.EventDao
@@ -93,6 +95,11 @@ object AppModule{
         return database.profileDao()
     }
 
+    @Provides
+    @Singleton
+    fun provideCacheDao(database: EventTrackerDatabase): CachedImageDao {
+        return database.cachedImageDao()
+    }
 
     //Repository Bağımlılıkları
     // Her Repository için bir @Provides metodu tanımlıyoruz.
@@ -126,5 +133,11 @@ object AppModule{
     @Singleton
     fun provideProfileRepository(profileDao: ProfileDao, categoryDao: CategoryDao, tagDao: TagDao, firestore: FirebaseFirestore, @ApplicationContext context: Context): ProfileRepository {
         return ProfileRepository(profileDao,categoryDao,tagDao,firestore,context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCacheRepository(cachedImageDao: CachedImageDao, @ApplicationContext context: Context): StorageCacheRepository {
+        return StorageCacheRepository(cachedImageDao,context)
     }
 }
