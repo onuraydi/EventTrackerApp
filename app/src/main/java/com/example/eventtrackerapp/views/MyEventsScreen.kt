@@ -2,8 +2,7 @@
 
 package com.example.eventtrackerapp.views
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,8 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -26,7 +23,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -41,35 +37,30 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.Event
-import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.model.roommodels.Event
+import com.example.eventtrackerapp.common.SelectableImageBox
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyEventsScreen(
     navController: NavController,
-    myEvents:List<Event>,
-    deleteEvent:(id:Int)->Unit
+    myEvents: List<Event?>,
+    deleteEvent:(event:Event)->Unit
 ){
     val showDialog = remember { mutableStateOf(false) }
-    val selectedEventId = remember { mutableIntStateOf(0) }
+    val selectedEvent = remember { mutableStateOf(Event()) }
 
         Scaffold(
             Modifier.fillMaxSize(),
@@ -102,7 +93,7 @@ fun MyEventsScreen(
                     contentPadding = PaddingValues(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(myEvents){
+                    items(myEvents.filterNotNull()){
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -118,13 +109,14 @@ fun MyEventsScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Image(
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .background(Color.Red)
-                                        .size(60.dp),
-                                    painter = painterResource(it.image),
-                                    contentDescription = "Profile",
+                                SelectableImageBox(
+                                    boxWidth = 60.dp,
+                                    boxHeight = 60.dp,
+                                    imagePath = it?.image,
+                                    modifier = Modifier,
+                                    placeHolder = painterResource(R.drawable.ic_launcher_background),
+                                    shape = CircleShape,
+                                    borderStroke = BorderStroke(1.dp,MaterialTheme.colorScheme.primaryContainer)
                                 )
 
                                 Column(
@@ -134,13 +126,13 @@ fun MyEventsScreen(
                                         .padding(start = 12.dp)
                                 ) {
                                     Text(
-                                        text = it.name ?: "",
+                                        text = it?.name ?: "",
                                         fontSize = 18.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
-                                        text = it.detail ?: "",
+                                        text = it?.detail ?: "",
                                         fontSize = 16.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -158,7 +150,7 @@ fun MyEventsScreen(
                                             Icon(Icons.Default.Info, "Detail")
                                         },
                                         onClick = {
-                                            navController.navigate("detail/${it.id}")
+                                            navController.navigate("detail/${it?.id}")
                                         }
                                     )
                                     IconButton(
@@ -166,7 +158,7 @@ fun MyEventsScreen(
                                             Icon(Icons.Default.Edit, "Edit")
                                         },
                                         onClick = {
-                                            navController.navigate("edit_event_screen/${it.id}")
+                                            navController.navigate("edit_event_screen/${it?.id}")
                                         }
                                     )
                                     IconButton(
@@ -174,7 +166,7 @@ fun MyEventsScreen(
                                             Icon(Icons.Default.Delete, "Delete")
                                         },
                                         onClick = {
-                                            selectedEventId.intValue = it.id
+                                            selectedEvent.value = it
                                             showDialog.value = true
                                         }
                                     )
@@ -188,7 +180,7 @@ fun MyEventsScreen(
                         dialogTitle = "Etkinlik Silinecek",
                         dialogText = "Eğer onaylarsan eklediğin etkinliği silmiş olacaksın." +
                                 " Sildiğin etkinliği bir daha geri alamazsın",
-                        onConfirmation = {deleteEvent(selectedEventId.value)},
+                        onConfirmation = {deleteEvent(selectedEvent.value)},
                         onDismissRequest = {showDialog.value = false}
                     )
                 }

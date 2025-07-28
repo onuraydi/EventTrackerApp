@@ -2,20 +2,13 @@ package com.example.eventtrackerapp.views
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
 import android.os.Build
-import android.provider.MediaStore
 import android.widget.Toast
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -40,13 +33,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -69,6 +59,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -79,27 +70,19 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.Event
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.eventtrackerapp.model.roommodels.Event
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import com.example.eventtrackerapp.model.EventWithTags
-import com.example.eventtrackerapp.model.Tag
-import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
-import com.example.eventtrackerapp.utils.EventTrackerAppAuthTextField
-import com.example.eventtrackerapp.utils.EventTrackerAppOutlinedTextField
-import com.example.eventtrackerapp.utils.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
+import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.PermissionHelper
+import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
-import com.example.eventtrackerapp.viewmodel.TagViewModel
-import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Date
@@ -110,30 +93,29 @@ import java.util.Locale
 @Composable
 fun AddEventScreen(
     navController: NavController,
-    tagViewModel: TagViewModel = viewModel(),
-    categoryViewModel: CategoryViewModel = viewModel(),
-    eventViewModel: EventViewModel = viewModel(),
-    permissionViewModel: PermissionViewModel = viewModel(),
+    categoryViewModel: CategoryViewModel,
+    eventViewModel: EventViewModel,
+    permissionViewModel: PermissionViewModel,
     ownerId:String
 ) {
-    LaunchedEffect(Unit) {
-        tagViewModel.resetTag()
-    }
-    
-    val categoryWithTags by categoryViewModel.categoryWithTags.collectAsState()
-    val selectedTag by tagViewModel.selectedTag.collectAsStateWithLifecycle()
-    val chosenTags by tagViewModel.chosenTags.collectAsStateWithLifecycle()
+//
+//    LaunchedEffect(Unit) {
+//        categoryViewModel.resetTag()
+//    }
 
-    val context = LocalContext.current
+    val categoryWithTags by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
+    val selectedTag by categoryViewModel.selectedTag.collectAsStateWithLifecycle()
+    val chosenTags by categoryViewModel.chosenTags.collectAsStateWithLifecycle()
     val selectedCategoryName = remember { mutableStateOf("") }
+    val context = LocalContext.current
 
-    val events by eventViewModel.allEventsWithTags.collectAsState(initial = emptyList())
 
     //TODO BU KISIM REFACTOR EDİLECEK: SEALED CLASS KULLANACAĞIM
     //Media Permission
     val permission = permissionViewModel.getPermissionName()
 
-    val imageUri by permissionViewModel.profileImageUri.collectAsState()
+    val imageUri by permissionViewModel.eventImageUri.collectAsStateWithLifecycle()
+    val imagePath = rememberSaveable { mutableStateOf("") } //resmin yolunu tutuyoruz
 
     //galeriye gidip fotoğraf seçmemizi sağlayacak
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -142,7 +124,10 @@ fun AddEventScreen(
         if(result.resultCode == Activity.RESULT_OK && result.data!=null){
             //kullanıcı resim seçti ve gelen intent boş değilse
             val data = result.data?.data
-            permissionViewModel.setImageUri(data)
+            if(data!=null){
+                val savedUri = PermissionHelper.saveImageToInternalStorage(context,data)
+                imagePath.value = savedUri.toString()
+            }
         }
     }
 
@@ -152,7 +137,7 @@ fun AddEventScreen(
     ) {granted->
         if(granted){
             //kullanıcı izin verdi
-            goToGallery(imagePickerLauncher)
+            PermissionHelper.goToGallery(imagePickerLauncher)
         }else{
             Toast.makeText(context,"İzin kalıcı olarak reddedildi. Lütfen ayarlardan izni verin",Toast.LENGTH_LONG).show()
         }
@@ -168,7 +153,7 @@ fun AddEventScreen(
                     title = { Text("Add Event", fontSize = 25.sp) },
                     navigationIcon = {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             "GoBack",
                             modifier = Modifier
                                 .padding(start = 8.dp)
@@ -192,7 +177,7 @@ fun AddEventScreen(
                 val eventDetail = rememberSaveable { mutableStateOf("") }
                 val detailError = rememberSaveable{mutableStateOf(false)}
 
-                val selectedDate = rememberSaveable { mutableStateOf<Long?>(null) }
+                val selectedDate = rememberSaveable { mutableStateOf<Long?>(0) }
                 val dateError = rememberSaveable{mutableStateOf(false)}
 
                 val showModal = rememberSaveable { mutableStateOf(false) }
@@ -205,7 +190,7 @@ fun AddEventScreen(
 
                 val categoryError = rememberSaveable{mutableStateOf(false)}
 
-                val categoryId = rememberSaveable{ mutableStateOf(0) }
+                val categoryId = rememberSaveable{ mutableStateOf("") }
                 val isExpanded = rememberSaveable{ mutableStateOf(false)}
 
                 Column(
@@ -218,47 +203,32 @@ fun AddEventScreen(
                 ) {
                     Spacer(Modifier.padding(vertical = 12.dp))
 
-                    //Profil Fotoğrafı
-                    Box(
-                        Modifier
-                            .size(180.dp,160.dp)
-                            .border(border = BorderStroke(2.dp, Color.Black), shape = RoundedCornerShape(12.dp))
-                            .clickable {
-                                doRequestPermission(
-                                    context = context,
-                                    permission = permission,
-                                    viewModel = permissionViewModel,
-                                    permissionLauncher = permissionLauncher,
-                                    imagePickerLauncher = imagePickerLauncher
-                                )
-                            }
-                    ){
-                        if(imageUri!=null){
-                            AsyncImage(
-                                model = imageUri,
-                                contentDescription = "Selected Photo",
-                                Modifier
-                                    .fillMaxSize(1f)
-                                    .align(Alignment.Center)
-                            )
-                        }else{
-                            Icon(
-                                painter = painterResource(R.drawable.image_icon),
-                                contentDescription = "Add Image",
-                                modifier = Modifier
-                                    .fillMaxSize(1f)
-                                    .align(Alignment.Center)
-                                    .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
+
+                    //Event Fotoğrafı
+                    SelectableImageBox(
+                        boxWidth= 180.dp,
+                        boxHeight = 160.dp,
+                        imagePath = imagePath.value,
+                        modifier = Modifier,
+                        placeHolder = painterResource(R.drawable.image_icon),
+                        shape = RoundedCornerShape(12.dp),
+                        onClick = {
+                            PermissionHelper.requestPermission(
+                                context,
+                                permission = permission,
+                                viewModel = permissionViewModel,
+                                imagePickerLauncher = imagePickerLauncher,
+                                permissionLauncher = permissionLauncher
                             )
                         }
-                    }
+                    )
 
                     Spacer(Modifier.padding(vertical = 5.dp))
                     Text("Please add event photo")
 
                     //Event Name
                     Spacer(Modifier.padding(vertical = 12.dp))
-                    EventTrackerAppAuthTextField(
+                    EventTrackerAppOutlinedTextField(
                         txt = "Event Name",
                         state = eventName,
                         onValueChange = {
@@ -266,16 +236,11 @@ fun AddEventScreen(
                             nameError.value = eventName.value.isBlank()
                         },
                         isError = nameError.value,
-                        supportingText = {
-                            if(nameError.value){
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        }
                     )
 
                     //Event Detail
                     Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppAuthTextField(
+                    EventTrackerAppOutlinedTextField(
                         modifier = Modifier.heightIn(min = 120.dp, max = 200.dp),
                         txt = "Event Detail",
                         state = eventDetail,
@@ -284,11 +249,6 @@ fun AddEventScreen(
                             detailError.value = eventDetail.value.isBlank()
                         },
                         isError = detailError.value,
-                        supportingText = {
-                            if(detailError.value){
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        },
                         isSingleLine = false
                     )
 
@@ -298,7 +258,7 @@ fun AddEventScreen(
 
                     //Event Duration
                     Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppAuthTextField(
+                    EventTrackerAppOutlinedTextField(
                         txt = "Event Duration",
                         state = eventDuration,
                         onValueChange = {
@@ -306,16 +266,11 @@ fun AddEventScreen(
                             durationError.value = eventDuration.value.isBlank()
                         },
                         isError = durationError.value,
-                        supportingText = {
-                            if(durationError.value){
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        }
                     )
 
                     //Event Location
                     Spacer(Modifier.padding(vertical = 8.dp))
-                    EventTrackerAppAuthTextField(
+                    EventTrackerAppOutlinedTextField(
                         txt = "Event Location",
                         state = eventLocation,
                         onValueChange = {
@@ -323,11 +278,6 @@ fun AddEventScreen(
                             locationError.value = eventLocation.value.isBlank()
                         },
                         isError = locationError.value,
-                        supportingText = {
-                            if(locationError.value){
-                                Text("Bu alanı boş bırakamazsınız")
-                            }
-                        }
                     )
 
                     //Select Category
@@ -373,13 +323,13 @@ fun AddEventScreen(
                         {
                             categoryWithTags.forEach{
                                 DropdownMenuItem(
-                                    text = {Text("${it.category.name}")},
+                                    text = {Text(it.category.name)},
                                     onClick = {
-                                        selectedCategoryName.value = it.category.name ?: ""
+                                        selectedCategoryName.value = it.category.name
                                         categoryError.value = selectedCategoryName.value.isBlank()
                                         isExpanded.value = false
                                         categoryId.value = it.category.id
-                                        tagViewModel.updateSelectedCategoryTags(it)
+                                        categoryViewModel.updateSelectedCategoryTags(it)
                                     }
                                 )
                             }
@@ -397,10 +347,10 @@ fun AddEventScreen(
                                 modifier = Modifier.padding(end = 8.dp),
                                 selected = isSelected,
                                 label = {
-                                    Text(tag.name?:"")
+                                    Text(tag.name)
                                 },
                                 onClick = {
-                                    tagViewModel.toggleTag(tag)
+                                    categoryViewModel.toggleTag(tag)
                                 },
                                 trailingIcon = if (isSelected){
                                     {
@@ -437,9 +387,9 @@ fun AddEventScreen(
                                 FilterChip(
                                     modifier = Modifier.padding(end = 3.dp),
                                     selected = true,
-                                    label = {Text(tag.name?:"", fontSize = 12.sp, maxLines = 1)},
+                                    label = {Text(tag.name, fontSize = 12.sp, maxLines = 1)},
                                     onClick = {
-                                        tagViewModel.removeChosenTag(tag)
+                                        categoryViewModel.removeChosenTag(tag)
                                     },
                                     trailingIcon = {
                                         Icon(Icons.Default.Clear,"Clear")
@@ -482,21 +432,15 @@ fun AddEventScreen(
                                     ownerId = ownerId,
                                     name = eventName.value,
                                     detail = eventDetail.value,
-                                    image = R.drawable.ic_launcher_background,
-                                    date = selectedDate.value,
+                                    image = imagePath.value,
+                                    date = selectedDate.value!!,  // TODO ?
                                     duration = eventDuration.value,
                                     location = eventLocation.value,
                                     likeCount = 0,
                                     categoryId = categoryId.value,
-
-                                    //participants = arrayListOf(),
-//                                category = Category(),
-//                                tagList = arrayListOf()
                                 )
-                                eventViewModel.insertEventWithTags(event = event, tags = chosenTags)
+                                eventViewModel.addEvent(event = event, selectedTags = chosenTags)
 
-
-                                println("etkinlik tagları"+events)
                                 navController.popBackStack()
                             }
                         })
@@ -506,31 +450,6 @@ fun AddEventScreen(
         }
     }
 
-fun doRequestPermission(
-    context: Context,
-    permission:String,
-    viewModel: PermissionViewModel,
-    permissionLauncher:ManagedActivityResultLauncher<String,Boolean>,
-    imagePickerLauncher:ManagedActivityResultLauncher<Intent,ActivityResult>
-){
-    if(ContextCompat.checkSelfPermission(context,permission)!=PackageManager.PERMISSION_GRANTED){
-        //izin reddedildi
-        if(viewModel.shouldShowRationale(context)){
-            Toast.makeText(context,"Fotoğraf yüklemek için galeri izni lazım",Toast.LENGTH_LONG).show()
-            permissionLauncher.launch(permission)
-        }else{
-            permissionLauncher.launch(permission)
-        }
-    }else{
-        //izin verildi
-        goToGallery(imagePickerLauncher)
-    }
-}
-
-fun goToGallery(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>){
-    val intent = Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-    launcher.launch(intent)
-}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)

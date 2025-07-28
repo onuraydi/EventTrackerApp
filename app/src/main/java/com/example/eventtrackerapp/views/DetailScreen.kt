@@ -1,6 +1,7 @@
 package com.example.eventtrackerapp.views
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -15,14 +16,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -36,46 +38,42 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.Category
-import com.example.eventtrackerapp.model.CommentWithProfileAndEvent
-import com.example.eventtrackerapp.model.Event
-import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
-import com.example.eventtrackerapp.utils.CommentBottomSheet
-import com.example.eventtrackerapp.viewmodel.CategoryViewModel
+import com.example.eventtrackerapp.common.CommentBottomSheet
+import com.example.eventtrackerapp.common.SelectableImageBox
+import com.example.eventtrackerapp.model.roommodels.Category
+import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
+import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
-import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.LikeViewModel
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
 import kotlinx.coroutines.flow.Flow
+import java.io.File
 
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -85,23 +83,27 @@ fun DetailScreen(
     event: Event,
     navController: NavController,
     category: Category,
-    commentList: Flow<List<CommentWithProfileAndEvent>>,
+    commentList: List<CommentWithProfileAndEvent>,
     commentViewModel: CommentViewModel,
     likeViewModel:LikeViewModel,
     profileId:String,
-    participantsViewModel: ParticipantsViewModel
+    participantsViewModel: ParticipantsViewModel,
 )
 {
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    val likeCount by likeViewModel.getLikeCount(event.id).collectAsState(initial = 0)
-    val isLiked by likeViewModel.isLikedByUser(event.id, profileId).collectAsState(initial = false)
+    val likeCount = likeViewModel.getLikeCountForEvent(event.id).collectAsState(event.likeCount)
+    val isLiked = likeViewModel.isEventLikedByUser(event.id,profileId).collectAsState(0)
 
-    val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(initial = 0)
+    val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(0)
 
-    val state by participantsViewModel.getParticipationState(event.id,profileId).collectAsState(initial = false)
+    val state by participantsViewModel.hasUserParticipated(event.id,profileId).collectAsState(false)
 
-    val participantsCount by participantsViewModel.getParticipantsCount(event.id).collectAsState(initial = 0)
+    val participantsCount by participantsViewModel.getParticipationCount(event.id).collectAsState(0)
+
+    val participants by participantsViewModel.getParticipantsForEvent(event.id).collectAsState(
+        emptyList()
+    )
 
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -113,7 +115,8 @@ fun DetailScreen(
                     Text("Etkinlik Detay Sayfası", fontSize = 25.sp)
                 },
                 navigationIcon = {
-                    Icon(Icons.Default.ArrowBack,null, modifier = Modifier
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,null, modifier = Modifier
                         .padding(start = 8.dp)
                         .clickable { navController.popBackStack() })
                 }
@@ -127,22 +130,22 @@ fun DetailScreen(
             .verticalScroll(rememberScrollState())) {
             Column() {
 
-                if (event != null && event.image != null && event.image != 0) {
-                    Image(
-                        painter = painterResource(id = event.image),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        contentScale = ContentScale.Crop
+                if (event != null && event.image != null && event.image != "") {
+                    SelectableImageBox(
+                        boxWidth = 200.dp,
+                        boxHeight = 200.dp,
+                        imagePath = event.image,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RectangleShape,
+                        placeHolder = painterResource(R.drawable.ic_launcher_background)
                     )
                 }
 
                 Spacer(Modifier.padding(top = 18.dp))
 
-                event.name?.let { Text(text= it, fontSize = 30.sp, fontWeight = FontWeight.W500) }
+                event.name.let { Text(text= it, fontSize = 30.sp, fontWeight = FontWeight.W500) }
                 Spacer(Modifier.padding(top = 3.dp))
-                category?.let {
+                category.let {
                     Text("Kategori:" + it.name)
                 }
                 Spacer(Modifier.padding(top = 10.dp))
@@ -168,33 +171,29 @@ fun DetailScreen(
                         navController.navigate("participants_screen/${event.id}")
                 })
                 Spacer(Modifier.padding(top = 5.dp))
-                Row(modifier = Modifier
+                LazyRow(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
                     .clickable { navController.navigate("participants_screen/${event.id}") }) {
-                    if(participantsCount < 4)
-                    {
-                        repeat(participantsCount)
-                        {
-                            Image(
-                                // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
-                                painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                                Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer), shape = CircleShape)
-                                    .size(60.dp))
-                            Spacer(Modifier.padding(start = 10.dp))
-                        }
+                    items(participants.take(3)){participant->
+                        //.take(3) ilk 3 elemanı alır. Eğer 3'ten fazla olursa aşağısı çalışır
+                        //itemsIndexed de olabilir.
+                        SelectableImageBox(
+                            boxWidth = 60.dp,
+                            boxHeight = 60.dp,
+                            imagePath = participant?.photo,
+                            modifier = Modifier,
+                            placeHolder = painterResource(R.drawable.ic_launcher_foreground),
+                            shape = CircleShape,
+                            borderStroke = BorderStroke(2.dp,MaterialTheme.colorScheme.primaryContainer)
+                        )
+                        Spacer(Modifier.padding(start = 10.dp))
                     }
-                    else
-                    {
-                        repeat(3)
-                        {
-                            Image(
-                                // TODO Buraya daha sonra kullanıcının profil fotoğrafı gelecek
-                                painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
-                                Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer), shape = CircleShape)
-                                    .size(60.dp))
-                            Spacer(Modifier.padding(start = 10.dp))
+                    if(participantsCount > 3){
+                        item {
+                            Text("+${participantsCount - 3} Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier)
                         }
-                        Text("+${participantsCount - 3} Kişi daha" ,fontWeight = FontWeight.W500, fontSize = 20.sp, textDecoration = TextDecoration.Underline,modifier =  Modifier
-                            .align(Alignment.CenterVertically))
                     }
                 }
                 Spacer(Modifier.padding(top = 20.dp))
@@ -205,14 +204,14 @@ fun DetailScreen(
                     // TODO etkinliğe katılıp katılmadığının kontorlü yapılarak butonun görünümü vb. değişecek
                     if (!state)
                     {
-                        ExtendedFloatingActionButton(onClick = {participantsViewModel.joinEvent(profileId = profileId, eventId = event.id) },
+                        ExtendedFloatingActionButton(onClick = {participantsViewModel.toggleAttendance(profileId = profileId, eventId = event.id) },
                             icon = { Icon(Icons.Default.Add,null)},
                             text = { Text("Katıl")},
                             modifier = Modifier.weight(1f)
                         )
                     }
                     else{
-                        ExtendedFloatingActionButton(onClick = {participantsViewModel.deleteParticipation(event.id,profileId)},
+                        ExtendedFloatingActionButton(onClick = {participantsViewModel.toggleAttendance(event.id,profileId)},
                             icon = {Icon(Icons.Default.Clear,null)},
                             text = { Text("Vazgeç")},
                             modifier = Modifier.weight(1f)
@@ -235,24 +234,24 @@ fun DetailScreen(
 
                     ) {
                     Row(Modifier.weight(1f),horizontalArrangement = Arrangement.Center){
-                        if (isLiked == false) {
+                        if (isLiked.value == false) {
                             Icon(Icons.Filled.FavoriteBorder, null, modifier = Modifier
                                 .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
                                 .clickable {
-                                    likeViewModel.likeEvent(event.id,profileId)
+                                    likeViewModel.toggleLike(event.id,profileId)
                                 })
                             Text(
-                                text = "${likeCount}",
+                                text = "${likeCount.value}",
                                 Modifier.align(Alignment.CenterVertically)
                             )
                         } else {
                             Icon(Icons.Filled.Favorite, null, modifier = Modifier
                                 .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
                                 .clickable {
-                                    likeViewModel.unlikeEvent(event.id,profileId)
+                                    likeViewModel.toggleLike(event.id,profileId)
                                 })
                             Text(
-                                text = "${likeCount}",
+                                text = "${likeCount.value}",
                                 Modifier.align(Alignment.CenterVertically)
                             )
                         }

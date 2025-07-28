@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -18,22 +17,17 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,25 +36,19 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
-import com.example.eventtrackerapp.model.Category
-import com.example.eventtrackerapp.model.Profile
-import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
+import com.example.eventtrackerapp.model.roommodels.Profile
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.ThemeViewModel
 
@@ -68,7 +56,7 @@ import com.example.eventtrackerapp.viewmodel.ThemeViewModel
 @Composable
 fun PreferencesScreen(
     navController: NavController,
-    profile:Profile,
+    profile: Profile,
     profileViewModel: ProfileViewModel = viewModel(),
     isDark:Boolean,
     themeViewModel: ThemeViewModel
@@ -183,10 +171,10 @@ fun PreferencesScreen(
 
                                         if(isSelected.value){
                                             //kategori eklenecek
-                                            profileViewModel.addTag(tag)
+                                            profileViewModel.addTag(tag,profile.id)
                                         }else{
                                             //kategori silinecek
-                                            profileViewModel.removeTag(tag.id)
+                                            profileViewModel.removeTag(tag.id,profile.id)
                                         }
                                     },
                                     label = {Text(tag.name ?: "")},
