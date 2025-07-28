@@ -18,7 +18,7 @@ interface ProfileDao {
     @Query("SELECT * FROM profiles WHERE id = :id")
     fun getById(id: String): Flow<Profile>
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun add(profile: Profile)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

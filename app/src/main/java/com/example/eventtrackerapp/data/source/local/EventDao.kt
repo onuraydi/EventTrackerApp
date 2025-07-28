@@ -22,8 +22,33 @@ interface EventDao {
     @Insert
     suspend fun insert(event: Event)
 
+    @Transaction
+    suspend fun withTransaction(block: suspend () -> Unit) {
+        block()
+    }
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllProfileEventCrossRef(crossRef: List<ProfileEventCrossRef>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllEventTagCrossRef(crossRef: List<EventTagCrossRef>)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(event : List<Event>)
+
+    @Transaction
+    suspend fun insertEventsAndCrossRefsInTransaction(
+        events: List<Event>,
+        eventTagCrossRefs: List<EventTagCrossRef>
+    ) {
+        // Önce Event'ları ekle (veya güncelle)
+        insertAll(events)
+        // Sonra EventTagCrossRef'leri ekle (ilişkili olduğu Event'lar artık DB'de olmalı)
+        insertAllEventTagCrossRef(eventTagCrossRefs)
+    }
+
+
+
 
     @Query("delete from events")
     suspend fun deleteAllEvents()
@@ -59,8 +84,7 @@ interface EventDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateProfileEventCrossRef(crossRef: ProfileEventCrossRef)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllProfileEventCrossRef(crossRef: List<ProfileEventCrossRef>)
+
 
     @Query("SELECT * FROM profile_event_cross_ref WHERE eventId = :eventId AND profileId = :profileId LIMIT 1")
     fun getProfileEventCrossRef(eventId: String, profileId:String):Flow<ProfileEventCrossRef?>
@@ -81,8 +105,7 @@ interface EventDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEventTagCrossRef(crossRef: EventTagCrossRef)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllEventTagCrossRef(crossRef: List<EventTagCrossRef>)
+
 
     @Delete
     suspend fun deleteEventTagCrossRef(crossRef: EventTagCrossRef)
