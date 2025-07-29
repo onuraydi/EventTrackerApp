@@ -36,6 +36,7 @@ import com.example.eventtrackerapp.viewmodel.LikeViewModel
 @Composable
 fun HomeScreen(
     eventList: List<EventWithTags?>,
+    isLoading:Boolean,
     navController: NavController,
     commentViewModel: CommentViewModel,
     likeViewModel: LikeViewModel,
@@ -87,19 +88,30 @@ fun HomeScreen(
         }
 
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(5.dp, vertical = 15.dp),
-        ) {
+        if (isLoading){
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentPadding = PaddingValues(5.dp, vertical = 15.dp),
+            ) {
 
-            items(eventList)
-            {
-                val commentList = it?.event?.id?.let { id -> commentViewModel.getComments(id).collectAsState(
-                    emptyList()
-                ) }
-                it?.event?.let { event -> EventRow(event, navController,commentList?.value,commentViewModel,profileId,likeViewModel) }
+                items(eventList)
+                {
+                    val commentList = it?.event?.id?.let { id -> commentViewModel.getComments(id).collectAsState(
+                        emptyList()
+                    ) }
+                    it?.event?.let { event -> EventRow(event, navController,commentList?.value,commentViewModel,profileId,likeViewModel) }
+                }
             }
         }
     }
