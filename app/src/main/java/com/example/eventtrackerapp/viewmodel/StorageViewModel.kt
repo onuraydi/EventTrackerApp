@@ -29,7 +29,7 @@ class StorageViewModel @Inject constructor(
         }
     }
 
-    fun getImagePathToCache(firebaseUrl:String){
+    fun getImagePathFromCache(firebaseUrl:String){
         viewModelScope.launch {
             _cachedImagePath.value = storageCacheRepository.getImagePath(firebaseUrl)
         }
