@@ -13,8 +13,13 @@ import com.example.eventtrackerapp.model.roommodels.EventWithParticipants
 import com.example.eventtrackerapp.model.roommodels.EventWithTags
 import com.example.eventtrackerapp.model.roommodels.Profile
 import com.example.eventtrackerapp.model.roommodels.Tag
+import com.example.eventtrackerapp.views.EditEventScreen
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
@@ -27,88 +32,103 @@ class EventRepository(
     private val tagCollection = firestore.collection("tags")
     private val attendancesCollection = firestore.collection("attendances")
 
-    fun getAllEventsWithRelations(): Flow<List<EventWithTags>> = flow {
-        try {
-            val eventSnapshot = eventCollection.get().await()
-            val firebaseEvents = eventSnapshot.documents.mapNotNull {
-                it.toObject(FirebaseEvent::class.java)
+    fun getAllEventsWithRelations(): Flow<List<EventWithTags>> = callbackFlow {
+        val listener = eventCollection.addSnapshotListener {snapshot,error ->
+            if (error != null)
+            {
+                Log.e(TAG,"etkinlik dinleme başarısız",error)
+                close(error)
+                return@addSnapshotListener
             }
+
+            val firebaseEvents = snapshot?.documents?.mapNotNull {
+                it.toObject(FirebaseEvent::class.java)
+            } ?: emptyList()
 
             val events = firebaseEvents.map { firebaseEvent ->
                 val event = EventMapper.toEntity(firebaseEvent)
-                val tags = firebaseEvent.tagIds.map { tagId ->
-                    Tag(id = tagId, name = "", categoryId = "")
-                }
-                EventWithTags(event = event, tags = tags)
+                val tags = firebaseEvent.tagIds.map { id -> Tag(id,"","") }  // HATA GELEBİLİR
+                EventWithTags(event,tags)
             }
 
-            emit(events)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error fetching events from Firestore", e)
-            emit(emptyList())
+            trySend(events).onFailure {
+                Log.e(TAG,"event listesi gönderilemedi")
+            }
         }
+        awaitClose {listener.remove()}
     }
 
-    fun getEventWithRelationsById(eventId: String): Flow<EventWithTags?> = flow {
-        try {
-            val doc = eventCollection.document(eventId).get().await()
-            val firebaseEvent = doc.toObject(FirebaseEvent::class.java)
+    fun getEventWithRelationsById(eventId: String): Flow<EventWithTags?> = callbackFlow {
+        val listener = eventCollection.document(eventId).addSnapshotListener{snapshot, error ->
+            if (error != null)
+            {
+                Log.e(TAG,"Etlinlik dinleme başarısız",error)
+                close(error)
+                return@addSnapshotListener
+            }
 
+            val firebaseEvent = snapshot?.toObject(FirebaseEvent::class.java)
             firebaseEvent?.let {
                 val event = EventMapper.toEntity(it)
-                val tags = it.tagIds.map { tagId ->
-                    Tag(id = tagId, name = "", categoryId = "")
-                }
-                emit(EventWithTags(event = event, tags = tags))
-            } ?: emit(null)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error fetching event by ID from Firestore", e)
-            emit(null)
+                val tags = it.tagIds.map { id -> Tag(id,"","")}
+                trySend(EventWithTags(event,tags))
+            } ?: trySend(null)
+        }
+        awaitClose {
+            listener.remove()
         }
     }
 
-    fun getEventsForUser(tagIds: List<String>): Flow<List<EventWithTags>> = flow {
-        try {
-            val snapshot = eventCollection.get().await()
-            val firebaseEvents = snapshot.documents.mapNotNull {
+    fun getEventsForUser(tagIds: List<String>): Flow<List<EventWithTags>> = callbackFlow {
+        val listener = eventCollection.addSnapshotListener { snapshot, error ->
+            if (error != null)
+            {
+                Log.e(TAG,"Event dinleme başarısız",error)
+                close(error)
+                return@addSnapshotListener
+            }
+
+            val firebaseEvent = snapshot?.documents?.mapNotNull {
                 it.toObject(FirebaseEvent::class.java)
+            } ?: emptyList()
+
+            val filteredEvents = firebaseEvent.filter {
+                it.tagIds.any {tagId -> tagId.contains(tagId)}
             }
 
-            val filteredEvents = firebaseEvents.filter { event ->
-                event.tagIds.any { tagIds.contains(it) }
+            val mapped = filteredEvents.map {
+                val event = EventMapper.toEntity(it)
+                val tags = it.tagIds.map { tagId -> Tag(tagId,"","") }
+                EventWithTags(event,tags)
             }
 
-            val eventsWithTags = filteredEvents.map { firebaseEvent ->
-                val event = EventMapper.toEntity(firebaseEvent)
-                val tags = firebaseEvent.tagIds.map { tagId ->
-                    Tag(id = tagId, name = "", categoryId = "")
-                }
-                EventWithTags(event = event, tags = tags)
-            }
-
-            emit(eventsWithTags)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error filtering events by tags", e)
-            emit(emptyList())
+            trySend(mapped)
+        }
+        awaitClose {
+            listener.remove()
         }
     }
 
-    fun getEventsForOwner(profileId: String): Flow<List<Event>> = flow {
-        try {
-            val snapshot = eventCollection
-                .whereEqualTo("ownerId", profileId)
-                .get().await()
-
-            val firebaseEvents = snapshot.documents.mapNotNull {
-                it.toObject(FirebaseEvent::class.java)
+    fun getEventsForOwner(profileId: String): Flow<List<Event>> = callbackFlow {
+        val listener = eventCollection
+            .whereEqualTo("ownerId",profileId)
+            .addSnapshotListener { snapshot, error ->
+            if (error != null)
+            {
+                Log.e(TAG,"Event dinleme başarısız",error)
+                close(error)
+                return@addSnapshotListener
             }
 
-            val events = firebaseEvents.map { EventMapper.toEntity(it) }
+            val firebaseEvent = snapshot?.documents?.mapNotNull {
+                it.toObject(FirebaseEvent::class.java)
+            } ?: emptyList()
 
-            emit(events)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error fetching owner events", e)
-            emit(emptyList())
+            trySend(firebaseEvent.map { EventMapper.toEntity(it) })
+        }
+
+        awaitClose{
+            listener.remove()
         }
     }
 
@@ -161,54 +181,90 @@ class EventRepository(
         }
     }
 
-    fun getParticipationCountForEvent(eventId: String): Flow<Int> = flow {
-        try {
-            val snapshot = attendancesCollection
-                .whereEqualTo("eventId", eventId)
-                .whereEqualTo("isAttending", true)
-                .get().await()
-            emit(snapshot.size())
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting participation count", e)
-            emit(0)
+    fun getParticipationCountForEvent(eventId: String): Flow<Int> = callbackFlow {
+        val listener = attendancesCollection
+            .whereEqualTo("eventId",eventId)
+            .whereEqualTo("isAttending",true)
+            .addSnapshotListener {snapshot, error ->
+                if (error != null)
+                {
+                    Log.e(TAG,"Katılımcı dinleme başarısız",error)
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                trySend(snapshot?.size() ?: 0)
+            }
+        awaitClose{
+            listener.remove()
         }
     }
 
-    fun hasUserParticipated(eventId: String, profileId: String): Flow<Boolean> = flow {
-        try {
-            val docId = "$eventId-$profileId"
-            val docSnapshot = attendancesCollection.document(docId).get().await()
-            val attendance = docSnapshot.toObject(FirebaseAttendance::class.java)
-            emit(attendance?.isAttending == true)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error checking attendance", e)
-            emit(false)
+    fun hasUserParticipated(eventId: String, profileId: String): Flow<Boolean> = callbackFlow {
+        val docId = "$eventId-$profileId"
+        val listener = attendancesCollection.document(docId)
+            .addSnapshotListener {snapshot,error ->
+                if (error != null)
+                {
+                    Log.e(TAG,"Katılımcı dinleme başarısız",error)
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val attended = snapshot?.toObject(FirebaseAttendance::class.java)?.isAttending == true
+                trySend(attended)
+            }
+        awaitClose {
+            listener.remove()
         }
     }
 
-    fun getEventWithParticipants(eventId: String): Flow<EventWithParticipants?> = flow {
-        try {
-            val eventDoc = eventCollection.document(eventId).get().await()
-            val firebaseEvent = eventDoc.toObject(FirebaseEvent::class.java)
+    fun getEventWithParticipants(eventId: String): Flow<EventWithParticipants?> = callbackFlow {
+        var attendanceListener: ListenerRegistration? = null
 
-            val attendanceSnapshot = attendancesCollection
-                .whereEqualTo("eventId", eventId)
-                .whereEqualTo("isAttending", true)
-                .get().await()
+        val eventListener = eventCollection.document(eventId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e(TAG, "event dinleme başarısız", error)
+                    trySend(null)
+                    return@addSnapshotListener
+                }
 
-            val participants = attendanceSnapshot.documents.mapNotNull {
-                it.toObject(FirebaseAttendance::class.java)
-            }.map {
-                Profile(id = it.profileId, userName = "", email = "")
+                val firebaseEvent = snapshot?.toObject(FirebaseEvent::class.java)
+                if (firebaseEvent == null) {
+                    trySend(null)
+                    return@addSnapshotListener
+                }
+
+                // Eski listener varsa temizle
+                attendanceListener?.remove()
+
+                attendanceListener = attendancesCollection
+                    .whereEqualTo("eventId", eventId)
+                    .whereEqualTo("isAttending", true)
+                    .addSnapshotListener { attendanceSnapshot, attendanceError ->
+                        if (attendanceError != null) {
+                            Log.e(TAG, "Katılımcı dinleme başarısız", attendanceError)
+                            return@addSnapshotListener
+                        }
+
+                        val firebaseParticipants = attendanceSnapshot?.documents?.mapNotNull {
+                            it.toObject(FirebaseAttendance::class.java)
+                        } ?: emptyList()
+
+                        val participants = firebaseParticipants.map {
+                            Profile(id = it.profileId, userName = "", email = "")
+                        }
+
+                        val event = EventMapper.toEntity(firebaseEvent)
+                        trySend(EventWithParticipants(event, participants))
+                    }
             }
 
-            firebaseEvent?.let {
-                val event = EventMapper.toEntity(it)
-                emit(EventWithParticipants(event, participants))
-            } ?: emit(null)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error fetching event with participants", e)
-            emit(null)
+        awaitClose {
+            Log.d(TAG, "Tüm listenerlar kapatılıyor")
+            eventListener.remove()
+            attendanceListener?.remove()
         }
     }
 

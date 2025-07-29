@@ -17,11 +17,11 @@ class CommentViewModel @Inject constructor(
     private val commentRepository:CommentRepository
 ): ViewModel() {
 
-    private val _commentList = MutableStateFlow<List<CommentWithProfileAndEvent>>(emptyList())
-    val commentList: StateFlow<List<CommentWithProfileAndEvent>> = _commentList
-
-    private val _commentCount = MutableStateFlow<Int>(0)
-    val commentCount: StateFlow<Int> = _commentCount
+//    private val _commentList = MutableStateFlow<List<CommentWithProfileAndEvent>>(emptyList())
+//    val commentList: StateFlow<List<CommentWithProfileAndEvent>> = _commentList
+//
+//    private val _commentCount = MutableStateFlow<Int>(0)
+//    val commentCount: StateFlow<Int> = _commentCount
 
 
     fun addComment(comment: Comment){

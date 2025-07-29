@@ -3,7 +3,10 @@ package com.example.eventtrackerapp.data.repositories
 import android.util.Log
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseLike
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 class LikeRepository(
@@ -35,26 +38,47 @@ class LikeRepository(
         }
     }
 
-    fun getLikeCountForEvent(eventId: String): Flow<Int> = flow {
-        try {
-            val snapshot = likesCollection
-                .whereEqualTo("eventId", eventId)
-                .get().await()
-            emit(snapshot.size())
-        } catch (e: Exception) {
-            Log.e(TAG, "Like sayısı alınamadı", e)
-            emit(0)
+    fun getLikeCountForEvent(eventId: String): Flow<Int> = callbackFlow {
+        val listener = likesCollection
+            .whereEqualTo("eventId",eventId)
+            .addSnapshotListener { snapShot, error ->
+                if(error != null)
+                {
+                    Log.e(TAG,"Like sayısı dinleme hatası",error)
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val count = snapShot?.size() ?: 0
+                trySend(count).onFailure {
+                    Log.e(TAG,"Like sayısı gönderilemedi",it)
+                }
+            }
+
+        awaitClose {
+            listener.remove()
         }
     }
 
-    fun isEventLikedByUser(eventId: String, profileId: String): Flow<Boolean> = flow {
-        try {
-            val docId = "${eventId}_$profileId"
-            val snapshot = likesCollection.document(docId).get().await()
-            emit(snapshot.exists())
-        } catch (e: Exception) {
-            Log.e(TAG, "Like kontrolü başarısız", e)
-            emit(false)
+    fun isEventLikedByUser(eventId: String, profileId: String): Flow<Boolean> = callbackFlow {
+        val docId = "${eventId}_$profileId"
+        val listener = likesCollection.document(docId)
+            .addSnapshotListener {snapshot, error ->
+                if (error != null)
+                {
+                    Log.e(TAG, "Like kontrolü dinleme hatası", error)
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val liked = snapshot?.exists() ?: false
+                trySend(liked).onFailure {
+                    Log.e(TAG,"Like bilgisi gönderilmedi")
+                }
+            }
+
+        awaitClose{
+            listener.remove()
         }
     }
 

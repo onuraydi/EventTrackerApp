@@ -23,11 +23,11 @@ class LikeViewModel @Inject constructor(
     private val likeRepository: LikeRepository
 ):ViewModel()
 {
-    private val _likeCount = MutableStateFlow<Int>(0)
-    val likeCount:StateFlow<Int> = _likeCount
-
-    private val _isEventLikedByUser = MutableStateFlow<Boolean>(false)
-    val isEventLikedByUser:StateFlow<Boolean> = _isEventLikedByUser
+//    private val _likeCount = MutableStateFlow<Int>(0)
+//    val likeCount:StateFlow<Int> = _likeCount
+//
+//    private val _isEventLikedByUser = MutableStateFlow<Boolean>(false)
+//    val isEventLikedByUser:StateFlow<Boolean> = _isEventLikedByUser
 
 
     fun getLikeCountForEvent(eventId:String):Flow<Int>
