@@ -107,8 +107,8 @@ object AppModule{
     // Hilt'in zaten yukarıda tanımladığımız @Provides metotlarından sağlayacağı bağımlılıklardır.
     @Provides
     @Singleton
-    fun provideCategoryRepository(categoryDao: CategoryDao, tagDao: TagDao, firestore: FirebaseFirestore, @ApplicationContext context: Context): CategoryRepository {
-        return CategoryRepository(categoryDao,tagDao,firestore,context)
+    fun provideCategoryRepository(firestore: FirebaseFirestore): CategoryRepository {
+        return CategoryRepository(firestore)
     }
 
     @Provides
@@ -119,14 +119,14 @@ object AppModule{
 
     @Provides
     @Singleton
-    fun provideEventRepository(eventDao: EventDao, profileDao: ProfileDao, firestore: FirebaseFirestore, @ApplicationContext context: Context): EventRepository {
-        return EventRepository(eventDao,profileDao,firestore,context)
+    fun provideEventRepository(firestore: FirebaseFirestore): EventRepository {
+        return EventRepository(firestore)
     }
 
     @Provides
     @Singleton
-    fun provideLikeRepository(likeDao: LikeDao, firestore: FirebaseFirestore, @ApplicationContext context: Context): LikeRepository {
-        return LikeRepository(likeDao,firestore,context)
+    fun provideLikeRepository(firestore: FirebaseFirestore): LikeRepository {
+        return LikeRepository(firestore)
     }
 
     @Provides
