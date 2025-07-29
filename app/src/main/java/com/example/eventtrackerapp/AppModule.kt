@@ -113,8 +113,8 @@ object AppModule{
 
     @Provides
     @Singleton
-    fun provideCommentRepository(commentDao: CommentDao, firestore: FirebaseFirestore, @ApplicationContext context: Context): CommentRepository {
-        return CommentRepository(commentDao,firestore,context)
+    fun provideCommentRepository(firestore: FirebaseFirestore): CommentRepository {
+        return CommentRepository(firestore)
     }
 
     @Provides
@@ -131,8 +131,8 @@ object AppModule{
 
     @Provides
     @Singleton
-    fun provideProfileRepository(profileDao: ProfileDao, categoryDao: CategoryDao, tagDao: TagDao, firestore: FirebaseFirestore, @ApplicationContext context: Context): ProfileRepository {
-        return ProfileRepository(profileDao,categoryDao,tagDao,firestore,context)
+    fun provideProfileRepository(firestore: FirebaseFirestore): ProfileRepository {
+        return ProfileRepository(firestore)
     }
 
     @Provides
