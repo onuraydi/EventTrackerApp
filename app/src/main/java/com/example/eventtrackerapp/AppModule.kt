@@ -12,7 +12,6 @@ import com.example.eventtrackerapp.data.source.local.CategoryDao
 import com.example.eventtrackerapp.data.source.local.CommentDao
 import com.example.eventtrackerapp.data.source.local.EventDao
 import com.example.eventtrackerapp.data.source.local.EventTrackerDatabase
-import com.example.eventtrackerapp.data.source.local.ExploreDao
 import com.example.eventtrackerapp.data.source.local.HistoryDao
 import com.example.eventtrackerapp.data.source.local.LikeDao
 import com.example.eventtrackerapp.data.source.local.ProfileDao
@@ -75,12 +74,6 @@ object AppModule{
     @Singleton
     fun provideCommentDao(database: EventTrackerDatabase): CommentDao {
         return database.commentDao()
-    }
-
-    @Provides
-    @Singleton
-    fun provideExploreDao(database: EventTrackerDatabase): ExploreDao {
-        return database.exploreDao()
     }
 
     @Provides

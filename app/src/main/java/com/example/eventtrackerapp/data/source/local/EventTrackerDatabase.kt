@@ -28,7 +28,6 @@ abstract class EventTrackerDatabase : RoomDatabase(){
     abstract fun profileEventDao():ProfileEventDao
     abstract fun commentDao():CommentDao
     abstract fun likeDao():LikeDao
-    abstract fun exploreDao():ExploreDao
     abstract fun historyDao():HistoryDao
     abstract fun cachedImageDao():CachedImageDao
     //bu fonksiyon çağrıldığı yerde eğer database objesi oluşturulduysa aynı

@@ -1,9 +1,13 @@
 package com.example.eventtrackerapp.data.repositories
 
 import android.util.Log
+import com.example.eventtrackerapp.data.mappers.CategoryMapper
 import com.example.eventtrackerapp.data.mappers.EventMapper
+import com.example.eventtrackerapp.data.mappers.TagMapper
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseAttendance
+import com.example.eventtrackerapp.model.firebasemodels.FirebaseCategory
 import com.example.eventtrackerapp.model.firebasemodels.FirebaseEvent
+import com.example.eventtrackerapp.model.firebasemodels.FirebaseTag
 import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.model.roommodels.EventWithParticipants
 import com.example.eventtrackerapp.model.roommodels.EventWithTags
@@ -20,6 +24,7 @@ class EventRepository(
     private val firestore: FirebaseFirestore
 ) {
     private val eventCollection = firestore.collection("events")
+    private val tagCollection = firestore.collection("tags")
     private val attendancesCollection = firestore.collection("attendances")
 
     fun getAllEventsWithRelations(): Flow<List<EventWithTags>> = flow {
@@ -206,6 +211,39 @@ class EventRepository(
             emit(null)
         }
     }
+
+    fun searchEvents(query: String): Flow<List<EventWithTags>> = flow {
+        val results = mutableListOf<EventWithTags>()
+        try {
+            val snapshot = eventCollection.get().await()
+
+            val filtered = snapshot.documents.mapNotNull { it.toObject(FirebaseEvent::class.java) }
+                .filter {
+                    it.name.contains(query, ignoreCase = true) ||
+                            it.detail.contains(query, ignoreCase = true)
+                }
+
+            for (event in filtered) {
+                val tagSnapshot = tagCollection.whereIn("id", event.tagIds).get().await()
+                val firebaseTags = tagSnapshot.documents.mapNotNull { it.toObject(FirebaseTag::class.java) }
+
+                if (firebaseTags != null) {
+                    val eventWithTags = EventWithTags(
+                        event = EventMapper.toEntity(event),
+                        tags = firebaseTags.map { TagMapper.toEntity(it) }
+                    )
+                    results.add(eventWithTags)
+                }
+            }
+
+            emit(results)
+        } catch (e: Exception) {
+            Log.e("FirestoreSearch", "Error searching events", e)
+            emit(emptyList())
+        }
+    }
+
+
 
     companion object {
         private const val TAG = "EventRepository"
