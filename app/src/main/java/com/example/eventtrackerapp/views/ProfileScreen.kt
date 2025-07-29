@@ -69,12 +69,6 @@ fun ProfileScreen(
                 Text(profile.fullName, fontSize = 20.sp)
                 Text(profile.email, fontSize = 14.sp, fontWeight = FontWeight.Light)
 
-                Text(
-                    text = "${profile.email}",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Light
-                )
-
             // MY Account
 
             EventTrackerExtendedFloatingActionButton(

@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -20,6 +21,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.eventtrackerapp.R
 import java.io.File
 
@@ -40,7 +43,8 @@ fun SelectableImageBox(
             .border(border = borderStroke, shape = shape)
             .clickable {
                 onClick()
-            }
+            },
+        contentAlignment = Alignment.Center
     ) {
 
         val model = remember(imagePath){
@@ -52,6 +56,11 @@ fun SelectableImageBox(
         }
 
         if(model!= null){
+            val painter = rememberAsyncImagePainter(model = model)
+
+            if(painter.state is AsyncImagePainter.State.Loading){
+                CircularProgressIndicator(modifier = Modifier.size(32.dp))
+            }
             AsyncImage(
                 model = model,
                 contentDescription = "Selected Photo",
@@ -62,7 +71,8 @@ fun SelectableImageBox(
                 contentScale = ContentScale.Crop
             )
 
-        }else{
+        }
+        else{
             //eğer fotoğraf yolu boş geldiyse
             Image(
                 painter = placeHolder,
