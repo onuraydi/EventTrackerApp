@@ -33,8 +33,8 @@ class StorageCacheRepository(
     }
 
     //Storage'a fotoğrafı yükleyen fonksiyon. Storage'a yükleyince download url döner
-    suspend fun uploadImageToStorage(uri: Uri, eventId:String):String?{
-        val fileName = "images/$eventId/${UUID.randomUUID()}.jpg"
+    suspend fun uploadImageToStorage(uri: Uri, eventId:String,filePath:String):String?{
+        val fileName = "$filePath/$eventId/${UUID.randomUUID()}.jpg"
         val storageref = Firebase.storage.reference.child(fileName)
 
         try {

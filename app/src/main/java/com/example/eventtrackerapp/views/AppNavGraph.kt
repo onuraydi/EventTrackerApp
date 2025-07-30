@@ -18,6 +18,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.data.source.local.UserPreferences
+import com.example.eventtrackerapp.model.roommodels.Category
+import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
@@ -76,39 +78,56 @@ fun AppNavGraph(
                 val categoryWithTags by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
                 val uid = auth.currentUser?.uid
                 val email = auth.currentUser?.email
-                CreateProfileScreen(navController,categoryViewModel,profileViewModel,permissionViewModel,userPreferences,categoryWithTags,uid!!,email!!)
+                CreateProfileScreen(navController,categoryViewModel,profileViewModel,permissionViewModel,storageViewModel,userPreferences,categoryWithTags,uid!!,email!!)
             }
 
             composable("home") {backStackEntry ->
                 val uid = auth.currentUser?.uid
 
                 if(uid==null){
-                    Text("Kullanıcı bulunamadı")
+                    HomeScreen(
+                        eventList = emptyList(),
+                        navController = navController,
+                        isLoading = true,
+                        commentViewModel = commentViewModel,
+                        likeViewModel = likeViewModel,
+                        profileId = "",
+                    )
                     return@composable
                 }
 
                 val profile by profileViewModel.getById(uid).collectAsState(null)
 
                 if(profile==null){
-                    CircularProgressIndicator()
-                    return@composable
-                }else{
-                    // TODO Sakın Silme !!!
-                    val categoryWithTags by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
-                    val selectedTag by categoryViewModel.selectedTag.collectAsStateWithLifecycle()
-                    val chosenTags by categoryViewModel.chosenTags.collectAsStateWithLifecycle()
-
-                    val eventList by eventViewModel.getEventsForUser(profile!!.selectedTagList.map { it.id }).collectAsState(
-                        emptyList()
+                    HomeScreen(
+                        eventList = emptyList(),
+                        navController = navController,
+                        isLoading = true,
+                        commentViewModel = commentViewModel,
+                        likeViewModel = likeViewModel,
+                        profileId = uid,
                     )
-
-                    if(eventList==null){
-                        CircularProgressIndicator()
-                        return@composable
-                    }else{
-                        HomeScreen(eventList = eventList, navController = navController,commentViewModel,likeViewModel,uid)
-                    }
+                    return@composable
                 }
+
+                // TODO Sakın Silme !!!
+                val categoryWithTags by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
+                val selectedTag by categoryViewModel.selectedTag.collectAsStateWithLifecycle()
+                val chosenTags by categoryViewModel.chosenTags.collectAsStateWithLifecycle()
+
+                val eventList by eventViewModel.getEventsForUser(profile!!.selectedTagList.map { it.id }).collectAsState(
+                    emptyList()
+                )
+                val isLoading = eventList.isEmpty() || profile == null
+
+                HomeScreen(
+                    eventList = eventList,
+                    navController = navController,
+                    isLoading = isLoading,
+                    commentViewModel = commentViewModel,
+                    likeViewModel = likeViewModel,
+                    profileId = uid,
+                )
             }
 
 
@@ -129,42 +148,29 @@ fun AppNavGraph(
             composable("detail/{id}") { backStackEntry ->
 
                 val eventId = backStackEntry.arguments?.getString("id") ?: ""
-                val uid = auth.currentUser?.uid!!
+                val uid = auth.currentUser?.uid ?: return@composable // güvenli kontrol
 
                 val eventWithTags by eventViewModel.getEventWithRelationsById(eventId).collectAsState(null)
-
-                //Category'i al
-
-                val category by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
-
-                if(eventWithTags == null || category.isEmpty()){
-                    CircularProgressIndicator()
-                    return@composable
-                }
-
-                // TODO bu metot belki değişebilir
-
-                val detailCategory = category.filter { cat ->
-                    cat.category.id == eventWithTags?.event?.categoryId
-                }.map { it.category }.first()
-
-                if(detailCategory == null){
-                    CircularProgressIndicator()
-                    return@composable
-                }
-
+                val categoryWithTags by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
                 val commentList by commentViewModel.getComments(eventId).collectAsState(emptyList())
 
-                DetailScreen(event = eventWithTags!!.event,
+                val isLoading = eventWithTags == null || categoryWithTags.isEmpty()
+
+                val detailCategory = eventWithTags?.event?.categoryId?.let { catId ->
+                    categoryWithTags.firstOrNull { it.category.id == catId }?.category
+                }
+
+                DetailScreen(
+                    event = eventWithTags?.event ?: Event(), // Boş event loading için
                     navController = navController,
-                    category = detailCategory,
+                    isLoading = isLoading || detailCategory == null,
+                    category = detailCategory ?: Category(),
                     commentList = commentList,
                     commentViewModel = commentViewModel,
                     likeViewModel = likeViewModel,
                     profileId = uid,
-                    participantsViewModel= participantsViewModel,
+                    participantsViewModel = participantsViewModel,
                 )
-
             }
 
 
