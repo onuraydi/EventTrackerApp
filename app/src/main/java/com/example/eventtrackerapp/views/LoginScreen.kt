@@ -125,7 +125,7 @@ fun LoginScreen(
 
         Spacer(Modifier.padding(vertical = 8.dp))
 
-        EventTrackerAppOutlinedButton("Sign Up") {
+        EventTrackerAppPrimaryButton("Sign Up") {
             navController.navigate("sign_up"){
                 launchSingleTop = true
             }

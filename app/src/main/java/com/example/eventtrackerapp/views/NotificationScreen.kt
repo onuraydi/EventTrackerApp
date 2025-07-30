@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.Greeting
+import com.example.eventtrackerapp.common.EventTrackerTopAppBar
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import kotlinx.coroutines.processNextEventInCurrentThread
 import kotlin.math.exp
@@ -67,22 +68,17 @@ fun NotificationScreen(navController: NavController){
     Scaffold(modifier = Modifier
         .fillMaxSize(),
         topBar = {
-            TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-            ),
-                title = {
-                    Text("Bildirimler", maxLines = 1, overflow = TextOverflow.Ellipsis)
-
+            EventTrackerTopAppBar(
+                title = "Bildirimler",
+                modifier = Modifier,
+                showBackButton = true,
+                onBackClick =
+                {
+                    navController.popBackStack()
                 },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack,null)
-                    }
-                })
-            })
+            )
+        }
+    )
     { innerPadding ->
         LazyColumn(Modifier
             .padding(innerPadding)

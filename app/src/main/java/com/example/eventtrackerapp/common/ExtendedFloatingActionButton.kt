@@ -27,7 +27,7 @@ fun EventTrackerExtendedFloatingActionButton(
     onClick: () -> Unit,
     leadingIcon: ImageVector,
     leadingIconDescription: String?,
-    tint: Color = LocalContentColor.current
+    tint: Color = MaterialTheme.colorScheme.background
 ){
     ExtendedFloatingActionButton(
         onClick = onClick,
@@ -35,7 +35,9 @@ fun EventTrackerExtendedFloatingActionButton(
             .fillMaxWidth()
             .height(60.dp)
             .padding(horizontal = 20.dp, vertical = 10.dp)
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.background),
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.background
     ) {
         Row(
             modifier = Modifier

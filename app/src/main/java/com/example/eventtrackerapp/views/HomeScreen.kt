@@ -70,11 +70,14 @@ fun HomeScreen(
         floatingActionButton =
         {
             FloatingActionButton(
-                onClick = { navController.navigate("addEvent") })
+                onClick = { navController.navigate("addEvent") },
+                containerColor = MaterialTheme.colorScheme.primary
+            )
             {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "Add Event"
+                    contentDescription = "Add Event",
+                    tint = Color.White
                 )
             }
         },
@@ -123,7 +126,7 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
             .fillMaxWidth()
             .padding(20.dp)
             .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = MaterialTheme.colorScheme.tertiaryContainer,
                 shape = RoundedCornerShape(20.dp)
             )
             .border(

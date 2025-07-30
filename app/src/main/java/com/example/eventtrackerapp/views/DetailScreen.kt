@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -51,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -65,6 +67,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.common.CommentBottomSheet
+import com.example.eventtrackerapp.common.EventTrackerTopAppBar
 import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.model.roommodels.Category
 import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
@@ -106,20 +109,16 @@ fun DetailScreen(
     )
 
     Scaffold(modifier = Modifier.fillMaxSize(),
-        topBar = {
-            CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-            ),
-                title = {
-                    Text("Etkinlik Detay Sayfası", fontSize = 25.sp)
+        topBar =
+        {
+            EventTrackerTopAppBar(
+                title = "Etkinlik Ekleme",
+                modifier = Modifier,
+                showBackButton = true,
+                onBackClick =
+                {
+                    navController.popBackStack()
                 },
-                navigationIcon = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,null, modifier = Modifier
-                        .padding(start = 8.dp)
-                        .clickable { navController.popBackStack() })
-                }
             )
         }
     ){ innerPadding ->
@@ -205,25 +204,31 @@ fun DetailScreen(
                     if (!state)
                     {
                         ExtendedFloatingActionButton(onClick = {participantsViewModel.toggleAttendance(profileId = profileId, eventId = event.id) },
-                            icon = { Icon(Icons.Default.Add,null)},
-                            text = { Text("Katıl")},
-                            modifier = Modifier.weight(1f)
+                            icon = { Icon(Icons.Default.Add,null, tint = Color.White)},
+                            text = { Text("Katıl", color = Color.White)},
+                            modifier = Modifier.weight(1f),
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onBackground,
                         )
                     }
                     else{
                         ExtendedFloatingActionButton(onClick = {participantsViewModel.toggleAttendance(event.id,profileId)},
-                            icon = {Icon(Icons.Default.Clear,null)},
-                            text = { Text("Vazgeç")},
-                            modifier = Modifier.weight(1f)
+                            icon = {Icon(Icons.Default.Clear,null,tint = Color.White)},
+                            text = { Text("Vazgeç", color = Color.White)},
+                            modifier = Modifier.weight(1f),
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onBackground,
                         )
                     }
 
 
                     // TODO Buraya şimdilik bir atama yapılmayacak zaman kalırsa uygulanır
                     ExtendedFloatingActionButton(onClick = { },
-                        icon = { Icon(Icons.Default.Place,null)},
-                        text = { Text("Haritada Gör")},
-                        modifier = Modifier.weight(1f)
+                        icon = { Icon(Icons.Default.Place,null,tint = Color.White)},
+                        text = { Text("Haritada Gör", color = Color.White)},
+                        modifier = Modifier.weight(1f),
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onBackground,
                     )
                 }
 

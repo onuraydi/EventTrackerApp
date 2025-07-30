@@ -40,6 +40,8 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerColors
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -77,6 +79,7 @@ import com.example.eventtrackerapp.model.roommodels.Event
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.EventTrackerTopAppBar
 import com.example.eventtrackerapp.common.PermissionHelper
 import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
@@ -99,10 +102,6 @@ fun AddEventScreen(
     storageViewModel: StorageViewModel,
     ownerId:String
 ) {
-//
-//    LaunchedEffect(Unit) {
-//        categoryViewModel.resetTag()
-//    }
 
     val categoryWithTags by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
     val selectedTag by categoryViewModel.selectedTag.collectAsStateWithLifecycle()
@@ -110,9 +109,6 @@ fun AddEventScreen(
     val selectedCategoryName = remember { mutableStateOf("") }
     val context = LocalContext.current
 
-
-    //TODO BU KISIM REFACTOR EDİLECEK: SEALED CLASS KULLANACAĞIM
-    //Media Permission
     val permission = permissionViewModel.getPermissionName()
 
     val uriData = remember{mutableStateOf<Uri?>(null)}
@@ -149,21 +145,16 @@ fun AddEventScreen(
     // TODO DEĞİŞECEK
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            topBar = {
-                CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                    title = { Text("Add Event", fontSize = 25.sp) },
-                    navigationIcon = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            "GoBack",
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .clickable { navController.popBackStack() }
-                        )
-                    }
+            topBar =
+            {
+                EventTrackerTopAppBar(
+                    title = "Etkinlik Ekleme",
+                    modifier = Modifier,
+                    showBackButton = true,
+                    onBackClick =
+                    {
+                        navController.popBackStack()
+                    },
                 )
             }
         ) { innerPadding ->
@@ -322,7 +313,8 @@ fun AddEventScreen(
                             expanded = isExpanded.value,
                             onDismissRequest = {
                                 isExpanded.value = false
-                            }
+                            },
+                            Modifier.background(MaterialTheme.colorScheme.primary)
                         )
                         {
                             categoryWithTags.forEach{
@@ -472,6 +464,17 @@ private fun DatePickerModal(
 
     DatePickerDialog(
         onDismissRequest = onDismiss,
+        colors = DatePickerDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            headlineContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            weekdayContentColor = MaterialTheme.colorScheme.primary,
+            subheadContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            selectedDayContentColor = Color.White,
+            selectedDayContainerColor = MaterialTheme.colorScheme.primary,
+            todayContentColor = MaterialTheme.colorScheme.primary,
+            todayDateBorderColor = MaterialTheme.colorScheme.primary
+        ),
         confirmButton = {
             TextButton(
                 onClick = {

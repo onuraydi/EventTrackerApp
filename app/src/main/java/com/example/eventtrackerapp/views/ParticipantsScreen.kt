@@ -51,6 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.common.EventTrackerTopAppBar
 import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.ui.theme.EventTrackerAppTheme
 import com.example.eventtrackerapp.viewmodel.ParticipantsViewModel
@@ -71,19 +72,14 @@ fun ParticipantsScreen(
     Scaffold(modifier = Modifier
         .fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {Text("Katılımcılar")},
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
-                ),
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack,null)
-                    }
-                }
+            EventTrackerTopAppBar(
+                title = "Katılımcılar",
+                modifier = Modifier,
+                showBackButton = true,
+                onBackClick =
+                {
+                    navController.popBackStack()
+                },
             )
         }
         ){innerPadding ->

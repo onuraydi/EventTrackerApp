@@ -234,7 +234,7 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.padding(8.dp))
 
-            EventTrackerAppOutlinedButton("Login")
+            EventTrackerAppPrimaryButton("Login")
             {
                 navController.popBackStack()
             }

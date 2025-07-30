@@ -9,6 +9,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -23,7 +24,13 @@ fun EventTrackerAppPrimaryButton(
 {
     Button(
         onClick = onClick,
-        Modifier.fillMaxWidth(0.7f),
+        colors = ButtonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = Color.White,
+            disabledContainerColor = MaterialTheme.colorScheme.secondary ,
+            disabledContentColor = MaterialTheme.colorScheme.secondary,
+        ),
+        modifier = Modifier.fillMaxWidth(0.7f),
         shape = RoundedCornerShape(12.dp)
     ) {
         Text(text, fontSize = fontSize)

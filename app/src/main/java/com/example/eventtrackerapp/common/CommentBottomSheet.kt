@@ -152,7 +152,6 @@ fun CommentBottomSheet(
 }
 
 
-// TODO Buradaki comment model oluşturduktan sonra düzeltilecek
 @Composable
 fun CommentItem(commentWithProfile: CommentWithProfileAndEvent) {
     Row(
@@ -177,12 +176,12 @@ fun CommentItem(commentWithProfile: CommentWithProfileAndEvent) {
                 text = commentWithProfile.profile.userName,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = commentWithProfile.comment.comment,
                 fontSize = 14.sp,
-                color = Color.DarkGray,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(top = 2.dp)
             )
         }

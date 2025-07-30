@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.common.EventTrackerTopAppBar
 import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.common.SelectableImageBox
 
@@ -65,21 +67,14 @@ fun MyEventsScreen(
         Scaffold(
             Modifier.fillMaxSize(),
             topBar = {
-                CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                    title = {Text("My Events")},
-                    navigationIcon = {
-                        IconButton(
-                            content = {
-                                Icon(Icons.Default.ArrowBack,"Go Back")
-                            },
-                            onClick = {
-                                navController.popBackStack()
-                            }
-                        )
-                    }
+                EventTrackerTopAppBar(
+                    title = "Eklediğim Etkinlikler",
+                    modifier = Modifier,
+                    showBackButton = true,
+                    onBackClick =
+                    {
+                        navController.popBackStack()
+                    },
                 )
             }
         ) { innerPadding->
@@ -99,7 +94,13 @@ fun MyEventsScreen(
                                 .fillMaxWidth()
                                 .heightIn(min = 72.dp),
                             elevation = CardDefaults.cardElevation(2.dp),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardColors(
+                                contentColor = MaterialTheme.colorScheme.onBackground,
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                disabledContentColor = MaterialTheme.colorScheme.primary,
+                                disabledContainerColor = MaterialTheme.colorScheme.primaryContainer
+                            )
                         ) {
                             Row(
                                 Modifier

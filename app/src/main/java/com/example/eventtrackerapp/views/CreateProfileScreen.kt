@@ -39,6 +39,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -48,6 +49,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -78,6 +80,7 @@ import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
+import com.example.eventtrackerapp.common.EventTrackerTopAppBar
 import com.example.eventtrackerapp.common.PermissionHelper
 import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.data.source.local.UserPreferences
@@ -151,15 +154,14 @@ fun CreateProfileScreen(
 
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            topBar = {
-                CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                    title = { Text(text = "Complete Your Profile", color = Color.White) },
-
+            topBar =
+            {
+                EventTrackerTopAppBar(
+                    title = "Profil Oluşturma",
+                    modifier = Modifier,
+                    showBackButton = false,
                 )
-            }
+            },
         ) { innerPadding ->
             Box(
                 modifier = Modifier

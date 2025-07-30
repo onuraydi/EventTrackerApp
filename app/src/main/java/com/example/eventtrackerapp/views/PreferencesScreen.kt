@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableChipColors
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -48,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.eventtrackerapp.R
+import com.example.eventtrackerapp.common.EventTrackerTopAppBar
 import com.example.eventtrackerapp.model.roommodels.Profile
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
 import com.example.eventtrackerapp.viewmodel.ThemeViewModel
@@ -64,23 +67,14 @@ fun PreferencesScreen(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                    title = {Text("Preferences")},
-                    navigationIcon = {
-                        IconButton(
-                            content = {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "Go Back")
-                              },
-                            onClick = {
-                                navController.popBackStack()
-                            }
-                        )
-                    }
+                EventTrackerTopAppBar(
+                    title = "Tercihlerim",
+                    modifier = Modifier,
+                    showBackButton = true,
+                    onBackClick =
+                    {
+                        navController.popBackStack()
+                    },
                 )
             }
         )
@@ -206,7 +200,13 @@ fun CardRow(
             .heightIn(min = 72.dp),
         elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(0.5.dp, Color.LightGray)
+        border = BorderStroke(0.5.dp, Color.LightGray),
+        colors = CardColors(
+            contentColor = MaterialTheme.colorScheme.onBackground,
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            disabledContentColor = MaterialTheme.colorScheme.primary,
+            disabledContainerColor = MaterialTheme.colorScheme.primaryContainer
+        )
     ) {
         Row(
             modifier = Modifier
