@@ -1,21 +1,11 @@
 package com.example.eventtrackerapp.views
 
 import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.provider.MediaStore
 import android.widget.Toast
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,27 +44,22 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
@@ -88,10 +73,7 @@ import com.example.eventtrackerapp.model.roommodels.Tag
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
 import com.example.eventtrackerapp.viewmodel.ProfileViewModel
-import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
+import com.example.eventtrackerapp.viewmodel.StorageViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -100,6 +82,7 @@ fun CreateProfileScreen(
     categoryViewModel: CategoryViewModel,
     profileViewModel: ProfileViewModel,
     permissionViewModel: PermissionViewModel,
+    storageViewModel: StorageViewModel,
     userPreferences: UserPreferences,
     categoryWithTags:List<CategoryWithTag>,
     uid:String,
@@ -108,18 +91,60 @@ fun CreateProfileScreen(
     val selectedTag by categoryViewModel.selectedTag.collectAsStateWithLifecycle()
     val chosenTags by categoryViewModel.chosenTags.collectAsStateWithLifecycle()
 
-    val selectedCompleteTagList = remember{ mutableStateListOf<Tag?>(null) }
-    val selectedCompleteCategoryList = remember{ mutableStateListOf<Category?>(null) }
+    val selectedCompleteTagList = remember{ mutableStateListOf<Tag>() }
+    val selectedCompleteCategoryList = remember { mutableStateListOf<Category>() }
     val isShow = rememberSaveable { mutableStateOf(false) }
-
-    val scope = rememberCoroutineScope()
 
     //Media Permission
     val context = LocalContext.current
     val permission = permissionViewModel.getPermissionName()
 
-    val imageUri by permissionViewModel.profileImageUri.collectAsStateWithLifecycle()
-    val imagePath = rememberSaveable { mutableStateOf("") }
+    val uriData = rememberSaveable { mutableStateOf<Uri?>(null) }
+    val galleryData = rememberSaveable { mutableStateOf("") }
+    val imagePath = storageViewModel.imagePath.collectAsStateWithLifecycle()
+    val isUploading = storageViewModel.isUploading.collectAsStateWithLifecycle()
+
+    // Form state variables
+    val fullNameState = rememberSaveable { mutableStateOf("") }
+    val fullNameError = rememberSaveable{mutableStateOf(false)}
+    val userNameState = rememberSaveable { mutableStateOf("") }
+    val userNameError = rememberSaveable{mutableStateOf(false)}
+    val gender = rememberSaveable { mutableStateOf("") }
+    val genderError = rememberSaveable{ mutableStateOf(false) }
+    val isExpanded = rememberSaveable { mutableStateOf(false) }
+
+    // Fotoğraf yükleme tamamlandığında profili oluştur
+    LaunchedEffect(imagePath.value) {
+        if (imagePath.value != null && isUploading.value == false) {
+            // Tüm gerekli alanlar dolu mu kontrol et
+            if (fullNameState.value.isNotBlank() && 
+                userNameState.value.isNotBlank() && 
+                gender.value.isNotBlank() && 
+                selectedCompleteTagList.isNotEmpty()) {
+                
+                android.util.Log.d("CreateProfileScreen", "Profil oluşturuluyor: ${fullNameState.value}")
+                
+                val profile = Profile(
+                    id = uid,
+                    email = email,
+                    fullName = fullNameState.value,
+                    userName = userNameState.value,
+                    gender = gender.value,
+                    selectedCategoryList = selectedCompleteCategoryList,
+                    selectedTagList = selectedCompleteTagList,
+                    photo = imagePath.value!!
+                )
+                profileViewModel.upsertProfile(profile)
+                navController.navigate("home"){
+                    popUpTo("create_profile_screen"){
+                        inclusive = true
+                    }
+                }
+            } else {
+                android.util.Log.d("CreateProfileScreen", "Form eksik: fullName=${fullNameState.value.isNotBlank()}, userName=${userNameState.value.isNotBlank()}, gender=${gender.value.isNotBlank()}, tags=${selectedCompleteTagList.isNotEmpty()}")
+            }
+        }
+    }
 
     //galeriye gidip fotoğraf seçmemizi sağlacyacak
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -127,15 +152,16 @@ fun CreateProfileScreen(
     ) { result->
         if(result.resultCode == Activity.RESULT_OK && result.data != null){
             //kullanıcı fotoğrafı seçtiyse ve gelen intent boş değilse
-            val data = result.data?.data
+            uriData.value = result.data?.data
             //kullanıcının seçtiği resmi viewModel
             // tarafında doldurup burada imageUri ile aldık
-            if(data!=null){
-                val savedUri = PermissionHelper.saveImageToInternalStorage(context,data)
-                imagePath.value = savedUri.toString()
+            if(uriData.value!=null){
+                val localPath = uriData.value?.let { PermissionHelper.saveImageToInternalStorage(context,it) }
+                if(localPath!=null){
+                    galleryData.value = localPath
+                }
             }
         }
-
     }
 
     //izin olaylarını tutacak
@@ -166,13 +192,7 @@ fun CreateProfileScreen(
                     .padding(innerPadding)
                     .fillMaxSize(),
             ) {
-                val fullNameState = rememberSaveable { mutableStateOf("") }
-                val fullNameError = rememberSaveable{mutableStateOf(false)}
-                val userNameState = rememberSaveable { mutableStateOf("") }
-                val userNameError = rememberSaveable{mutableStateOf(false)}
-                val gender = rememberSaveable { mutableStateOf("") }
-                val genderError = rememberSaveable{ mutableStateOf(false) }
-                val isExpanded = rememberSaveable { mutableStateOf(false) }
+
 
                 Column(
                     modifier = Modifier
@@ -188,7 +208,7 @@ fun CreateProfileScreen(
                     SelectableImageBox(
                         boxWidth = 80.dp,
                         boxHeight = 80.dp,
-                        imagePath = imagePath.value,
+                        imagePath = galleryData.value,
                         modifier = Modifier,
                         placeHolder = painterResource(R.drawable.profile_photo_add_icon),
                         shape = CircleShape,
@@ -309,10 +329,10 @@ fun CreateProfileScreen(
                                             // Kategori kaldırıldı → hem chosenTags hem selectedCompleteTagList içinden temizle
                                             categoryViewModel.resetChosenTagForCategory(it.category.id)
 
-                                            selectedCompleteCategoryList.removeAll{category-> category == it.category}
+                                            selectedCompleteCategoryList.removeAll{category-> category.id == it.category.id}
 
                                             // Compose'daki selectedCompleteTagList içinden bu kategoriye ait tag’leri çıkar
-                                            selectedCompleteTagList.removeAll{tag-> tag?.categoryId == it.category.id }
+                                            selectedCompleteTagList.removeAll{tag-> tag.categoryId == it.category.id }
                                         }
                                     },
                                     trailingIcon = if (selected.value) {
@@ -346,10 +366,10 @@ fun CreateProfileScreen(
                                     label = { Text(tag.name) },
                                     onClick = {
                                         categoryViewModel.toggleTag(tag)
-                                        if(!selectedCompleteTagList.any{it?.id == tag.id}){
+                                        if(!selectedCompleteTagList.any{it.id == tag.id}){
                                             selectedCompleteTagList.add(tag)
                                         }else if(isSelected){
-                                            selectedCompleteTagList.removeAll{it?.id == tag.id}
+                                            selectedCompleteTagList.removeAll{it.id == tag.id}
                                         }
                                     },
                                     trailingIcon = if (isSelected) {
@@ -384,7 +404,7 @@ fun CreateProfileScreen(
                             Modifier.padding(5.dp),
                             maxItemsInEachRow = 4,
                         ) {
-                            selectedCompleteTagList.filterNotNull().forEach {tag->
+                            selectedCompleteTagList.forEach {tag->
                                 FilterChip(
                                     modifier = Modifier.padding(end = 3.dp),
                                     label = { Text(tag.name, fontSize = 12.sp, maxLines = 1) },
@@ -408,38 +428,50 @@ fun CreateProfileScreen(
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 15.dp)
                 ){
-                    EventTrackerAppPrimaryButton("Tamamla") {
+                    EventTrackerAppPrimaryButton(
+                        text = if (isUploading.value) "Yükleniyor..." else "Tamamla",
+                        enabled = !isUploading.value
+                    ) {
+                        android.util.Log.d("CreateProfileScreen", "Tamamla butonuna tıklandı")
+                        android.util.Log.d("CreateProfileScreen", "uriData: ${uriData.value}, imagePath: ${imagePath.value}, isUploading: ${isUploading.value}")
+                        
                         if(fullNameState.value.isBlank() || userNameState.value.isBlank() || gender.value.isBlank() || selectedCompleteTagList.size == 0){
                             fullNameError.value = fullNameState.value.isBlank()
                             userNameError.value = userNameState.value.isBlank()
                             genderError.value = gender.value.isBlank()
+                            android.util.Log.d("CreateProfileScreen", "Form validasyonu başarısız")
                             return@EventTrackerAppPrimaryButton
                         }else{
-//                            scope.launch {
-//                                userPreferences.setIsProfileCompleted(value = true)
-//                            }
-                            val profile = Profile(
-                                id = uid,
-                                email = email,
-                                fullName = fullNameState.value,
-                                userName = userNameState.value,
-                                gender = gender.value,
-                                selectedCategoryList = selectedCompleteCategoryList.filterNotNull(),
-                                selectedTagList = selectedCompleteTagList.filterNotNull(),
-                                photo = imagePath.value
-                            )
-                            profileViewModel.upsertProfile(profile)
-                            navController.navigate("home"){
-//                                popUpTo("create_profile_screen"){
-//                                    inclusive = true
-//                                }
+                            // Eğer fotoğraf seçilmişse ve henüz yüklenmemişse
+                            if(uriData.value != null && imagePath.value == null && !isUploading.value){
+                                android.util.Log.d("CreateProfileScreen", "Fotoğraf yükleniyor...")
+                                storageViewModel.setImageToStorage(uriData.value!!, uid)
+                            } else if(uriData.value == null) {
+                                // Fotoğraf seçilmemiş, direkt profil oluştur
+                                android.util.Log.d("CreateProfileScreen", "Fotoğraf olmadan profil oluşturuluyor")
+                                val profile = Profile(
+                                    id = uid,
+                                    email = email,
+                                    fullName = fullNameState.value,
+                                    userName = userNameState.value,
+                                    gender = gender.value,
+                                    selectedCategoryList = selectedCompleteCategoryList,
+                                    selectedTagList = selectedCompleteTagList,
+                                    photo = ""
+                                )
+                                profileViewModel.upsertProfile(profile)
+                                navController.navigate("home"){
+                                    popUpTo("create_profile_screen"){
+                                        inclusive = true
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
+}
 
 //@Preview(showBackground = true)
 //@Composable
@@ -448,58 +480,3 @@ fun CreateProfileScreen(
 ////        CreateProfileScreen()
 //    }
 //}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*Spacer(Modifier.padding(vertical = 5.dp))
-                    Box(
-                        Modifier
-                            .fillMaxWidth(0.9f)
-                            .wrapContentHeight()
-                            .defaultMinSize(minHeight = 80.dp)
-                            .heightIn(max = 150.dp)
-                            .verticalScroll(rememberScrollState())
-                            .background(color = Color.LightGray, shape = RoundedCornerShape(12.dp))
-                    ) {
-                        FlowRow(
-                            Modifier.padding(5.dp),
-                            maxItemsInEachRow = 4,
-                        ) {
-                            selectedTag.forEach {tag->
-                                val isSelected = chosenTags.any { it.id == tag.id }
-
-                                FilterChip(
-                                    modifier = Modifier.padding(end = 3.dp),
-                                    label = { Text(tag.name?:"", fontSize = 12.sp, maxLines = 1) },
-                                    selected = isSelected,
-                                    onClick = {
-                                        if(isSelected){
-                                            tagViewModel.toggleTag(tag)
-                                            selectedCompleteTagList.remove(tag)
-                                        }else{
-                                            selectedCompleteTagList.add(tag)
-                                        }
-                                    },
-                                    trailingIcon = {
-                                        Icon(Icons.Default.Clear, "Clear")
-                                    }
-                                )
-                            }
-                        }
-                    }*/

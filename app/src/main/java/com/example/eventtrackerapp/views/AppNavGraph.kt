@@ -78,7 +78,7 @@ fun AppNavGraph(
                 val categoryWithTags by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
                 val uid = auth.currentUser?.uid
                 val email = auth.currentUser?.email
-                CreateProfileScreen(navController,categoryViewModel,profileViewModel,permissionViewModel,userPreferences,categoryWithTags,uid!!,email!!)
+                CreateProfileScreen(navController,categoryViewModel,profileViewModel,permissionViewModel,storageViewModel,userPreferences,categoryWithTags,uid!!,email!!)
             }
 
             composable("home") {backStackEntry ->

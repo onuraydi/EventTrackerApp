@@ -19,11 +19,13 @@ import androidx.compose.ui.unit.sp
 fun EventTrackerAppPrimaryButton(
     text:String,
     fontSize: TextUnit = 18.sp,
+    enabled: Boolean = true,
     onClick : () -> Unit)
 {
     Button(
         onClick = onClick,
-        Modifier.fillMaxWidth(0.7f),
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth(0.7f),
         shape = RoundedCornerShape(12.dp)
     ) {
         Text(text, fontSize = fontSize)

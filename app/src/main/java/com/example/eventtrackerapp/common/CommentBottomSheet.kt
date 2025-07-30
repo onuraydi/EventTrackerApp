@@ -43,6 +43,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.model.roommodels.Comment
 import com.example.eventtrackerapp.model.roommodels.CommentWithProfileAndEvent
@@ -160,9 +161,9 @@ fun CommentItem(commentWithProfile: CommentWithProfileAndEvent) {
             .fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
-        Image(
+        AsyncImage(
             // TODO burası sonra düzeltilecek
-            painter = painterResource(R.drawable.ic_launcher_foreground),
+            model = commentWithProfile.profile.photo,
             contentDescription = "Profil Resmi",
             modifier = Modifier
                 .size(36.dp)

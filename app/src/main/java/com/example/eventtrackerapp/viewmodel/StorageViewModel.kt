@@ -20,18 +20,29 @@ class StorageViewModel @Inject constructor(
     private val _imagePath = MutableStateFlow<String?>(null)
     val imagePath: StateFlow<String?> = _imagePath
 
-    private val _cachedImagePath = MutableStateFlow<String?>(null)
-    val cachedImagePath:StateFlow<String?> = _imagePath
+    private val _isUploading = MutableStateFlow(false)
+    val isUploading: StateFlow<Boolean> = _isUploading
 
     fun setImageToStorage(uri: Uri, eventId:String){
         viewModelScope.launch {
-            _imagePath.value = storageCacheRepository.uploadImageToStorage(uri,eventId)
+            android.util.Log.d("StorageViewModel", "Fotoğraf yükleme başladı")
+            _isUploading.value = true
+            try {
+                val result = storageCacheRepository.uploadImageToStorage(uri, eventId, "eventImage")
+                android.util.Log.d("StorageViewModel", "Fotoğraf yükleme tamamlandı: $result")
+                _imagePath.value = result
+            } catch (e: Exception) {
+                android.util.Log.e("StorageViewModel", "Fotoğraf yükleme hatası", e)
+            } finally {
+                _isUploading.value = false
+                android.util.Log.d("StorageViewModel", "Fotoğraf yükleme durumu: ${_isUploading.value}")
+            }
         }
     }
 
-    fun getImagePathFromCache(firebaseUrl:String){
-        viewModelScope.launch {
-            _cachedImagePath.value = storageCacheRepository.getImagePath(firebaseUrl)
-        }
-    }
+//    fun getImagePathFromCache(firebaseUrl:String){
+//        viewModelScope.launch {
+//            _cachedImagePath.value = storageCacheRepository.getImagePath(firebaseUrl)
+//        }
+//    }
 }

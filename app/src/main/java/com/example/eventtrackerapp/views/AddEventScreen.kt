@@ -6,6 +6,9 @@ import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Build
 import android.widget.Toast
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -478,6 +481,12 @@ private fun DatePickerModal(
                     val selectedDate = datePickerState.selectedDateMillis
                     val currentDate = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
+                    // Debug bilgisi
+                    android.util.Log.d("DatePicker", "Selected timestamp: $selectedDate")
+                    selectedDate?.let { 
+                        android.util.Log.d("DatePicker", "Formatted date: ${convertMillisToDate(it)}")
+                    }
+
                     if(selectedDate!=null && selectedDate >= currentDate){
                         onDateSelected(selectedDate)
                         onDismiss()
@@ -513,12 +522,16 @@ fun ShowDateModal(
 
 
     OutlinedTextField(
-        value = dateState.value?.let{ convertMillisToDate(it) } ?: "",
+        value = dateState.value?.let{ 
+            val formattedDate = convertMillisToDate(it)
+            android.util.Log.d("ShowDateModal", "Raw timestamp: $it, Formatted: $formattedDate")
+            formattedDate
+        } ?: "",
         onValueChange = {},
         readOnly = true,
         label = {Text("Event Date")},
         placeholder = {
-            Text("MM/DD/YYYY")
+            Text("DD/MM/YYYY")
         },
         leadingIcon = {
             Icon(Icons.Default.DateRange,"Select Date")
@@ -558,9 +571,24 @@ fun ShowDateModal(
 
 }
 
-fun convertMillisToDate(millis:Long) :String{
-    val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-    return formatter.format(Date(millis))
+fun convertMillisToDate(millis: Long): String {
+    return try {
+        // Modern DateTimeFormatter kullanımı (API 26+ için)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val instant = Instant.ofEpochMilli(millis)
+            val localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            formatter.format(localDateTime)
+        } else {
+            // Eski SimpleDateFormat kullanımı
+            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val date = Date(millis)
+            formatter.format(date)
+        }
+    } catch (e: Exception) {
+        // Eğer formatlama başarısız olursa, timestamp'i string olarak döndür
+        "Invalid Date: $millis"
+    }
 }
 
 //@Preview(showBackground = true)

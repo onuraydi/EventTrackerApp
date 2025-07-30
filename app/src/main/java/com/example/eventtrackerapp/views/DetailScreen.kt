@@ -63,6 +63,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import android.icu.text.SimpleDateFormat
+import android.os.Build
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.common.CommentBottomSheet
@@ -128,8 +136,10 @@ fun DetailScreen(
         Box(modifier = Modifier
             .padding(innerPadding)
             .fillMaxWidth()
-            .padding(8.dp)
-            .verticalScroll(rememberScrollState())) {
+            .padding(10.dp)
+            .verticalScroll(rememberScrollState()),
+            contentAlignment = Alignment.Center
+        ) {
             Column() {
 
                 if(isLoading){
@@ -161,10 +171,10 @@ fun DetailScreen(
                         Text("Kategori:" + it.name)
                     }
                     Spacer(Modifier.padding(top = 10.dp))
-                    Row(Modifier.padding(horizontal = 20.dp)) {
+                    Row() {
                         Icon(Icons.Default.DateRange,null)
                         Spacer(Modifier.padding(start = 5.dp))
-                        Text(text = event.date.toString())
+                        Text(text = formatEventDate(event.date))
 
                         Spacer(Modifier.weight(1f))
 
@@ -194,7 +204,7 @@ fun DetailScreen(
                             SelectableImageBox(
                                 boxWidth = 60.dp,
                                 boxHeight = 60.dp,
-                                imagePath = participant?.photo,
+                                imagePath = participant.photo,
                                 modifier = Modifier,
                                 placeHolder = painterResource(R.drawable.ic_launcher_foreground),
                                 shape = CircleShape,
@@ -306,3 +316,23 @@ fun DetailScreen(
 //        //DetailScreen();
 //    }
 //}
+
+private fun formatEventDate(timestamp: Long): String {
+    return try {
+        // Modern DateTimeFormatter kullanımı (API 26+ için)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val instant = Instant.ofEpochMilli(timestamp)
+            val localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            formatter.format(localDateTime)
+        } else {
+            // Eski SimpleDateFormat kullanımı
+            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val date = Date(timestamp)
+            formatter.format(date)
+        }
+    } catch (e: Exception) {
+        // Eğer formatlama başarısız olursa, timestamp'i string olarak döndür
+        "Invalid Date: $timestamp"
+    }
+}
