@@ -229,7 +229,7 @@ fun SimpleSearchBar(
                             "HistoryItem",
                             Modifier.weight(1f)
                             )
-                        Text(historyItem, modifier = Modifier.weight(4f).padding(start = 4.dp))
+                        Text(historyItem, modifier = Modifier.weight(4f).padding(start = 4.dp), color = MaterialTheme.colorScheme.onBackground)
                         Icon(
                             Icons.Default.Clear,
                             "Clear",
@@ -237,7 +237,8 @@ fun SimpleSearchBar(
                                 .weight(1f)
                                 .clickable {
                                     deleteItem(historyItem)
-                                }
+                                },
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
