@@ -9,6 +9,7 @@ import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.model.roommodels.Profile
 import com.example.eventtrackerapp.views.MyAccountScreen
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.toObject
 import com.google.firestore.v1.StructuredAggregationQuery.Aggregation.Count
 import kotlinx.coroutines.CoroutineScope
@@ -29,9 +30,15 @@ class CommentRepository(
 
     //Etkinliğe özel yorumları Firestore'dan dinle
     fun getCommentsForEvent(eventId: String): Flow<List<CommentWithProfileAndEvent>> = callbackFlow {
-        val listenerRegistration = commentsCollection
-            .whereEqualTo("eventId",eventId)
-            .addSnapshotListener {snapshot, error ->
+        var listenerRegistration: ListenerRegistration? = null
+        
+        // Boş event ID kontrolü
+        if (eventId.isBlank()) {
+            trySend(emptyList())
+        } else {
+            listenerRegistration = commentsCollection
+                .whereEqualTo("eventId",eventId)
+                .addSnapshotListener {snapshot, error ->
                 if (error != null){
                     Log.e(TAG,"Yorum dinleme başarısız")
                     close(error)
@@ -82,35 +89,51 @@ class CommentRepository(
                     }
                 }
             }
+        }
+        
         awaitClose {
-            listenerRegistration.remove()
+            listenerRegistration?.remove()
         }
     }
 
     //Etkinliğe ait yorum sayısını getirme (Room'dan alınıyor)
     fun getCommentCountForEvent(eventId:String):Flow<Int> = callbackFlow {
-        val listenerRegistration = commentsCollection
-            .whereEqualTo("eventId",eventId)
-            .addSnapshotListener{snapshot,error ->
-                if (error != null)
-                {
-                    Log.e(TAG,"Yorum dinleme başarısız",error)
-                    close(error)
-                    return@addSnapshotListener
-                }
+        var listenerRegistration: ListenerRegistration? = null
+        
+        // Boş event ID kontrolü
+        if (eventId.isBlank()) {
+            trySend(0)
+        } else {
+            listenerRegistration = commentsCollection
+                .whereEqualTo("eventId",eventId)
+                .addSnapshotListener{snapshot,error ->
+                    if (error != null)
+                    {
+                        Log.e(TAG,"Yorum dinleme başarısız",error)
+                        close(error)
+                        return@addSnapshotListener
+                    }
 
-                val count = snapshot?.size() ?: 0
-                trySend(count).onFailure {
-                    Log.e(TAG,"Yorum sayısı gönderilemedi",it)
+                    val count = snapshot?.size() ?: 0
+                    trySend(count).onFailure {
+                        Log.e(TAG,"Yorum sayısı gönderilemedi",it)
+                    }
                 }
-            }
+        }
+        
         awaitClose{
-            listenerRegistration.remove()
+            listenerRegistration?.remove()
         }
     }
 
     //Firestore'a yorum ekleme
     suspend fun upsertComment(comment: Comment) {
+        // Boş ID kontrolü
+        if (comment.eventId.isBlank() || comment.profileId.isBlank()) {
+            Log.w(TAG, "upsertComment: Boş eventId veya profileId")
+            return
+        }
+        
         val firebaseComment = CommentMapper.toFirebaseModel(comment)
 
         try {

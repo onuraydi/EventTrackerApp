@@ -168,7 +168,9 @@ fun MyImage(event: Event, navController: NavController){
         placeHolder = painterResource(R.drawable.ic_launcher_background),
         shape = RectangleShape,
         onClick = {
-            navController.navigate("detail/${event.id}")
+            if (event.id.isNotBlank()) {
+                navController.navigate("detail/${event.id}")
+            }
         }
     )
 
@@ -251,7 +253,9 @@ fun SimpleSearchBar(
                             .fillMaxWidth()
                             .clickable {
                                 onSearch(eventWithTag.event.name ?: "")
-                                navController.navigate("detail/${eventWithTag.event.id}")
+                                if (eventWithTag.event.id.isNotBlank()) {
+                                    navController.navigate("detail/${eventWithTag.event.id}")
+                                }
                             }
                     ){
                         Icon(painterResource(R.drawable.baseline_event_24),"HistoryItem", tint = MaterialTheme.colorScheme.onBackground)

@@ -103,6 +103,7 @@ fun EditEventScreen(
 
     // ViewModel'den state'ler
     val categoryId = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.categoryId)}
+    val eventPhotoState = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.image)}
 //    val category = categoryWithTags.forEach { category -> category.category }
 
     val selectedCategoryName = rememberSaveable { mutableStateOf("") }
@@ -495,7 +496,7 @@ fun EditEventScreen(
                                             ownerId = ownerId,
                                             name = eventName.value,
                                             detail = eventDetail.value,
-                                            image = R.drawable.ic_launcher_background.toString(), // TODO Düzeltilecek
+                                            image = eventPhotoState.value ?:"https://firebasestorage.googleapis.com/v0/b/eventtrackerapp-b4f67.firebasestorage.app/o/eventImage%2Fn7LTxzfjaKgI9yQJoxXRnJSLykG2%2Fa8f47a3c-2342-4acc-8a53-11f4d3667acc.jpg?alt=media&token=9d4871fc-1f53-4bbd-af97-db4f1be1e0e5", // TODO Düzeltilecek
                                             date = selectedDate.value!!,
                                             duration = eventDuration.value,
                                             location = eventLocation.value,

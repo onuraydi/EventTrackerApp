@@ -127,10 +127,13 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
 
     var showBottomSheet by remember { mutableStateOf(false ) }
 
-    val likeCount by likeViewModel.getLikeCountForEvent(event.id).collectAsState(event.likeCount)
-    val isLiked by likeViewModel.isEventLikedByUser(event.id,profileId).collectAsState(false)
+    // Event ID kontrolü - boş ID durumunda güvenli değerler döndür
+    val eventId = if (event.id.isNotBlank()) event.id else ""
 
-    val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(0)
+    val likeCount by likeViewModel.getLikeCountForEvent(eventId).collectAsState(event.likeCount)
+    val isLiked by likeViewModel.isEventLikedByUser(eventId,profileId).collectAsState(false)
+
+    val commentCount by commentViewModel.getCommentCount(eventId).collectAsState(0)
 
 
     Column(
@@ -159,7 +162,9 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
             placeHolder = painterResource(R.drawable.ic_launcher_background),
             shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
             onClick = {
-                navController.navigate("detail/${event.id}")
+                if (eventId.isNotBlank()) {
+                    navController.navigate("detail/${eventId}")
+                }
             }
         )
 
@@ -170,7 +175,9 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
                 Icon(Icons.Filled.FavoriteBorder,null, modifier = Modifier
                     .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
                     .clickable {
-                        likeViewModel.toggleLike(eventId = event.id,profileId);
+                        if (eventId.isNotBlank()) {
+                            likeViewModel.toggleLike(eventId = eventId, profileId)
+                        }
                     })
                 Text(text = "${likeCount}",Modifier.align(Alignment.CenterVertically))
             }else
@@ -178,7 +185,9 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
                 Icon(Icons.Filled.Favorite,null, modifier = Modifier
                     .padding(start = 15.dp, top = 15.dp, bottom = 15.dp,end=5.dp)
                     .clickable {
-                        likeViewModel.toggleLike(event.id,profileId)
+                        if (eventId.isNotBlank()) {
+                            likeViewModel.toggleLike(eventId, profileId)
+                        }
                     })
                 Text(text = "${likeCount}",Modifier.align(Alignment.CenterVertically))
             }
@@ -212,7 +221,11 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
         event.name.let {
             Text(text= it, modifier = Modifier
                 .padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
-                .clickable {  navController.navigate("detail/${event.id}") },
+                .clickable {  
+                    if (eventId.isNotBlank()) {
+                        navController.navigate("detail/${eventId}")
+                    }
+                },
                 fontWeight = W500, fontSize = 20.sp
             )
         }
@@ -224,7 +237,7 @@ private fun EventRow(event: Event, navController: NavController, commentList:Lis
             currentUserImage = painterResource(R.drawable.ic_launcher_foreground),
             commentViewModel = commentViewModel,
             profileId = profileId,
-            eventId = event.id
+            eventId = eventId
         )
     }
 }

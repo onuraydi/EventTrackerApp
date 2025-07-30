@@ -105,16 +105,20 @@ fun DetailScreen(
 {
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    val likeCount = likeViewModel.getLikeCountForEvent(event.id).collectAsState(event.likeCount)
-    val isLiked = likeViewModel.isEventLikedByUser(event.id,profileId).collectAsState(0)
+    // Event ID kontrolü - boş ID durumunda güvenli değerler döndür
+    val eventId = if (!isLoading && event.id.isNotBlank()) event.id else ""
 
-    val commentCount by commentViewModel.getCommentCount(event.id).collectAsState(0)
+    val likeCount = likeViewModel.getLikeCountForEvent(eventId).collectAsState(event.likeCount)
+    val isLiked = likeViewModel.isEventLikedByUser(eventId,profileId).collectAsState(0)
 
-    val state by participantsViewModel.hasUserParticipated(event.id,profileId).collectAsState(false)
 
-    val participantsCount by participantsViewModel.getParticipationCount(event.id).collectAsState(0)
+    val commentCount by commentViewModel.getCommentCount(eventId).collectAsState(0)
 
-    val participants by participantsViewModel.getParticipantsForEvent(event.id).collectAsState(
+    val state by participantsViewModel.hasUserParticipated(eventId,profileId).collectAsState(false)
+
+    val participantsCount by participantsViewModel.getParticipationCount(eventId).collectAsState(0)
+
+    val participants by participantsViewModel.getParticipantsForEvent(eventId).collectAsState(
         emptyList()
     )
 
@@ -122,7 +126,7 @@ fun DetailScreen(
         topBar =
         {
             EventTrackerTopAppBar(
-                title = "Etkinlik Ekleme",
+                title = "Detay",
                 modifier = Modifier,
                 showBackButton = true,
                 onBackClick =
@@ -141,7 +145,7 @@ fun DetailScreen(
         ) {
             Column() {
 
-                if(isLoading){
+                if(isLoading || eventId.isBlank()){
                     CircularProgressIndicator()
                 }else{
                     if (event != null && event.image != null && event.image != "") {
@@ -182,14 +186,20 @@ fun DetailScreen(
                     Spacer(Modifier.padding(top = 20.dp))
                     Text("Katılımcılar", fontSize = 30.sp, fontWeight = FontWeight.W500, modifier = Modifier
                         .clickable {
-                            navController.navigate("participants_screen/${event.id}")
+                            if (eventId.isNotBlank()) {
+                                navController.navigate("participants_screen/${eventId}")
+                            }
                         })
                     Spacer(Modifier.padding(top = 5.dp))
                     LazyRow(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .clickable { navController.navigate("participants_screen/${event.id}") }) {
+                            .clickable { 
+                                if (eventId.isNotBlank()) {
+                                    navController.navigate("participants_screen/${eventId}")
+                                }
+                            }) {
                         items(participants.take(3)){participant->
                             //.take(3) ilk 3 elemanı alır. Eğer 3'ten fazla olursa aşağısı çalışır
                             //itemsIndexed de olabilir.
@@ -218,7 +228,11 @@ fun DetailScreen(
                     // TODO etkinliğe katılıp katılmadığının kontorlü yapılarak butonun görünümü vb. değişecek
                     if (!state)
                     {
-                        ExtendedFloatingActionButton(onClick = {participantsViewModel.toggleAttendance(profileId = profileId, eventId = event.id) },
+                        ExtendedFloatingActionButton(onClick = {
+                            if (eventId.isNotBlank()) {
+                                participantsViewModel.toggleAttendance(profileId = profileId, eventId = eventId)
+                            }
+                        },
                             icon = { Icon(Icons.Default.Add,null, tint = Color.White)},
                             text = { Text("Katıl", color = Color.White)},
                             modifier = Modifier.weight(1f),
@@ -227,7 +241,11 @@ fun DetailScreen(
                         )
                     }
                     else{
-                        ExtendedFloatingActionButton(onClick = {participantsViewModel.toggleAttendance(event.id,profileId)},
+                        ExtendedFloatingActionButton(onClick = {
+                            if (eventId.isNotBlank()) {
+                                participantsViewModel.toggleAttendance(eventId, profileId)
+                            }
+                        },
                             icon = {Icon(Icons.Default.Clear,null,tint = Color.White)},
                             text = { Text("Vazgeç", color = Color.White)},
                             modifier = Modifier.weight(1f),
@@ -258,7 +276,9 @@ fun DetailScreen(
                                 Icon(Icons.Filled.FavoriteBorder, null, modifier = Modifier
                                     .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
                                     .clickable {
-                                        likeViewModel.toggleLike(event.id,profileId)
+                                        if (eventId.isNotBlank()) {
+                                            likeViewModel.toggleLike(eventId, profileId)
+                                        }
                                     })
                                 Text(
                                     text = "${likeCount.value}",
@@ -268,7 +288,9 @@ fun DetailScreen(
                                 Icon(Icons.Filled.Favorite, null, modifier = Modifier
                                     .padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 5.dp)
                                     .clickable {
-                                        likeViewModel.toggleLike(event.id,profileId)
+                                        if (eventId.isNotBlank()) {
+                                            likeViewModel.toggleLike(eventId, profileId)
+                                        }
                                     })
                                 Text(
                                     text = "${likeCount.value}",
@@ -298,7 +320,7 @@ fun DetailScreen(
                         currentUserImage = painterResource(R.drawable.ic_launcher_foreground),
                         commentViewModel = commentViewModel,
                         profileId = profileId,
-                        eventId = event.id
+                        eventId = eventId
                     )
                 }
             }

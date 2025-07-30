@@ -164,7 +164,7 @@ fun AppNavGraph(
                 DetailScreen(
                     event = eventWithTags?.event ?: Event(), // Boş event loading için
                     navController = navController,
-                    isLoading = isLoading || detailCategory == null,
+                    isLoading = isLoading || detailCategory == null || eventWithTags?.event?.id.isNullOrBlank(),
                     category = detailCategory ?: Category(),
                     commentList = commentList,
                     commentViewModel = commentViewModel,
