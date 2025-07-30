@@ -2,6 +2,7 @@ package com.example.eventtrackerapp.views
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,7 +39,8 @@ import com.example.eventtrackerapp.common.SelectableImageBox
 fun ProfileScreen(
     navController: NavController,
     authViewModel:AuthViewModel,
-    profile: Profile
+    profile: Profile,
+    isLoading:Boolean
     )
 {
     Scaffold(Modifier
@@ -45,95 +48,105 @@ fun ProfileScreen(
         bottomBar = { BottomNavBar(navController = navController)}
     ) { innerPadding ->
 
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .fillMaxHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        if(isLoading){
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ){
+                CircularProgressIndicator()
+            }
+        }else{
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-            //Profil Fotoğrafı
-            SelectableImageBox(
-                boxWidth = 140.dp,
-                boxHeight = 140.dp,
-                imagePath = profile.photo,
-                modifier = Modifier,
-                placeHolder = painterResource(R.drawable.ic_launcher_foreground),
-                shape = CircleShape,
-                borderStroke = BorderStroke(1.dp,MaterialTheme.colorScheme.primaryContainer)
-            )
+                //Profil Fotoğrafı
+                SelectableImageBox(
+                    boxWidth = 140.dp,
+                    boxHeight = 140.dp,
+                    imagePath = profile.photo,
+                    modifier = Modifier,
+                    placeHolder = painterResource(R.drawable.ic_launcher_foreground),
+                    shape = CircleShape,
+                    borderStroke = BorderStroke(1.dp,MaterialTheme.colorScheme.primaryContainer)
+                )
 
                 Spacer(Modifier.padding(10.dp))
 
                 Text(profile.fullName, fontSize = 20.sp)
                 Text(profile.email, fontSize = 14.sp, fontWeight = FontWeight.Light)
 
-            // MY Account
+                // MY Account
 
-            EventTrackerExtendedFloatingActionButton(
-                text = "My Account",
-                onClick =
-                {
-                    navController.navigate("my_account")
+                EventTrackerExtendedFloatingActionButton(
+                    text = "My Account",
+                    onClick =
                     {
-                        launchSingleTop = true
-                    }
-                },
-                leadingIcon = Icons.Filled.Person,
-                leadingIconDescription = "Person"
-            )
-
-            // My Preferences
-
-            EventTrackerExtendedFloatingActionButton(
-                text = "My Preferences",
-                onClick =
-                {
-                    navController.navigate("preferences")
-                    {
-                        launchSingleTop = true
-                    }
-                },
-                leadingIcon = Icons.Filled.Build,
-                leadingIconDescription = "Person"
-            )
-
-            // My Events
-
-            EventTrackerExtendedFloatingActionButton(
-                text = "My Events",
-                onClick =
-                {
-                    navController.navigate("my_events")
-                    {
-                        launchSingleTop = true
-                    }
-                },
-                leadingIcon = Icons.Filled.Star,
-                leadingIconDescription = "Person"
-            )
-
-            // Log Out
-
-            EventTrackerExtendedFloatingActionButton(
-                text = "Log Out",
-                textColor = Color.Red,
-                onClick =
-                {
-                    authViewModel.logOut()
-                    navController.navigate("login_screen")
-                    {
-                        popUpTo("profile")
+                        navController.navigate("my_account")
                         {
-                            inclusive = true
+                            launchSingleTop = true
                         }
-                    }
-                },
-                leadingIcon = Icons.AutoMirrored.Filled.ExitToApp,
-                leadingIconDescription = "Person",
-                tint = Color.Red
-            )
+                    },
+                    leadingIcon = Icons.Filled.Person,
+                    leadingIconDescription = "Person"
+                )
+
+                // My Preferences
+
+                EventTrackerExtendedFloatingActionButton(
+                    text = "My Preferences",
+                    onClick =
+                    {
+                        navController.navigate("preferences")
+                        {
+                            launchSingleTop = true
+                        }
+                    },
+                    leadingIcon = Icons.Filled.Build,
+                    leadingIconDescription = "Person"
+                )
+
+                // My Events
+
+                EventTrackerExtendedFloatingActionButton(
+                    text = "My Events",
+                    onClick =
+                    {
+                        navController.navigate("my_events")
+                        {
+                            launchSingleTop = true
+                        }
+                    },
+                    leadingIcon = Icons.Filled.Star,
+                    leadingIconDescription = "Person"
+                )
+
+                // Log Out
+
+                EventTrackerExtendedFloatingActionButton(
+                    text = "Log Out",
+                    textColor = Color.Red,
+                    onClick =
+                    {
+                        authViewModel.logOut()
+                        navController.navigate("login_screen")
+                        {
+                            popUpTo("profile")
+                            {
+                                inclusive = true
+                            }
+                        }
+                    },
+                    leadingIcon = Icons.AutoMirrored.Filled.ExitToApp,
+                    leadingIconDescription = "Person",
+                    tint = Color.Red
+                )
+            }
         }
+
     }
 }

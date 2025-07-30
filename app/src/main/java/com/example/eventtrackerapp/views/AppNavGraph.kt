@@ -20,6 +20,7 @@ import com.example.eventtrackerapp.Authentication.AuthViewModel
 import com.example.eventtrackerapp.data.source.local.UserPreferences
 import com.example.eventtrackerapp.model.roommodels.Category
 import com.example.eventtrackerapp.model.roommodels.Event
+import com.example.eventtrackerapp.model.roommodels.Profile
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.CommentViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
@@ -192,9 +193,12 @@ fun AppNavGraph(
 
                     val profile by profileViewModel.getById(uid).collectAsState(null)
 
-                    profile?.let {
-                        ProfileScreen(navController = navController,authViewModel, it)
-                    }
+                    ProfileScreen(
+                        navController,
+                        authViewModel,
+                        profile = profile ?: Profile(),
+                        isLoading = profile == null
+                    )
                 }
             }
 

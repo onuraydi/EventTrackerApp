@@ -162,7 +162,7 @@ fun CommentItem(commentWithProfile: CommentWithProfileAndEvent) {
     ) {
         AsyncImage(
             // TODO burası sonra düzeltilecek
-            model = commentWithProfile.profile.photo,
+            model = R.drawable.ic_launcher_foreground,
             contentDescription = "Profil Resmi",
             modifier = Modifier
                 .size(36.dp)
