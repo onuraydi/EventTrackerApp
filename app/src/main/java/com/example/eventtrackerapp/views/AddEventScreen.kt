@@ -61,6 +61,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -85,6 +86,7 @@ import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.common.EventTrackerTopAppBar
 import com.example.eventtrackerapp.common.PermissionHelper
 import com.example.eventtrackerapp.common.SelectableImageBox
+import com.example.eventtrackerapp.model.roommodels.Profile
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
 import com.example.eventtrackerapp.viewmodel.PermissionViewModel
@@ -117,6 +119,64 @@ fun AddEventScreen(
     val uriData = remember{mutableStateOf<Uri?>(null)}
     val galleryData = rememberSaveable{mutableStateOf("")}
     val imagePath = storageViewModel.imagePath.collectAsStateWithLifecycle()//resmin yolunu tutuyoruz
+
+    val isUploading = storageViewModel.isUploading.collectAsStateWithLifecycle()
+
+    //Event States
+    //Adı, Tarihi,
+    // Detayı,Etkinlik Süresi,Resim,
+    // Konum,Websitesi,Kategori, Tag(AltKategori)
+    val eventName = rememberSaveable { mutableStateOf("") }
+    val nameError = rememberSaveable{mutableStateOf(false)}
+
+    val eventDetail = rememberSaveable { mutableStateOf("") }
+    val detailError = rememberSaveable{mutableStateOf(false)}
+
+    val selectedDate = rememberSaveable { mutableStateOf<Long?>(0) }
+    val dateError = rememberSaveable{mutableStateOf(false)}
+
+    val showModal = rememberSaveable { mutableStateOf(false) }
+
+    val eventDuration = rememberSaveable { mutableStateOf("") }
+    val durationError = rememberSaveable{mutableStateOf(false)}
+
+    val eventLocation = rememberSaveable { mutableStateOf("") }
+    val locationError = rememberSaveable{mutableStateOf(false)}
+
+    val categoryError = rememberSaveable{mutableStateOf(false)}
+
+    val categoryId = rememberSaveable{ mutableStateOf("") }
+    val isExpanded = rememberSaveable{ mutableStateOf(false)}
+
+    // Fotoğraf yükleme tamamlandığında event'i oluştur
+    LaunchedEffect(imagePath.value) {
+        if (imagePath.value != null && isUploading.value == false) {
+            // Tüm gerekli alanlar dolu mu kontrol et
+            if (eventName.value.isNotBlank() ||
+                eventDetail.value.isNotBlank() ||
+                eventDuration.value.isNotBlank() ||
+                eventLocation.value.isNotBlank() ||
+                selectedCategoryName.value.isNotBlank() ||
+                selectedDate.value != null ||
+                chosenTags.isNotEmpty()) {
+                val event = Event(
+                        ownerId = ownerId,
+                        name = eventName.value,
+                        detail = eventDetail.value,
+                        image = imagePath.value!!,
+                        date = selectedDate.value!!,  // TODO ?
+                        duration = eventDuration.value,
+                        location = eventLocation.value,
+                        likeCount = 0,
+                        categoryId = categoryId.value,
+                    )
+                eventViewModel.addEvent(event,selectedTag)
+                navController.popBackStack()
+            } else {
+                android.util.Log.d("AddEventScreen", "Form eksik")
+            }
+        }
+    }
 
     //galeriye gidip fotoğraf seçmemizi sağlayacak
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -166,30 +226,6 @@ fun AddEventScreen(
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                //Adı, Tarihi,
-                // Detayı,Etkinlik Süresi,Resim,
-                // Konum,Websitesi,Kategori, Tag(AltKategori)
-                val eventName = rememberSaveable { mutableStateOf("") }
-                val nameError = rememberSaveable{mutableStateOf(false)}
-
-                val eventDetail = rememberSaveable { mutableStateOf("") }
-                val detailError = rememberSaveable{mutableStateOf(false)}
-
-                val selectedDate = rememberSaveable { mutableStateOf<Long?>(0) }
-                val dateError = rememberSaveable{mutableStateOf(false)}
-
-                val showModal = rememberSaveable { mutableStateOf(false) }
-
-                val eventDuration = rememberSaveable { mutableStateOf("") }
-                val durationError = rememberSaveable{mutableStateOf(false)}
-
-                val eventLocation = rememberSaveable { mutableStateOf("") }
-                val locationError = rememberSaveable{mutableStateOf(false)}
-
-                val categoryError = rememberSaveable{mutableStateOf(false)}
-
-                val categoryId = rememberSaveable{ mutableStateOf("") }
-                val isExpanded = rememberSaveable{ mutableStateOf(false)}
 
                 Column(
                     modifier = Modifier
@@ -427,25 +463,27 @@ fun AddEventScreen(
                                 categoryError.value = selectedCategoryName.value.isBlank()
                                 return@EventTrackerAppPrimaryButton
                             } else {
-                                uriData.value?.let { storageViewModel.setImageToStorage(it,ownerId) }
-                                val event = imagePath.value?.let {
-                                    Event(
+                                // Eğer fotoğraf seçilmişse ve henüz yüklenmemişse
+                                if(uriData.value != null && imagePath.value == null && !isUploading.value){
+                                    android.util.Log.d("CreateProfileScreen", "Fotoğraf yükleniyor...")
+                                    storageViewModel.setImageToStorage(uriData.value!!, ownerId)
+                                } else if(uriData.value == null) {
+                                    // Fotoğraf seçilmemiş, direkt profil oluştur
+                                    android.util.Log.d("CreateProfileScreen", "Fotoğraf olmadan profil oluşturuluyor")
+                                    val event = Event(
                                         ownerId = ownerId,
                                         name = eventName.value,
                                         detail = eventDetail.value,
-                                        image = it,
+                                        image = imagePath.value!!,
                                         date = selectedDate.value!!,  // TODO ?
                                         duration = eventDuration.value,
                                         location = eventLocation.value,
                                         likeCount = 0,
                                         categoryId = categoryId.value,
                                     )
+                                    eventViewModel.addEvent(event,selectedTag)
+                                    navController.popBackStack()
                                 }
-                                if (event != null) {
-                                    eventViewModel.addEvent(event = event, selectedTags = chosenTags)
-                                }
-
-                                navController.popBackStack()
                             }
                         })
                 }

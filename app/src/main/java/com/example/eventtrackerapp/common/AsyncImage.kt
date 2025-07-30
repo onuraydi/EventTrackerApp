@@ -49,7 +49,7 @@ fun SelectableImageBox(
 
         val model = remember(imagePath){
             when{
-                imagePath.isNullOrEmpty() -> R.drawable.ic_launcher_background
+                imagePath.isNullOrEmpty() -> null
                 imagePath.startsWith("http") -> imagePath//url
                 else-> File(imagePath)//cihaz yolu
             }

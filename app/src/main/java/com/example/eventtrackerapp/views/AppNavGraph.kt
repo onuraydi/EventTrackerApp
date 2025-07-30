@@ -210,7 +210,7 @@ fun AppNavGraph(
                     val profile by profileViewModel.getById(uid).collectAsState(null)
 
                     profile?.let {
-                        MyAccountScreen(navController,profile!!,profileViewModel,permissionViewModel)
+                        MyAccountScreen(navController,profile!!,profileViewModel,permissionViewModel,storageViewModel)
                     }
                 }
             }

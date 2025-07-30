@@ -104,7 +104,7 @@ fun CreateProfileScreen(
 
     val uriData = rememberSaveable { mutableStateOf<Uri?>(null) }
     val galleryData = rememberSaveable { mutableStateOf("") }
-    val imagePath = storageViewModel.imagePath.collectAsStateWithLifecycle()
+    val imagePath = storageViewModel.profileImagePath.collectAsStateWithLifecycle()
     val isUploading = storageViewModel.isUploading.collectAsStateWithLifecycle()
 
     // Form state variables
@@ -117,7 +117,7 @@ fun CreateProfileScreen(
     val isExpanded = rememberSaveable { mutableStateOf(false) }
 
     // Fotoğraf yükleme tamamlandığında profili oluştur
-    LaunchedEffect(imagePath.value) {
+    LaunchedEffect(imagePath.value,isUploading.value) {
         if (imagePath.value != null && isUploading.value == false) {
             // Tüm gerekli alanlar dolu mu kontrol et
             if (fullNameState.value.isNotBlank() && 
@@ -447,7 +447,7 @@ fun CreateProfileScreen(
                             // Eğer fotoğraf seçilmişse ve henüz yüklenmemişse
                             if(uriData.value != null && imagePath.value == null && !isUploading.value){
                                 android.util.Log.d("CreateProfileScreen", "Fotoğraf yükleniyor...")
-                                storageViewModel.setImageToStorage(uriData.value!!, uid)
+                                storageViewModel.setProfileImageToStorage(uriData.value!!, uid)
                             } else if(uriData.value == null) {
                                 // Fotoğraf seçilmemiş, direkt profil oluştur
                                 android.util.Log.d("CreateProfileScreen", "Fotoğraf olmadan profil oluşturuluyor")
