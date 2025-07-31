@@ -103,7 +103,7 @@ fun MyAccountScreen(
                     photo = imagePath.value!!
                 )
                 profileViewModel.updateProfile(profile)
-//                navController.popBackStack()
+                navController.popBackStack()
             } else {
                 android.util.Log.d("CreateProfileScreen", "Form eksik: fullName=${fullNameState.value.isNotBlank()}, userName=${userNameState.value.isNotBlank()}, gender=${gender.value.isNotBlank()}, tags=${profile.selectedTagList.isNotEmpty()}")
             }
@@ -388,7 +388,7 @@ fun MyAccountScreen(
                             selectedCategoryList = profile.selectedCategoryList,
                             selectedTagList = profile.selectedTagList,
                             addedEventIds = profile.addedEventIds,
-                            photo = ""
+                            photo = profile.photo
                         )
                         profileViewModel.updateProfile(profile)
                         navController.popBackStack()

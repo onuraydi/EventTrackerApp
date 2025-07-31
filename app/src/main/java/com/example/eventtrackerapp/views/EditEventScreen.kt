@@ -1,9 +1,12 @@
 package com.example.eventtrackerapp.views
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
+import android.app.Activity
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,10 +27,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,16 +37,13 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,24 +51,24 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
 import com.example.eventtrackerapp.R
 import com.example.eventtrackerapp.common.EventTrackerAppOutlinedTextField
 import com.example.eventtrackerapp.common.EventTrackerAppPrimaryButton
 import com.example.eventtrackerapp.common.EventTrackerTopAppBar
+import com.example.eventtrackerapp.common.PermissionHelper
 import com.example.eventtrackerapp.common.SelectableImageBox
 import com.example.eventtrackerapp.model.roommodels.Event
 import com.example.eventtrackerapp.model.roommodels.Tag
 import com.example.eventtrackerapp.viewmodel.CategoryViewModel
 import com.example.eventtrackerapp.viewmodel.EventViewModel
-import java.io.File
+import com.example.eventtrackerapp.viewmodel.PermissionViewModel
+import com.example.eventtrackerapp.viewmodel.StorageViewModel
 
 
 @SuppressLint("NewApi", "AutoboxingStateCreation")
@@ -82,35 +80,117 @@ fun EditEventScreen(
     eventId:String,
     eventViewModel: EventViewModel,
     categoryViewModel: CategoryViewModel,
+    permissionViewModel: PermissionViewModel,
+    storageViewModel: StorageViewModel,
     ownerId: String
 ) {
     val context = LocalContext.current
 
-
-    // TODO Burası tekrardan refactor edilecek
-
-
-//    // Kategori verisini yükle
-//    LaunchedEffect(Unit) {
-//        categoryViewModel.getAllCategoryWithTags()
-//    }
-
     val categoryWithTags by categoryViewModel.getAllCategoryWithTags().collectAsState(emptyList())
-
-//    val allEventsWithRelations by eventViewModel.allEventsWithRelations.observeAsState(emptyList())
 
     val eventWithTags = eventViewModel.getEventWithRelationsById(eventId).collectAsState(null)
 
     // ViewModel'den state'ler
-    val categoryId = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.categoryId)}
-    val eventPhotoState = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.image)}
-//    val category = categoryWithTags.forEach { category -> category.category }
+    val categoryId = rememberSaveable { mutableStateOf<String?>(null) }
 
     val selectedCategoryName = rememberSaveable { mutableStateOf("") }
     val chosenTags = remember { mutableStateListOf<Tag>() }
 
-    LaunchedEffect(categoryWithTags) {
-        if (categoryWithTags.isNotEmpty()) {
+    //Event States
+    val eventName = rememberSaveable { mutableStateOf("") }
+    val nameError = rememberSaveable { mutableStateOf(false) }
+
+    val eventDetail = rememberSaveable { mutableStateOf("") }
+    val detailError = rememberSaveable { mutableStateOf(false) }
+
+    val selectedDate = rememberSaveable { mutableStateOf<Long?>(0) }
+    val dateError = rememberSaveable { mutableStateOf(false) }
+
+    val showModal = rememberSaveable { mutableStateOf(false) }
+
+    val eventDuration = rememberSaveable { mutableStateOf("") }
+    val durationError = rememberSaveable { mutableStateOf(false) }
+
+    val eventLocation = rememberSaveable { mutableStateOf("") }
+    val locationError = rememberSaveable { mutableStateOf(false) }
+
+    val categoryError = rememberSaveable { mutableStateOf(false) }
+
+    val eventImage = rememberSaveable { mutableStateOf<String?>(null) }
+
+    // Event verisi yüklendiğinde state'leri güncelle
+    LaunchedEffect(eventWithTags.value) {
+        eventWithTags.value?.event?.let { event ->
+            eventName.value = event.name ?: ""
+            eventDetail.value = event.detail ?: ""
+            selectedDate.value = event.date
+            eventDuration.value = event.duration ?: ""
+            eventLocation.value = event.location ?: ""
+            eventImage.value = event.image
+            categoryId.value = event.categoryId
+        }
+    }
+
+    //Media Permission
+    val permission = permissionViewModel.getPermissionName()
+    val uriData = rememberSaveable { mutableStateOf<Uri?>(null) }
+    val isUploading = storageViewModel.isUploading.collectAsStateWithLifecycle()
+    val imagePath = storageViewModel.imagePath.collectAsStateWithLifecycle()
+
+    LaunchedEffect(imagePath.value, isUploading.value) {
+        if(imagePath.value != null && isUploading.value == false){
+            // Tüm gerekli alanlar dolu mu kontrol et
+            if (eventName.value.isNotBlank() &&
+                eventDetail.value.isNotBlank() &&
+                eventDuration.value.isNotBlank() &&
+                eventLocation.value.isNotBlank() &&
+                selectedCategoryName.value.isNotBlank() &&
+                selectedDate.value != null &&
+                chosenTags.isNotEmpty()) {
+                val event = Event(
+                    id = eventId,
+                    ownerId = ownerId,
+                    name = eventName.value,
+                    detail = eventDetail.value,
+                    image = imagePath.value!!,
+                    date = selectedDate.value!!,
+                    duration = eventDuration.value,
+                    location = eventLocation.value,
+                    likeCount = eventWithTags.value?.event?.likeCount ?: 0,
+                    categoryId = categoryId.value!!,
+                )
+                eventViewModel.updateEvent(event, chosenTags)
+                navController.popBackStack()
+            } else {
+                android.util.Log.d("EditEventScreen", "Form eksik")
+            }
+        }
+    }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result->
+        if(result.resultCode == Activity.RESULT_OK && result.data!=null){
+            uriData.value = result.data?.data
+            if(uriData.value!=null){
+                val localPath = PermissionHelper.saveImageToInternalStorage(context,uriData.value!!)
+                eventImage.value = localPath
+            }
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted->
+        if(granted){
+            PermissionHelper.goToGallery(imagePickerLauncher)
+        }else{
+            Toast.makeText(context,"Fotoğraf yüklemek için galeri iznine ihtiyaç var.",Toast.LENGTH_LONG).show()
+        }
+    }
+
+    LaunchedEffect(categoryWithTags, eventWithTags.value) {
+        if (categoryWithTags.isNotEmpty() && eventWithTags.value != null) {
             val selectedCategory = categoryWithTags.firstOrNull { it.category.id == eventWithTags.value?.event?.categoryId}
             if (selectedCategory != null) {
                 selectedCategoryName.value = selectedCategory.category.name
@@ -127,7 +207,7 @@ fun EditEventScreen(
     }
 
     // KategoriId veya categoryWithTags değişince, seçili kategori adı ve tag'ları güncelle
-    LaunchedEffect(categoryId.value, categoryWithTags) {
+    LaunchedEffect(categoryId.value, categoryWithTags, eventWithTags.value) {
         val selected = categoryWithTags.firstOrNull { it.category.id == categoryId.value }
         selectedCategoryName.value = selected?.category?.name ?: ""
         if (categoryId.value != eventWithTags.value?.event?.categoryId) {
@@ -141,7 +221,7 @@ fun EditEventScreen(
 
     val isExpanded = rememberSaveable { mutableStateOf(false) }
 
-    if (categoryWithTags.isEmpty())
+    if (categoryWithTags.isEmpty() || eventWithTags.value == null)
     {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center)
         {
@@ -174,27 +254,6 @@ fun EditEventScreen(
                 .fillMaxSize()
         ) {
 
-                val eventName = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.name ?: "") }
-                val nameError = rememberSaveable { mutableStateOf(false) }
-
-                val eventDetail = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.detail ?: "") }
-                val detailError = rememberSaveable { mutableStateOf(false) }
-
-                val selectedDate = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.date) }
-                val dateError = rememberSaveable { mutableStateOf(false) }
-
-                val showModal = rememberSaveable { mutableStateOf(false) }
-
-                val eventDuration = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.duration ?: "") }
-                val durationError = rememberSaveable { mutableStateOf(false) }
-
-                val eventLocation = rememberSaveable { mutableStateOf(eventWithTags.value?.event?.location ?: "") }
-                val locationError = rememberSaveable { mutableStateOf(false) }
-
-                val categoryError = rememberSaveable { mutableStateOf(false) }
-
-                val eventImage = rememberSaveable{mutableStateOf(eventWithTags.value?.event?.image)}
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -217,7 +276,13 @@ fun EditEventScreen(
                     placeHolder = painterResource(R.drawable.image_icon),
                     shape = RoundedCornerShape(12.dp),
                     onClick = {
-                        //TODO fotoğraf yükleme gelecek
+                        PermissionHelper.requestPermission(
+                            context = context,
+                            permission = permission,
+                            viewModel = permissionViewModel,
+                            permissionLauncher = permissionLauncher,
+                            imagePickerLauncher = imagePickerLauncher
+                        )
                     }
                 )
 
@@ -471,6 +536,7 @@ fun EditEventScreen(
                 ) {
                     EventTrackerAppPrimaryButton(
                         text = "Update Event",
+                        enabled = !isUploading.value,
                         onClick = {
                             if (
                                 eventName.value.isBlank() ||
@@ -489,28 +555,31 @@ fun EditEventScreen(
                                 categoryError.value = selectedCategoryName.value.isBlank()
                                 return@EventTrackerAppPrimaryButton
                             } else {
-                                val event = eventWithTags.value?.event?.id?.let {
-                                    categoryId.value?.let { it1 ->
-                                        Event(
-                                            id = it,
-                                            ownerId = ownerId,
-                                            name = eventName.value,
-                                            detail = eventDetail.value,
-                                            image = eventPhotoState.value ?:"https://firebasestorage.googleapis.com/v0/b/eventtrackerapp-b4f67.firebasestorage.app/o/eventImage%2Fn7LTxzfjaKgI9yQJoxXRnJSLykG2%2Fa8f47a3c-2342-4acc-8a53-11f4d3667acc.jpg?alt=media&token=9d4871fc-1f53-4bbd-af97-db4f1be1e0e5", // TODO Düzeltilecek
-                                            date = selectedDate.value!!,
-                                            duration = eventDuration.value,
-                                            location = eventLocation.value,
-                                            likeCount = 0,
-                                            categoryId = it1,
-                                        )
-                                    }
+                                // Eğer fotoğraf seçilmişse ve henüz yüklenmemişse
+                                if(uriData.value != null && imagePath.value == null && !isUploading.value){
+                                    android.util.Log.d("EditEventScreen", "Fotoğraf yükleniyor...")
+                                    storageViewModel.setImageToStorage(uriData.value!!, ownerId)
+                                } else if(uriData.value == null) {
+                                    // Fotoğraf seçilmemiş, mevcut resmi kullan
+                                    android.util.Log.d("EditEventScreen", "Mevcut resimle event güncelleniyor")
+                                    val event = Event(
+                                        id = eventId,
+                                        ownerId = ownerId,
+                                        name = eventName.value,
+                                        detail = eventDetail.value,
+                                        image = eventImage.value!!,
+                                        date = selectedDate.value!!,
+                                        duration = eventDuration.value,
+                                        location = eventLocation.value,
+                                        likeCount = eventWithTags.value?.event?.likeCount ?: 0,
+                                        categoryId = categoryId.value!!,
+                                    )
+                                    eventViewModel.updateEvent(event, chosenTags)
+                                    navController.popBackStack()
                                 }
-                                eventViewModel.updateEvent(event = event!!, selectedTags = chosenTags)
-                                navController.popBackStack()
                             }
                         })
                 }
             }
         }
     }
-

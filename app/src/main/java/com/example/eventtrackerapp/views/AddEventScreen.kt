@@ -445,6 +445,7 @@ fun AddEventScreen(
                 ) {
                     EventTrackerAppPrimaryButton(
                         text = "Add Event",
+                        enabled = !isUploading.value,
                         onClick = {
                             if (
                                 eventName.value.isBlank() ||

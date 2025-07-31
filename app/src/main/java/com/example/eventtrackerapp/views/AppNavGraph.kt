@@ -276,7 +276,7 @@ fun AppNavGraph(
 //                val eventWithTags by eventViewModel.getEventWithRelationsById(eventId).collectAsState(null)
 
                 val uid = auth.currentUser?.uid
-                EditEventScreen(navController,eventId,eventViewModel,categoryViewModel,uid!!)
+                EditEventScreen(navController,eventId,eventViewModel,categoryViewModel,permissionViewModel,storageViewModel,uid!!)
             }
         }
     }
