@@ -89,9 +89,8 @@ class EventRepository(
 
     fun getEventsForUser(tagIds: List<String>): Flow<List<EventWithTags>> = callbackFlow {
         val listener = eventCollection.addSnapshotListener { snapshot, error ->
-            if (error != null)
-            {
-                Log.e(TAG,"Event dinleme başarısız",error)
+            if (error != null) {
+                Log.e(TAG, "Event dinleme başarısız", error)
                 close(error)
                 return@addSnapshotListener
             }
@@ -100,14 +99,14 @@ class EventRepository(
                 it.toObject(FirebaseEvent::class.java)
             } ?: emptyList()
 
-            val filteredEvents = firebaseEvent.filter {
-                it.tagIds.any {tagId -> tagId.contains(tagId)}
+            val filteredEvents = firebaseEvent.filter { event ->
+                event.tagIds.any { tagId -> tagIds.contains(tagId) }
             }
 
-            val mapped = filteredEvents.map {
-                val event = EventMapper.toEntity(it)
-                val tags = it.tagIds.map { tagId -> Tag(tagId,"","") }
-                EventWithTags(event,tags)
+            val mapped = filteredEvents.map { firebaseEvent ->
+                val event = EventMapper.toEntity(firebaseEvent)
+                val tags = firebaseEvent.tagIds.map { tagId -> Tag(tagId, "", "") }
+                EventWithTags(event, tags)
             }
 
             trySend(mapped)
@@ -116,6 +115,7 @@ class EventRepository(
             listener.remove()
         }
     }
+
 
     fun getEventsForOwner(profileId: String): Flow<List<Event>> = callbackFlow {
         var listener: ListenerRegistration? = null
