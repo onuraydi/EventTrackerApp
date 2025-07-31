@@ -103,7 +103,7 @@ fun EditEventScreen(
     val eventDetail = rememberSaveable { mutableStateOf("") }
     val detailError = rememberSaveable { mutableStateOf(false) }
 
-    val selectedDate = rememberSaveable { mutableStateOf<Long?>(0) }
+    val selectedDate = rememberSaveable { mutableStateOf<Long?>(null) }
     val dateError = rememberSaveable { mutableStateOf(false) }
 
     val showModal = rememberSaveable { mutableStateOf(false) }
@@ -118,6 +118,12 @@ fun EditEventScreen(
 
     val eventImage = rememberSaveable { mutableStateOf<String?>(null) }
 
+    //Media Permission
+    val permission = permissionViewModel.getPermissionName()
+    val uriData = rememberSaveable { mutableStateOf<Uri?>(null) }
+    val isUploading = storageViewModel.isUploading.collectAsStateWithLifecycle(false)
+    val imagePath = storageViewModel.imagePath.collectAsStateWithLifecycle()
+
     // Event verisi yüklendiğinde state'leri güncelle
     LaunchedEffect(eventWithTags.value) {
         eventWithTags.value?.event?.let { event ->
@@ -128,14 +134,12 @@ fun EditEventScreen(
             eventLocation.value = event.location ?: ""
             eventImage.value = event.image
             categoryId.value = event.categoryId
+            
+            // Storage state'lerini temizle
+            uriData.value = null
+            storageViewModel.clearImagePath()
         }
     }
-
-    //Media Permission
-    val permission = permissionViewModel.getPermissionName()
-    val uriData = rememberSaveable { mutableStateOf<Uri?>(null) }
-    val isUploading = storageViewModel.isUploading.collectAsStateWithLifecycle()
-    val imagePath = storageViewModel.imagePath.collectAsStateWithLifecycle()
 
     LaunchedEffect(imagePath.value, isUploading.value) {
         if(imagePath.value != null && isUploading.value == false){
@@ -559,15 +563,16 @@ fun EditEventScreen(
                                 if(uriData.value != null && imagePath.value == null && !isUploading.value){
                                     android.util.Log.d("EditEventScreen", "Fotoğraf yükleniyor...")
                                     storageViewModel.setImageToStorage(uriData.value!!, ownerId)
-                                } else if(uriData.value == null) {
-                                    // Fotoğraf seçilmemiş, mevcut resmi kullan
-                                    android.util.Log.d("EditEventScreen", "Mevcut resimle event güncelleniyor")
+                                } else {
+                                    // Fotoğraf seçilmemiş veya yeni resim yüklenmiş
+                                    val finalImagePath = if(imagePath.value != null) imagePath.value!! else eventImage.value!!
+                                    android.util.Log.d("EditEventScreen", "Event güncelleniyor - Resim: $finalImagePath")
                                     val event = Event(
                                         id = eventId,
                                         ownerId = ownerId,
                                         name = eventName.value,
                                         detail = eventDetail.value,
-                                        image = eventImage.value!!,
+                                        image = finalImagePath,
                                         date = selectedDate.value!!,
                                         duration = eventDuration.value,
                                         location = eventLocation.value,

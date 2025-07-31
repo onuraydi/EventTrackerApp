@@ -137,6 +137,10 @@ fun CreateProfileScreen(
                     selectedTagList = selectedCompleteTagList,
                     photo = imagePath.value!!
                 )
+
+                uriData.value = null
+                storageViewModel.clearImagePath()
+
                 profileViewModel.upsertProfile(profile)
                 navController.navigate("home"){
                     popUpTo("create_profile_screen"){

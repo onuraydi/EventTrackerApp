@@ -170,6 +170,10 @@ fun AddEventScreen(
                         likeCount = 0,
                         categoryId = categoryId.value,
                     )
+                // Storage state'lerini temizle
+                uriData.value = null
+                storageViewModel.clearImagePath()
+
                 eventViewModel.addEvent(event,selectedTag)
                 navController.popBackStack()
             } else {

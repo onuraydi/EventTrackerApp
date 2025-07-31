@@ -45,17 +45,17 @@ class StorageViewModel @Inject constructor(
 
     fun setProfileImageToStorage(uri: Uri, profileId:String){
         viewModelScope.launch {
-            android.util.Log.d("StorageViewModel", "Fotoğraf yükleme başladı")
+            android.util.Log.d("StorageViewModel", "Profil fotoğrafı yükleme başladı")
             _isUploading.value = true
             try {
-                val result = storageCacheRepository.uploadImageToStorage(uri, profileId, "eventImage")
-                android.util.Log.d("StorageViewModel", "Fotoğraf yükleme tamamlandı: $result")
+                val result = storageCacheRepository.uploadImageToStorage(uri, profileId, "profileImage")
+                android.util.Log.d("StorageViewModel", "Profil fotoğrafı yükleme tamamlandı: $result")
                 _profileImagePath.value = result
             } catch (e: Exception) {
-                android.util.Log.e("StorageViewModel", "Fotoğraf yükleme hatası", e)
+                android.util.Log.e("StorageViewModel", "Profil fotoğrafı yükleme hatası", e)
             } finally {
                 _isUploading.value = false
-                android.util.Log.d("StorageViewModel", "Fotoğraf yükleme durumu: ${_isUploading.value}")
+                android.util.Log.d("StorageViewModel", "Profil fotoğrafı yükleme durumu: ${_isUploading.value}")
             }
         }
     }
@@ -65,4 +65,10 @@ class StorageViewModel @Inject constructor(
 //            _cachedImagePath.value = storageCacheRepository.getImagePath(firebaseUrl)
 //        }
 //    }
+
+    fun clearImagePath() {
+        _imagePath.value = null
+        _profileImagePath.value = null
+        _isUploading.value = false
+    }
 }

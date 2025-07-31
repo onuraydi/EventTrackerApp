@@ -65,7 +65,7 @@ fun MyAccountScreen(
     val profilePhotoState = rememberSaveable { mutableStateOf(profile.photo) }
 
     val uriData = rememberSaveable { mutableStateOf<Uri?>(null) }
-    val isUploading = storageViewModel.isUploading.collectAsStateWithLifecycle()
+    val isUploading = storageViewModel.isUploading.collectAsStateWithLifecycle(false)
     val imagePath = storageViewModel.profileImagePath.collectAsStateWithLifecycle()
 
     //TextField states
@@ -368,13 +368,21 @@ fun MyAccountScreen(
                     .padding(bottom = 20.dp)
             ) {
                 EventTrackerAppPrimaryButton(
-                    text = if (isUploading.value) "Yükleniyor..." else "Tamamla",
+                    text = if (isUploading.value) "Yükleniyor..." else "Güncelle",
                     enabled = !isUploading.value
                 )
                 {
+                    // Form validasyonu
+                    if (fullNameState.value.isBlank() || userNameState.value.isBlank() || gender.value.isBlank()) {
+                        fullNameError.value = fullNameState.value.isBlank()
+                        userNameError.value = userNameState.value.isBlank()
+                        genderError.value = gender.value.isBlank()
+                        return@EventTrackerAppPrimaryButton
+                    }
+
                     // Eğer fotoğraf seçilmişse ve henüz yüklenmemişse
                     if(uriData.value != null && imagePath.value == null && !isUploading.value){
-                        android.util.Log.d("CreateProfileScreen", "Fotoğraf yükleniyor...")
+                        android.util.Log.d("MyAccountScreen", "Fotoğraf yükleniyor...")
                         storageViewModel.setProfileImageToStorage(uriData.value!!, profile.id)
                     } else if(uriData.value == null) {
                         // Fotoğraf seçilmemiş, direkt profil oluştur
