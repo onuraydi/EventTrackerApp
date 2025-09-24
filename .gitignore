@@ -55,3 +55,6 @@ Thumbs.db
 
 # Compose Preview cache
 **/.idea/.compose-previews/
+
+
+google-services.json
